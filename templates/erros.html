@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block titulo %}Erros nas Cargas{% endblock %}
+
+{% block conteudo %}
+<div class="card">
+    <h2>Erros nas Cargas</h2>
+    <div class="card-body">
+        <form method="post" action="{{ url_for('processar') }}">
+            <input type="hidden" name="modelo" value="erro">
+
+            <label>Clientes</label>
+            <div class="clientes">
+                {% for id_cliente, cliente in clientes.items() %}
+                    <label>
+                        <input type="checkbox" name="clientes" value="{{ id_cliente }}">
+                        {{ cliente.nome }}
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="acoes">
+                <button type="submit" name="acao" value="visualizar" class="btn-visualizar">
+                    VISUALIZAR NO OUTLOOK
+                </button>
+                <button type="submit" name="acao" value="enviar" class="btn-enviar">
+                    ABRIR PARA ENVIAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

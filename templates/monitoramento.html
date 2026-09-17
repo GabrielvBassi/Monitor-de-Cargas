@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block titulo %}Monitoramento{% endblock %}
+
+{% block conteudo %}
+<div class="viz-root">
+<div class="card">
+    <h2>Arquivos de erro pendentes</h2>
+    <div class="card-body">
+        {% if erro_diretorio %}
+            <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
+        {% elif pendentes %}
+            <div class="grafico-pendentes">
+                {% for item in grafico_pendentes %}
+                    <div class="barra-h-linha">
+                        <span class="barra-h-label">{{ item.cliente }}</span>
+                        <div class="barra-h-trilho">
+                            <div
+                                class="barra-h-fill"
+                                style="width: {{ item.percentual }}%;"
+                                title="{{ item.cliente }}: {{ item.total_linhas }} linha(s)"
+                            ></div>
+                        </div>
+                        <span class="barra-h-valor">{{ item.total_linhas }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Arquivo</th>
+                        <th>Linhas</th>
+                        <th>Modificado em</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in pendentes %}
+                        {% for arquivo in item.arquivos %}
+                            <tr>
+                                <td>{{ item.cliente }}</td>
+                                <td>{{ arquivo.arquivo }}</td>
+                                <td>{{ arquivo.quantidade_linhas }}</td>
+                                <td>{{ arquivo.modificado_em.strftime("%d/%m/%Y %H:%M") }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="vazio">Nenhum arquivo de erro pendente.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h2>Historico de envios</h2>
+    <div class="card-body">
+        {% if historico %}
+            <div class="grafico-historico">
+                {% for evento in grafico_historico %}
+                    <div class="barra-v-coluna">
+                        <div
+                            class="barra-v-trilho"
+                            title="{{ evento.label }} - Sucesso: {{ evento.qtd_sucessos }} / Falha: {{ evento.qtd_falhas }}"
+                        >
+                            <div class="barra-v-fill sucesso" style="height: {{ evento.percentual_sucessos }}%;"></div>
+                            <div
+                                class="barra-v-fill falha"
+                                style="height: {{ evento.percentual_falhas }}%; bottom: calc({{ evento.percentual_sucessos }}% + 2px);"
+                            ></div>
+                        </div>
+                        <span class="barra-v-label">{{ evento.label }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="legenda">
+                <span class="legenda-item"><i class="cor-sucesso"></i> Sucesso</span>
+                <span class="legenda-item"><i class="cor-falha"></i> Falha</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quando</th>
+                        <th>Modelo</th>
+                        <th>Acao</th>
+                        <th>Sucesso</th>
+                        <th>Falha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for evento in historico %}
+                        <tr>
+                            <td>{{ evento.timestamp }}</td>
+                            <td>{{ evento.modelo }}</td>
+                            <td>{{ evento.acao }}</td>
+                            <td>
+                                {% if evento.sucessos %}
+                                    <span class="tag sucesso">{{ evento.sucessos | join(", ") }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if evento.falhas %}
+                                    <span class="tag falha">{{ evento.falhas | join("; ") }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="vazio">Nenhum envio registrado ainda.</p>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}

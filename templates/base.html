@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block titulo %}Gerador de E-mails{% endblock %}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Segoe UI, Arial, sans-serif;
+            background: #f2f4f7;
+            margin: 0;
+            color: #222;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: #1f2d3d;
+            color: #fff;
+            padding: 24px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar h1 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0 20px 20px;
+            margin: 0;
+            opacity: 0.7;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px 20px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .sidebar a.ativo {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-left-color: #2563eb;
+        }
+
+        .conteudo {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .card {
+            background: #fff;
+            max-width: 680px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            margin: 0;
+            padding: 18px 24px;
+            background: #1f2d3d;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 24px 28px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            margin-top: 18px;
+        }
+
+        .clientes {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+
+        .clientes label {
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+        }
+
+        .acoes {
+            display: flex;
+            gap: 10px;
+            margin-top: 26px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-visualizar {
+            background: #e2e8f0;
+            color: #1f2d3d;
+        }
+
+        .btn-visualizar:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-enviar {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-enviar:hover {
+            background: #1d4ed8;
+        }
+
+        .flash {
+            max-width: 680px;
+            margin: 0 0 16px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .flash.sucesso {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .flash.erro {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        th {
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tag.sucesso {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .tag.falha {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .vazio {
+            color: #64748b;
+            font-size: 13px;
+            padding: 8px 0;
+        }
+
+        .viz-root {
+            color-scheme: light;
+            --viz-text-secondary: #52514e;
+            --viz-muted: #898781;
+            --viz-grid: #e1e0d9;
+            --viz-series-blue: #2a78d6;
+            --viz-status-good: #0ca30c;
+            --viz-status-critical: #d03b3b;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:where(:not([data-theme="light"])) .viz-root {
+                color-scheme: dark;
+                --viz-text-secondary: #c3c2b7;
+                --viz-muted: #898781;
+                --viz-grid: #2c2c2a;
+                --viz-series-blue: #3987e5;
+                --viz-status-good: #0ca30c;
+                --viz-status-critical: #e66767;
+            }
+        }
+
+        :root[data-theme="dark"] .viz-root {
+            color-scheme: dark;
+            --viz-text-secondary: #c3c2b7;
+            --viz-muted: #898781;
+            --viz-grid: #2c2c2a;
+            --viz-series-blue: #3987e5;
+            --viz-status-good: #0ca30c;
+            --viz-status-critical: #e66767;
+        }
+
+        .grafico-pendentes {
+            margin-bottom: 20px;
+        }
+
+        .barra-h-linha {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        .barra-h-label {
+            width: 100px;
+            flex-shrink: 0;
+            text-align: right;
+            font-size: 12px;
+            color: var(--viz-text-secondary);
+        }
+
+        .barra-h-trilho {
+            flex: 1;
+            height: 14px;
+            background: var(--viz-grid);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .barra-h-fill {
+            height: 100%;
+            min-width: 4px;
+            background: var(--viz-series-blue);
+            border-radius: 4px;
+        }
+
+        .barra-h-valor {
+            width: 36px;
+            flex-shrink: 0;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+            color: #0b0b0b;
+        }
+
+        .grafico-historico {
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            height: 140px;
+            padding-top: 10px;
+            border-bottom: 1px solid var(--viz-grid);
+            margin-bottom: 8px;
+        }
+
+        .barra-v-coluna {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            flex: 1;
+            height: 100%;
+        }
+
+        .barra-v-trilho {
+            position: relative;
+            width: 100%;
+            max-width: 28px;
+            height: 100%;
+            background: var(--viz-grid);
+            border-radius: 4px;
+        }
+
+        .barra-v-fill {
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-radius: 4px;
+        }
+
+        .barra-v-fill.sucesso {
+            bottom: 0;
+            background: var(--viz-status-good);
+        }
+
+        .barra-v-fill.falha {
+            background: var(--viz-status-critical);
+        }
+
+        .barra-v-label {
+            margin-top: 6px;
+            font-size: 10px;
+            color: var(--viz-muted);
+            white-space: nowrap;
+        }
+
+        .legenda {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: var(--viz-text-secondary);
+        }
+
+        .legenda-item i {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .legenda-item .cor-sucesso {
+            background: var(--viz-status-good);
+        }
+
+        .legenda-item .cor-falha {
+            background: var(--viz-status-critical);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>Gerador de E-mails</h1>
+        <a href="{{ url_for('monitoramento') }}" class="{{ 'ativo' if pagina_ativa == 'monitoramento' else '' }}">Monitoramento</a>
+        <a href="{{ url_for('erros') }}" class="{{ 'ativo' if pagina_ativa == 'erros' else '' }}">Erros nas Cargas</a>
+        <a href="{{ url_for('faturamentos') }}" class="{{ 'ativo' if pagina_ativa == 'faturamentos' else '' }}">Faturamentos</a>
+    </div>
+
+    <div class="conteudo">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% for categoria, texto in mensagens %}
+                <div class="flash {{ categoria }}">{{ texto }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block conteudo %}{% endblock %}
+    </div>
+</body>
+</html>
