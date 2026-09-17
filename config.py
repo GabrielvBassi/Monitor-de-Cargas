@@ -1,6 +1,10 @@
 import os
 
-ERROS_DIRETORIO = r"C:\Users\Gabriel\OneDrive\Área de Trabalho\Diretorio-teste"
+#SFTP_HOST = "10.75.192.92"
+#SFTP_PORT = 22
+#ERROS_DIRETORIO = "/home/amabr_cargas/shell"
+ERROS_DIRETORIO = r"C:\Users\GBASSI\Documents\Python\arquivos"
+
 ERROS_EXTENSAO = ".txt"
 
 # Automacao de UI para o envio (botao Enviar da janela de composicao aberta
