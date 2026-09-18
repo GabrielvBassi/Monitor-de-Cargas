@@ -3,7 +3,8 @@ import os
 #SFTP_HOST = "10.75.192.92"
 #SFTP_PORT = 22
 #ERROS_DIRETORIO = "/home/amabr_cargas/shell"
-ERROS_DIRETORIO = r"C:\Users\GBASSI\Documents\Python\arquivos"
+#ERROS_DIRETORIO = r"C:\Users\GBASSI\Documents\Python\arquivos"
+ERROS_DIRETORIO = r"C:\Users\Gabriel\OneDrive\Área de Trabalho\Diretorio-teste"
 
 ERROS_EXTENSAO = ".txt"
 

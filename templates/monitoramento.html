@@ -4,52 +4,149 @@
 
 {% block conteudo %}
 <div class="viz-root">
+
+<div class="kpis">
+    <div class="kpi">
+        <div class="kpi-rotulo">Clientes monitorados</div>
+        <div class="kpi-valor">{{ kpis.total_clientes }}</div>
+    </div>
+    <div class="kpi destaque">
+        <div class="kpi-rotulo">Clientes com registros BAD</div>
+        <div class="kpi-valor">{{ kpis.clientes_bad }}</div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-rotulo">Arquivos BAD encontrados</div>
+        <div class="kpi-valor">{{ kpis.arquivos_bad }}</div>
+    </div>
+    <div class="kpi destaque">
+        <div class="kpi-rotulo">Total de registros BAD</div>
+        <div class="kpi-valor">{{ kpis.registros_bad }}</div>
+    </div>
+</div>
+
 <div class="card">
-    <h2>Arquivos de erro pendentes</h2>
+    <h2>Resumo por cliente</h2>
     <div class="card-body">
         {% if erro_diretorio %}
             <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
-        {% elif pendentes %}
-            <div class="grafico-pendentes">
-                {% for item in grafico_pendentes %}
-                    <div class="barra-h-linha">
-                        <span class="barra-h-label">{{ item.cliente }}</span>
-                        <div class="barra-h-trilho">
-                            <div
-                                class="barra-h-fill"
-                                style="width: {{ item.percentual }}%;"
-                                title="{{ item.cliente }}: {{ item.total_linhas }} linha(s)"
-                            ></div>
+        {% else %}
+            {% set com_registros = resumo | selectattr("registros_bad", "gt", 0) | list %}
+            {% if com_registros %}
+                <div class="grafico-pendentes">
+                    {% for item in com_registros %}
+                        <div class="barra-h-linha">
+                            <span class="barra-h-label">{{ item.cliente }}</span>
+                            <div class="barra-h-trilho">
+                                <div
+                                    class="barra-h-fill"
+                                    style="width: {{ item.percentual }}%;"
+                                    title="{{ item.cliente }}: {{ item.registros_bad }} registro(s)"
+                                ></div>
+                            </div>
+                            <span class="barra-h-valor">{{ item.registros_bad }}</span>
                         </div>
-                        <span class="barra-h-valor">{{ item.total_linhas }}</span>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="filtros">
+                <input
+                    id="filtroClienteResumo"
+                    type="text"
+                    placeholder="Filtrar cliente..."
+                    onkeyup="filtrarResumo()"
+                >
+                <select id="filtroStatus" onchange="filtrarResumo()">
+                    <option value="">Todos os status</option>
+                    <option value="bad">Somente BAD</option>
+                    <option value="ok">Somente OK</option>
+                    <option value="aviso">BAD vazio / sem registros</option>
+                </select>
             </div>
 
-            <table>
+            <div class="legenda">
+                <span class="legenda-item"><i class="cor-falha"></i> Vermelho: possui registros BAD</span>
+                <span class="legenda-item"><i class="cor-sucesso"></i> Verde: nenhum arquivo BAD encontrado</span>
+                <span class="legenda-item"><i class="cor-aviso"></i> Amarelo: arquivo BAD encontrado, mas sem registro contado</span>
+            </div>
+
+            <table id="tabelaResumo">
                 <thead>
                     <tr>
-                        <th>Cliente</th>
-                        <th>Arquivo</th>
-                        <th>Linhas</th>
-                        <th>Modificado em</th>
+                        <th class="ordenavel">Cliente</th>
+                        <th class="ordenavel">Tipo</th>
+                        <th class="ordenavel">Arquivos BAD</th>
+                        <th class="ordenavel">Arquivos com registros</th>
+                        <th class="ordenavel">Registros BAD</th>
+                        <th class="ordenavel">Ultima ocorrencia</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in pendentes %}
-                        {% for arquivo in item.arquivos %}
-                            <tr>
-                                <td>{{ item.cliente }}</td>
-                                <td>{{ arquivo.arquivo }}</td>
-                                <td>{{ arquivo.quantidade_linhas }}</td>
-                                <td>{{ arquivo.modificado_em.strftime("%d/%m/%Y %H:%M") }}</td>
-                            </tr>
-                        {% endfor %}
+                    {% for item in resumo %}
+                        <tr data-cliente="{{ item.cliente | lower }}" data-status="{{ item.status }}">
+                            <td>{{ item.cliente }}</td>
+                            <td>{{ item.tipo }}</td>
+                            <td class="num">{{ item.arquivos_bad }}</td>
+                            <td class="num">{{ item.arquivos_com_registros }}</td>
+                            <td class="num destaque-num">{{ item.registros_bad }}</td>
+                            <td>{{ item.ultima_ocorrencia.strftime("%d/%m/%Y %H:%M") if item.ultima_ocorrencia else "-" }}</td>
+                            <td><span class="tag {{ item.status }}">{{ item.status | upper }}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h2>Detalhamento dos arquivos BAD</h2>
+    <div class="card-body">
+        {% if erro_diretorio %}
+            <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
+        {% elif detalhamento %}
+            <div class="filtros">
+                <input
+                    id="filtroClienteDetalhe"
+                    type="text"
+                    placeholder="Filtrar cliente..."
+                    onkeyup="filtrarDetalhe()"
+                >
+                <select id="filtroTipo" onchange="filtrarDetalhe()">
+                    <option value="">FULL + INCREMENTAL</option>
+                    <option value="full">FULL</option>
+                    <option value="incremental">INCREMENTAL</option>
+                    <option value="nao identificado">Nao identificado</option>
+                </select>
+            </div>
+
+            <table id="tabelaDetalhe">
+                <thead>
+                    <tr>
+                        <th class="ordenavel">Cliente</th>
+                        <th class="ordenavel">Arquivo</th>
+                        <th class="ordenavel">Tipo</th>
+                        <th class="ordenavel">Qtd. BAD</th>
+                        <th class="ordenavel">Data do arquivo</th>
+                        <th>Caminho</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in detalhamento %}
+                        <tr data-cliente="{{ item.cliente | lower }}" data-tipo="{{ item.tipo | lower }}">
+                            <td>{{ item.cliente }}</td>
+                            <td>{{ item.arquivo }}</td>
+                            <td>{{ item.tipo }}</td>
+                            <td class="num destaque-num">{{ item.quantidade_linhas }}</td>
+                            <td>{{ item.modificado_em.strftime("%d/%m/%Y %H:%M") }}</td>
+                            <td class="caminho" title="{{ item.caminho }}">{{ item.caminho }}</td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p class="vazio">Nenhum arquivo de erro pendente.</p>
+            <p class="vazio">Nenhum arquivo de erro encontrado.</p>
         {% endif %}
     </div>
 </div>
@@ -115,5 +212,84 @@
         {% endif %}
     </div>
 </div>
+
 </div>
+
+<script>
+function filtrarResumo() {
+    const cliente = document.getElementById("filtroClienteResumo").value.toLowerCase();
+    const status = document.getElementById("filtroStatus").value.toLowerCase();
+    const linhas = document.querySelectorAll("#tabelaResumo tbody tr");
+
+    linhas.forEach(function (linha) {
+        const clienteLinha = linha.dataset.cliente || "";
+        const statusLinha = linha.dataset.status || "";
+
+        let mostrar = true;
+
+        if (cliente && !clienteLinha.includes(cliente)) {
+            mostrar = false;
+        }
+
+        if (status && statusLinha !== status) {
+            mostrar = false;
+        }
+
+        linha.style.display = mostrar ? "" : "none";
+    });
+}
+
+function filtrarDetalhe() {
+    const cliente = document.getElementById("filtroClienteDetalhe").value.toLowerCase();
+    const tipo = document.getElementById("filtroTipo").value.toLowerCase();
+    const linhas = document.querySelectorAll("#tabelaDetalhe tbody tr");
+
+    linhas.forEach(function (linha) {
+        const clienteLinha = linha.dataset.cliente || "";
+        const tipoLinha = linha.dataset.tipo || "";
+
+        let mostrar = true;
+
+        if (cliente && !clienteLinha.includes(cliente)) {
+            mostrar = false;
+        }
+
+        if (tipo && tipoLinha !== tipo) {
+            mostrar = false;
+        }
+
+        linha.style.display = mostrar ? "" : "none";
+    });
+}
+
+document.querySelectorAll("#tabelaResumo th, #tabelaDetalhe th").forEach(function (th) {
+    th.addEventListener("click", function () {
+        const tabela = th.closest("table");
+        const tbody = tabela.querySelector("tbody");
+        const coluna = Array.from(th.parentNode.children).indexOf(th);
+        const linhas = Array.from(tbody.querySelectorAll("tr"));
+
+        const asc = th.dataset.asc !== "true";
+        th.dataset.asc = asc ? "true" : "false";
+
+        linhas.sort(function (a, b) {
+            const va = a.children[coluna].innerText.trim();
+            const vb = b.children[coluna].innerText.trim();
+
+            const na = Number(va.replace(",", "."));
+            const nb = Number(vb.replace(",", "."));
+
+            if (!isNaN(na) && !isNaN(nb) && va !== "" && vb !== "") {
+                return asc ? na - nb : nb - na;
+            }
+
+            return asc ? va.localeCompare(vb, "pt-BR") : vb.localeCompare(va, "pt-BR");
+        });
+
+        linhas.forEach(function (linha) {
+            tbody.appendChild(linha);
+        });
+    });
+});
+</script>
 {% endblock %}

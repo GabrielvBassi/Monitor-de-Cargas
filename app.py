@@ -3,7 +3,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from models.cliente_model import ClienteModel
 from services.error_file_service import ErrorFileService
 from services.historico_service import HistoricoService
-from services.monitoramento_service import preparar_grafico_historico, preparar_grafico_pendentes
+from services.monitoramento_service import (
+    montar_detalhamento,
+    montar_kpis,
+    preparar_grafico_historico,
+    preparar_grafico_resumo,
+)
 from services.processamento_service import processar_envio
 
 app = Flask(__name__)
@@ -20,9 +25,9 @@ def monitoramento():
     erro_diretorio = None
 
     try:
-        pendentes = ErrorFileService.pendentes_por_cliente(ClienteModel.todos())
+        resumo = ErrorFileService.resumo_por_cliente(ClienteModel.todos())
     except FileNotFoundError as exc:
-        pendentes = []
+        resumo = []
         erro_diretorio = str(exc)
 
     historico = HistoricoService.listar()
@@ -30,10 +35,11 @@ def monitoramento():
     return render_template(
         "monitoramento.html",
         pagina_ativa="monitoramento",
-        pendentes=pendentes,
         erro_diretorio=erro_diretorio,
+        kpis=montar_kpis(resumo),
+        resumo=preparar_grafico_resumo(resumo),
+        detalhamento=montar_detalhamento(resumo),
         historico=historico,
-        grafico_pendentes=preparar_grafico_pendentes(pendentes),
         grafico_historico=preparar_grafico_historico(historico),
     )
 

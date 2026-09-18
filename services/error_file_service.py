@@ -1,16 +1,31 @@
 import os
+import re
 from datetime import datetime
 
 from config import ERROS_DIRETORIO, ERROS_EXTENSAO
 
+PADRAO_TIPO = re.compile(r"_([FI])\d", re.IGNORECASE)
+
 
 class ErrorFileService:
-    """Localiza arquivos de erro de um cliente no diretorio configurado e conta suas linhas."""
+    """Localiza arquivos de erro (BAD) de um cliente no diretorio configurado."""
 
     @staticmethod
     def contar_linhas(caminho_arquivo):
         with open(caminho_arquivo, "r", encoding="utf-8", errors="ignore") as arquivo:
             return sum(1 for _ in arquivo)
+
+    @staticmethod
+    def classificar_tipo(nome_arquivo):
+        """Classifica o arquivo como FULL ou INCREMENTAL pela letra que segue
+        o nome do cliente (ex: CLIENTE_F202601011_BAD.TXT / CLIENTE_I202601011_BAD.TXT).
+        Retorna 'Nao identificado' quando o padrao nao e encontrado."""
+        match = PADRAO_TIPO.search(nome_arquivo)
+
+        if not match:
+            return "Nao identificado"
+
+        return "FULL" if match.group(1).upper() == "F" else "INCREMENTAL"
 
     @classmethod
     def buscar_arquivos_cliente(cls, nome_cliente):
@@ -36,25 +51,40 @@ class ErrorFileService:
                 "caminho": caminho_completo,
                 "quantidade_linhas": cls.contar_linhas(caminho_completo),
                 "modificado_em": datetime.fromtimestamp(os.path.getmtime(caminho_completo)),
+                "tipo": cls.classificar_tipo(nome_arquivo),
             })
 
         return arquivos_encontrados
 
     @classmethod
-    def pendentes_por_cliente(cls, clientes):
-        """Retorna, para cada cliente com arquivos de erro pendentes, o nome
-        do cliente, os arquivos encontrados (com data de modificacao) e o
-        total de linhas somado."""
-        pendentes = []
+    def resumo_por_cliente(cls, clientes):
+        """Retorna, para TODOS os clientes cadastrados, um resumo dos
+        arquivos BAD: contagens, tipos encontrados, ultima ocorrencia e
+        status (ok / aviso / bad)."""
+        resumo = []
 
         for cliente in clientes.values():
             arquivos = cls.buscar_arquivos_cliente(cliente["nome"])
+            arquivos_com_registros = [a for a in arquivos if a["quantidade_linhas"] > 0]
+            registros_bad = sum(a["quantidade_linhas"] for a in arquivos)
+            tipos = sorted({a["tipo"] for a in arquivos})
 
-            if arquivos:
-                pendentes.append({
-                    "cliente": cliente["nome"],
-                    "arquivos": arquivos,
-                    "total_linhas": sum(arquivo["quantidade_linhas"] for arquivo in arquivos),
-                })
+            if not arquivos:
+                status = "ok"
+            elif not arquivos_com_registros:
+                status = "aviso"
+            else:
+                status = "bad"
 
-        return pendentes
+            resumo.append({
+                "cliente": cliente["nome"],
+                "tipo": ", ".join(tipos) if tipos else "-",
+                "arquivos_bad": len(arquivos),
+                "arquivos_com_registros": len(arquivos_com_registros),
+                "registros_bad": registros_bad,
+                "ultima_ocorrencia": max((a["modificado_em"] for a in arquivos), default=None),
+                "status": status,
+                "arquivos": arquivos,
+            })
+
+        return resumo
