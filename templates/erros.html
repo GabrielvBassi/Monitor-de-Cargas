@@ -3,9 +3,25 @@
 {% block titulo %}Erros nas Cargas{% endblock %}
 
 {% block conteudo %}
+<div class="barra-atualizacao">
+    <span class="atualizado-em">
+        {% if atualizado_em %}
+            Ultima checagem dos arquivos BAD: {{ atualizado_em.strftime("%d/%m/%Y %H:%M:%S") }}
+        {% else %}
+            Ainda nao verificado
+        {% endif %}
+    </span>
+    <a href="{{ url_for('erros') }}?atualizar=1" class="btn-atualizar">Atualizar</a>
+</div>
+
 <div class="card">
     <h2>Erros nas Cargas</h2>
     <div class="card-body">
+        <p class="vazio">
+            O envio usa o ultimo arquivo BAD encontrado na checagem acima -- clique em "Atualizar" antes de
+            enviar se quiser garantir que esta vendo o estado mais recente dos diretorios.
+        </p>
+
         <form method="post" action="{{ url_for('processar') }}">
             <input type="hidden" name="modelo" value="erro">
 

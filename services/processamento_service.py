@@ -2,8 +2,8 @@ from models.cliente_model import ClienteModel
 from models.email_model import EmailModel
 from services.email_generator import EmailGenerator
 from services.email_service import EmailService
-from services.error_file_service import ErrorFileService
 from services.historico_service import HistoricoService
+from services.monitoramento_cache import obter_principal
 
 
 def processar_envio(nome_modelo, ids_clientes, acao):
@@ -23,6 +23,22 @@ def processar_envio(nome_modelo, ids_clientes, acao):
     if acao not in ("visualizar", "enviar"):
         raise ValueError("Acao invalida.")
 
+    validacoes_por_cliente = {}
+
+    if nome_modelo == "erro":
+        # Reaproveita a ultima varredura do Monitoramento (cache) em vez de
+        # escanear o diretorio de novo -- o e-mail usa sempre o ultimo
+        # registro BAD encontrado naquela varredura, nao uma busca nova.
+        dados, _ = obter_principal()
+
+        if dados.get("erro_clientes"):
+            raise ValueError(dados["erro_clientes"])
+
+        if dados.get("erro_diretorio"):
+            raise ValueError(dados["erro_diretorio"])
+
+        validacoes_por_cliente = {item["cliente"]: item for item in dados["validacoes"]}
+
     email_service = EmailService()
 
     sucessos = []
@@ -37,27 +53,28 @@ def processar_envio(nome_modelo, ids_clientes, acao):
 
         try:
             if nome_modelo == "erro":
-                arquivos = ErrorFileService.buscar_arquivos_cliente(cliente["nome"])
+                validacao = validacoes_por_cliente.get(cliente["nome"])
 
-                if not arquivos:
-                    falhas.append(f"{cliente['nome']} (nenhum arquivo de erro encontrado)")
+                if not validacao or not validacao["bad_arquivo"]:
+                    falhas.append(
+                        f"{cliente['nome']} (nenhum arquivo BAD na ultima varredura do Monitoramento)"
+                    )
                     continue
 
-                for arquivo in arquivos:
-                    email = EmailGenerator.gerar(
-                        nome_modelo,
-                        modelo,
-                        cliente,
-                        variaveis_extra={
-                            "arquivo": arquivo["arquivo"],
-                            "quantidade_linhas": arquivo["quantidade_linhas"],
-                        },
-                    )
+                email = EmailGenerator.gerar(
+                    nome_modelo,
+                    modelo,
+                    cliente,
+                    variaveis_extra={
+                        "arquivo": validacao["bad_arquivo"],
+                        "quantidade_linhas": validacao["bad_registros"],
+                    },
+                )
 
-                    if acao == "visualizar":
-                        email_service.visualizar(email)
-                    else:
-                        email_service.enviar(email)
+                if acao == "visualizar":
+                    email_service.visualizar(email)
+                else:
+                    email_service.enviar(email)
             else:
                 email = EmailGenerator.gerar(nome_modelo, modelo, cliente)
 

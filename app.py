@@ -63,7 +63,19 @@ def erros():
         flash(str(exc), "erro")
         clientes = {}
 
-    return render_template("erros.html", pagina_ativa="erros", clientes=clientes)
+    # O envio de e-mail de erro usa a varredura cacheada (services/
+    # monitoramento_cache.py) para saber o ultimo arquivo BAD de cada
+    # cliente -- aqui so exibimos quando foi a ultima checagem e permitimos
+    # forcar uma nova (?atualizar=1) sem precisar ir ate o Monitoramento.
+    forcar = request.args.get("atualizar") == "1"
+    _, atualizado_em = obter_principal(forcar=forcar)
+
+    return render_template(
+        "erros.html",
+        pagina_ativa="erros",
+        clientes=clientes,
+        atualizado_em=atualizado_em,
+    )
 
 
 @app.route("/faturamentos")
