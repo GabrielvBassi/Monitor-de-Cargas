@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 
 from models.cliente_model import ClienteModel
 from services.error_file_service import ErrorFileService
+from services.execucao_service import ExecucaoService
 from services.historico_service import HistoricoService
 from services.monitoramento_service import (
     montar_detalhamento,
@@ -23,12 +24,28 @@ def index():
 @app.route("/monitoramento")
 def monitoramento():
     erro_diretorio = None
+    erro_clientes = None
 
     try:
-        resumo = ErrorFileService.resumo_por_cliente(ClienteModel.todos())
-    except FileNotFoundError as exc:
-        resumo = []
-        erro_diretorio = str(exc)
+        clientes = ClienteModel.todos()
+    except (FileNotFoundError, ValueError) as exc:
+        clientes = {}
+        erro_clientes = str(exc)
+
+    resumo = []
+    erro_backup = None
+    execucoes = []
+
+    if not erro_clientes:
+        try:
+            resumo = ErrorFileService.resumo_por_cliente(clientes)
+        except FileNotFoundError as exc:
+            erro_diretorio = str(exc)
+
+        try:
+            execucoes = ExecucaoService.validar_clientes(clientes)
+        except FileNotFoundError as exc:
+            erro_backup = str(exc)
 
     historico = HistoricoService.listar()
 
@@ -36,9 +53,12 @@ def monitoramento():
         "monitoramento.html",
         pagina_ativa="monitoramento",
         erro_diretorio=erro_diretorio,
+        erro_clientes=erro_clientes,
+        erro_backup=erro_backup,
         kpis=montar_kpis(resumo),
         resumo=preparar_grafico_resumo(resumo),
         detalhamento=montar_detalhamento(resumo),
+        execucoes=execucoes,
         historico=historico,
         grafico_historico=preparar_grafico_historico(historico),
     )
@@ -46,12 +66,24 @@ def monitoramento():
 
 @app.route("/erros")
 def erros():
-    return render_template("erros.html", pagina_ativa="erros", clientes=ClienteModel.todos())
+    try:
+        clientes = ClienteModel.todos()
+    except (FileNotFoundError, ValueError) as exc:
+        flash(str(exc), "erro")
+        clientes = {}
+
+    return render_template("erros.html", pagina_ativa="erros", clientes=clientes)
 
 
 @app.route("/faturamentos")
 def faturamentos():
-    return render_template("faturamentos.html", pagina_ativa="faturamentos", clientes=ClienteModel.todos())
+    try:
+        clientes = ClienteModel.todos()
+    except (FileNotFoundError, ValueError) as exc:
+        flash(str(exc), "erro")
+        clientes = {}
+
+    return render_template("faturamentos.html", pagina_ativa="faturamentos", clientes=clientes)
 
 
 @app.route("/processar", methods=["POST"])

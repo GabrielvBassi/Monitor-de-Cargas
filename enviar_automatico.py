@@ -7,9 +7,13 @@ quando o usuario estiver conectado" -- a opcao "Executar independente do
 usuario ter feito logon ou nao" NAO funciona, pois roda numa sessao sem
 area de trabalho interativa.
 
+Os IDs de cliente sao gerados a partir do nome na planilha clientes.xlsx
+(ex: "Mapfre" -> "mapfre"). Confira os IDs atuais na pagina Erros nas Cargas
+ou Faturamentos (valor de cada checkbox).
+
 Uso:
-    python enviar_automatico.py --modelo erro --clientes mafri,cliente_b
-    python enviar_automatico.py --modelo faturamento --clientes mafri,cliente_b --acao visualizar
+    python enviar_automatico.py --modelo erro --clientes mapfre,clienteb
+    python enviar_automatico.py --modelo faturamento --clientes mapfre,clienteb --acao visualizar
 """
 import argparse
 import logging
@@ -31,7 +35,7 @@ def main():
     parser.add_argument(
         "--clientes",
         required=True,
-        help="IDs de clientes separados por virgula (ex: mafri,cliente_b)",
+        help="IDs de clientes separados por virgula (ex: mapfre,clienteb)",
     )
     parser.add_argument("--acao", default="enviar", choices=["visualizar", "enviar"])
     args = parser.parse_args()

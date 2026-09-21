@@ -27,7 +27,9 @@
 <div class="card">
     <h2>Resumo por cliente</h2>
     <div class="card-body">
-        {% if erro_diretorio %}
+        {% if erro_clientes %}
+            <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
+        {% elif erro_diretorio %}
             <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
         {% else %}
             {% set com_registros = resumo | selectattr("registros_bad", "gt", 0) | list %}
@@ -74,6 +76,7 @@
                 <thead>
                     <tr>
                         <th class="ordenavel">Cliente</th>
+                        <th class="ordenavel">Frequencia</th>
                         <th class="ordenavel">Tipo</th>
                         <th class="ordenavel">Arquivos BAD</th>
                         <th class="ordenavel">Arquivos com registros</th>
@@ -86,6 +89,7 @@
                     {% for item in resumo %}
                         <tr data-cliente="{{ item.cliente | lower }}" data-status="{{ item.status }}">
                             <td>{{ item.cliente }}</td>
+                            <td>{{ item.frequencia_verificacao }}</td>
                             <td>{{ item.tipo }}</td>
                             <td class="num">{{ item.arquivos_bad }}</td>
                             <td class="num">{{ item.arquivos_com_registros }}</td>
@@ -101,9 +105,60 @@
 </div>
 
 <div class="card">
+    <h2>Validacao de execucoes (backups)</h2>
+    <div class="card-body">
+        {% if erro_clientes %}
+            <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
+        {% elif erro_backup %}
+            <p class="vazio">Nao foi possivel ler a pasta de backups: {{ erro_backup }}</p>
+        {% elif execucoes %}
+            <div class="legenda">
+                <span class="legenda-item"><i class="cor-sucesso"></i> Verde: execucao dentro da frequencia esperada</span>
+                <span class="legenda-item"><i class="cor-falha"></i> Vermelho: sem backup dentro da frequencia (atrasado)</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Frequencia</th>
+                        <th>Ultimo arquivo</th>
+                        <th>Data da execucao</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in execucoes %}
+                        <tr>
+                            <td>{{ item.cliente }}</td>
+                            <td>{{ item.frequencia_verificacao }}</td>
+                            <td>{{ item.arquivo or "-" }}</td>
+                            <td>{{ item.ultima_execucao.strftime("%d/%m/%Y %H:%M") if item.ultima_execucao else "-" }}</td>
+                            <td>
+                                {% if item.status == "nao_avaliado" %}
+                                    <span class="tag nao_avaliado" title="Frequencia '{{ item.frequencia_verificacao }}' nao reconhecida">NAO AVALIADO</span>
+                                {% elif item.status == "ok" %}
+                                    <span class="tag ok">OK</span>
+                                {% else %}
+                                    <span class="tag atrasado">ATRASADO</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="vazio">Nenhum cliente para validar.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
     <h2>Detalhamento dos arquivos BAD</h2>
     <div class="card-body">
-        {% if erro_diretorio %}
+        {% if erro_clientes %}
+            <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
+        {% elif erro_diretorio %}
             <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
         {% elif detalhamento %}
             <div class="filtros">

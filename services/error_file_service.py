@@ -1,8 +1,7 @@
-import os
 import re
-from datetime import datetime
 
 from config import ERROS_DIRETORIO, ERROS_EXTENSAO
+from services.arquivo_service import buscar_arquivos
 
 PADRAO_TIPO = re.compile(r"_([FI])\d", re.IGNORECASE)
 
@@ -29,32 +28,13 @@ class ErrorFileService:
 
     @classmethod
     def buscar_arquivos_cliente(cls, nome_cliente):
-        if not os.path.isdir(ERROS_DIRETORIO):
-            raise FileNotFoundError(f"Diretorio de erros nao encontrado: {ERROS_DIRETORIO}")
+        arquivos = buscar_arquivos(ERROS_DIRETORIO, ERROS_EXTENSAO, nome_cliente)
 
-        arquivos_encontrados = []
+        for arquivo in arquivos:
+            arquivo["quantidade_linhas"] = cls.contar_linhas(arquivo["caminho"])
+            arquivo["tipo"] = cls.classificar_tipo(arquivo["arquivo"])
 
-        for nome_arquivo in os.listdir(ERROS_DIRETORIO):
-            caminho_completo = os.path.join(ERROS_DIRETORIO, nome_arquivo)
-
-            if not os.path.isfile(caminho_completo):
-                continue
-
-            if not nome_arquivo.lower().endswith(ERROS_EXTENSAO.lower()):
-                continue
-
-            if nome_cliente.lower() not in nome_arquivo.lower():
-                continue
-
-            arquivos_encontrados.append({
-                "arquivo": nome_arquivo,
-                "caminho": caminho_completo,
-                "quantidade_linhas": cls.contar_linhas(caminho_completo),
-                "modificado_em": datetime.fromtimestamp(os.path.getmtime(caminho_completo)),
-                "tipo": cls.classificar_tipo(nome_arquivo),
-            })
-
-        return arquivos_encontrados
+        return arquivos
 
     @classmethod
     def resumo_por_cliente(cls, clientes):
@@ -78,6 +58,7 @@ class ErrorFileService:
 
             resumo.append({
                 "cliente": cliente["nome"],
+                "frequencia_verificacao": cliente.get("frequencia_verificacao", "-"),
                 "tipo": ", ".join(tipos) if tipos else "-",
                 "arquivos_bad": len(arquivos),
                 "arquivos_com_registros": len(arquivos_com_registros),

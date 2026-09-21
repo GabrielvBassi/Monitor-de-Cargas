@@ -8,6 +8,24 @@ ERROS_DIRETORIO = r"C:\Users\Gabriel\OneDrive\Área de Trabalho\Diretorio-teste"
 
 ERROS_EXTENSAO = ".txt"
 
+# Diretorio com os backups dos arquivos processados com SUCESSO (movidos
+# apos a execucao). Usado para validar se cada cliente teve execucao dentro
+# da frequencia de verificacao configurada na planilha de clientes.
+BACKUP_DIRETORIO = os.environ.get(
+    "BACKUP_DIRETORIO",
+    r"C:\Users\Gabriel\OneDrive\Área de Trabalho\Diretorio-backup-teste",
+)
+BACKUP_EXTENSAO = os.environ.get("BACKUP_EXTENSAO", ".txt")
+
+# Planilha de clientes: basta abrir, editar e salvar para atualizar a lista
+# usada pelo app (colunas: Cliente, Sistema, Ambiente, Periodo, Frequencia de
+# Verificacao, Email Erro To, Email Erro CC, Ativo). Nao precisa reiniciar o
+# app -- a planilha e relida a cada requisicao.
+CLIENTES_XLSX_PATH = os.environ.get(
+    "CLIENTES_XLSX_PATH",
+    os.path.join(os.path.dirname(__file__), "clientes.xlsx"),
+)
+
 # Automacao de UI para o envio (botao Enviar da janela de composicao aberta
 # via mailto:). Sem API/OAuth/SMTP: precisa da tela ativa e desbloqueada
 # durante o processamento, e do Outlook novo configurado como app padrao para
