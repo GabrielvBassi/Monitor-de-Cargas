@@ -73,7 +73,7 @@ class ExecucaoService:
                 "cliente": cliente["nome"],
                 "frequencia_verificacao": frequencia or "-",
                 "arquivo": ultimo["arquivo"] if ultimo else None,
-                "ultima_execucao": ultimo["modificado_em"] if ultimo else None,
+                "modificado_em": ultimo["modificado_em"] if ultimo else None,
                 "status": status,
             })
 

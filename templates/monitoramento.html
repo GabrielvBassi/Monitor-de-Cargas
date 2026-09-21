@@ -46,31 +46,31 @@
                 >
 
                 <div class="filtro-grupo">
-                    <span class="filtro-grupo-titulo">BAD:</span>
-                    <label class="filtro-check">
+                    <span class="filtro-grupo-titulo">BAD</span>
+                    <label class="filtro-check chip-bad">
                         <input type="checkbox" class="filtro-bad" value="bad" onchange="filtrarValidacao()">
-                        Arquivos que geraram BAD
+                        Com BAD
                     </label>
-                    <label class="filtro-check">
+                    <label class="filtro-check chip-ok">
                         <input type="checkbox" class="filtro-bad" value="nao_bad" onchange="filtrarValidacao()">
-                        Arquivos que nao geraram BAD
+                        Sem BAD
                     </label>
                 </div>
 
                 <div class="filtro-grupo">
-                    <span class="filtro-grupo-titulo">Processamento:</span>
-                    <label class="filtro-check">
+                    <span class="filtro-grupo-titulo">Processamento</span>
+                    <label class="filtro-check chip-pendente">
                         <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
-                        Arquivos com processamento PENDENTE
+                        Pendente
                     </label>
-                    <label class="filtro-check">
+                    <label class="filtro-check chip-ok">
                         <input type="checkbox" class="filtro-exec" value="ok" onchange="filtrarValidacao()">
-                        Arquivos com processamento OK
+                        OK
                     </label>
                 </div>
             </div>
 
-            <p class="vazio">Marque uma ou mais opcoes de cada grupo para combinar filtros (ex: "geraram BAD" + "processamento PENDENTE").</p>
+            <p class="vazio">Combine os filtros marcando mais de uma opcao (ex: "Com BAD" + "Pendente").</p>
 
             <div class="legenda">
                 <span class="legenda-item"><i class="cor-falha"></i> BAD: possui registros no arquivo mais recente</span>

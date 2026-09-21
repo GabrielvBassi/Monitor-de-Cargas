@@ -299,9 +299,14 @@
 
         .filtros {
             display: flex;
+            align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 10px 4px;
             margin-bottom: 14px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px solid #eef1f5;
+            border-radius: 8px;
         }
 
         .filtros input,
@@ -310,6 +315,7 @@
             border-radius: 6px;
             padding: 8px 10px;
             font-size: 13px;
+            background: #fff;
         }
 
         .filtros input {
@@ -379,28 +385,68 @@
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 4px 14px;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            gap: 8px;
+            padding: 6px 14px;
+            border-left: 2px solid #e2e8f0;
         }
 
         .filtro-grupo-titulo {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            color: #64748b;
+            color: #94a3b8;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-right: 2px;
         }
 
         .filtro-check {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid #d8dee6;
+            background: #fff;
             font-size: 13px;
-            color: #0b0b0b;
+            font-weight: 500;
+            color: #64748b;
             cursor: pointer;
             white-space: nowrap;
+            user-select: none;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .filtro-check:hover {
+            border-color: #94a3b8;
+            color: #334155;
+        }
+
+        .filtro-check input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: currentColor;
+            margin: 0;
+        }
+
+        .filtro-check.chip-bad:has(input:checked) {
+            background: #fee2e2;
+            border-color: #f3a9a9;
+            color: #991b1b;
+            box-shadow: 0 1px 3px rgba(153, 27, 27, 0.15);
+        }
+
+        .filtro-check.chip-ok:has(input:checked) {
+            background: #dcfce7;
+            border-color: #93e0ac;
+            color: #166534;
+            box-shadow: 0 1px 3px rgba(22, 101, 52, 0.15);
+        }
+
+        .filtro-check.chip-pendente:has(input:checked) {
+            background: #fef9c3;
+            border-color: #f3de85;
+            color: #854d0e;
+            box-shadow: 0 1px 3px rgba(133, 77, 14, 0.15);
         }
 
         .grafico-historico {
