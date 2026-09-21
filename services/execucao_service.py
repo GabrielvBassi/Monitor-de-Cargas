@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 
 import config
-from services.arquivo_service import buscar_arquivos
+from services.arquivo_service import arquivos_em_pastas, listar_pastas, localizar_pastas_cliente
 
 _PERIODOS_FIXOS = {
     "diaria": timedelta(days=1),
@@ -48,10 +48,14 @@ class ExecucaoService:
 
     @classmethod
     def validar_clientes(cls, clientes):
+        """Le o diretorio de backup UMA UNICA VEZ (nao uma vez por cliente)
+        -- essencial em compartilhamentos de rede."""
+        pastas = listar_pastas(config.BACKUP_DIRETORIO)
         resultado = []
 
         for cliente in clientes.values():
-            arquivos = buscar_arquivos(config.BACKUP_DIRETORIO, config.BACKUP_EXTENSAO, cliente["nome"])
+            pastas_cliente = localizar_pastas_cliente(pastas, cliente["nome"])
+            arquivos = arquivos_em_pastas(pastas_cliente, config.BACKUP_EXTENSAO)
             ultimo = max(arquivos, key=lambda arquivo: arquivo["modificado_em"], default=None)
 
             frequencia = cliente.get("frequencia_verificacao", "")

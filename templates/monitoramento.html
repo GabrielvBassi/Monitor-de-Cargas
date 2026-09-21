@@ -11,28 +11,30 @@
         <div class="kpi-valor">{{ kpis.total_clientes }}</div>
     </div>
     <div class="kpi destaque">
-        <div class="kpi-rotulo">Clientes com registros BAD</div>
+        <div class="kpi-rotulo">Clientes com BAD</div>
         <div class="kpi-valor">{{ kpis.clientes_bad }}</div>
     </div>
     <div class="kpi">
-        <div class="kpi-rotulo">Arquivos BAD encontrados</div>
-        <div class="kpi-valor">{{ kpis.arquivos_bad }}</div>
+        <div class="kpi-rotulo">Clientes com aviso</div>
+        <div class="kpi-valor">{{ kpis.clientes_aviso }}</div>
     </div>
     <div class="kpi destaque">
-        <div class="kpi-rotulo">Total de registros BAD</div>
-        <div class="kpi-valor">{{ kpis.registros_bad }}</div>
+        <div class="kpi-rotulo">Clientes atrasados (execucao)</div>
+        <div class="kpi-valor">{{ kpis.clientes_atrasados }}</div>
     </div>
 </div>
 
 <div class="card">
-    <h2>Resumo por cliente</h2>
+    <h2>Validacao de clientes (BAD + Processamento)</h2>
     <div class="card-body">
         {% if erro_clientes %}
             <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
         {% elif erro_diretorio %}
             <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
+        {% elif erro_backup %}
+            <p class="vazio">Nao foi possivel ler a pasta de backups: {{ erro_backup }}</p>
         {% else %}
-            {% set com_registros = resumo | selectattr("registros_bad", "gt", 0) | list %}
+            {% set com_registros = resumo | selectattr("quantidade_linhas", "gt", 0) | list %}
             {% if com_registros %}
                 <div class="grafico-pendentes">
                     {% for item in com_registros %}
@@ -42,10 +44,10 @@
                                 <div
                                     class="barra-h-fill"
                                     style="width: {{ item.percentual }}%;"
-                                    title="{{ item.cliente }}: {{ item.registros_bad }} registro(s)"
+                                    title="{{ item.cliente }}: {{ item.quantidade_linhas }} registro(s) no ultimo arquivo BAD"
                                 ></div>
                             </div>
-                            <span class="barra-h-valor">{{ item.registros_bad }}</span>
+                            <span class="barra-h-valor">{{ item.quantidade_linhas }}</span>
                         </div>
                     {% endfor %}
                 </div>
@@ -53,91 +55,57 @@
 
             <div class="filtros">
                 <input
-                    id="filtroClienteResumo"
+                    id="filtroCliente"
                     type="text"
                     placeholder="Filtrar cliente..."
-                    onkeyup="filtrarResumo()"
+                    onkeyup="filtrarValidacao()"
                 >
-                <select id="filtroStatus" onchange="filtrarResumo()">
-                    <option value="">Todos os status</option>
+                <select id="filtroStatusBad" onchange="filtrarValidacao()">
+                    <option value="">BAD: todos os status</option>
                     <option value="bad">Somente BAD</option>
+                    <option value="aviso">Somente aviso (vazio)</option>
                     <option value="ok">Somente OK</option>
-                    <option value="aviso">BAD vazio / sem registros</option>
+                </select>
+                <select id="filtroStatusExec" onchange="filtrarValidacao()">
+                    <option value="">Processamento: todos os status</option>
+                    <option value="ok">Somente OK</option>
+                    <option value="atrasado">Somente atrasado</option>
+                    <option value="nao_avaliado">Somente nao avaliado</option>
                 </select>
             </div>
 
             <div class="legenda">
-                <span class="legenda-item"><i class="cor-falha"></i> Vermelho: possui registros BAD</span>
-                <span class="legenda-item"><i class="cor-sucesso"></i> Verde: nenhum arquivo BAD encontrado</span>
-                <span class="legenda-item"><i class="cor-aviso"></i> Amarelo: arquivo BAD encontrado, mas sem registro contado</span>
+                <span class="legenda-item"><i class="cor-falha"></i> BAD: possui registros no arquivo mais recente</span>
+                <span class="legenda-item"><i class="cor-aviso"></i> BAD: arquivo encontrado, mas vazio</span>
+                <span class="legenda-item"><i class="cor-sucesso"></i> BAD/Processamento: OK</span>
+                <span class="legenda-item"><i class="cor-falha"></i> Processamento: atrasado (sem backup dentro da frequencia)</span>
             </div>
 
-            <table id="tabelaResumo">
+            <table id="tabelaValidacao">
                 <thead>
                     <tr>
                         <th class="ordenavel">Cliente</th>
                         <th class="ordenavel">Frequencia</th>
+                        <th class="ordenavel">Arquivo BAD (mais recente)</th>
                         <th class="ordenavel">Tipo</th>
-                        <th class="ordenavel">Arquivos BAD</th>
-                        <th class="ordenavel">Arquivos com registros</th>
-                        <th class="ordenavel">Registros BAD</th>
-                        <th class="ordenavel">Ultima ocorrencia</th>
-                        <th>Status</th>
+                        <th>Status BAD</th>
+                        <th class="ordenavel">Arquivo de Backup (mais recente)</th>
+                        <th>Status Processamento</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in resumo %}
-                        <tr data-cliente="{{ item.cliente | lower }}" data-status="{{ item.status }}">
+                    {% for item in validacoes %}
+                        <tr data-cliente="{{ item.cliente | lower }}" data-status-bad="{{ item.bad_status }}" data-status-exec="{{ item.exec_status }}">
                             <td>{{ item.cliente }}</td>
                             <td>{{ item.frequencia_verificacao }}</td>
-                            <td>{{ item.tipo }}</td>
-                            <td class="num">{{ item.arquivos_bad }}</td>
-                            <td class="num">{{ item.arquivos_com_registros }}</td>
-                            <td class="num destaque-num">{{ item.registros_bad }}</td>
-                            <td>{{ item.ultima_ocorrencia.strftime("%d/%m/%Y %H:%M") if item.ultima_ocorrencia else "-" }}</td>
-                            <td><span class="tag {{ item.status }}">{{ item.status | upper }}</span></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
-    </div>
-</div>
-
-<div class="card">
-    <h2>Validacao de execucoes (backups)</h2>
-    <div class="card-body">
-        {% if erro_clientes %}
-            <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
-        {% elif erro_backup %}
-            <p class="vazio">Nao foi possivel ler a pasta de backups: {{ erro_backup }}</p>
-        {% elif execucoes %}
-            <div class="legenda">
-                <span class="legenda-item"><i class="cor-sucesso"></i> Verde: execucao dentro da frequencia esperada</span>
-                <span class="legenda-item"><i class="cor-falha"></i> Vermelho: sem backup dentro da frequencia (atrasado)</span>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Frequencia</th>
-                        <th>Ultimo arquivo</th>
-                        <th>Data da execucao</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in execucoes %}
-                        <tr>
-                            <td>{{ item.cliente }}</td>
-                            <td>{{ item.frequencia_verificacao }}</td>
-                            <td>{{ item.arquivo or "-" }}</td>
-                            <td>{{ item.ultima_execucao.strftime("%d/%m/%Y %H:%M") if item.ultima_execucao else "-" }}</td>
+                            <td title="{{ item.bad_modificado_em.strftime('%d/%m/%Y %H:%M') if item.bad_modificado_em else '' }}">{{ item.bad_arquivo or "-" }}</td>
+                            <td>{{ item.bad_tipo }}</td>
+                            <td><span class="tag {{ item.bad_status }}">{{ item.bad_status | upper }}</span></td>
+                            <td title="{{ item.exec_modificado_em.strftime('%d/%m/%Y %H:%M') if item.exec_modificado_em else '' }}">{{ item.exec_arquivo or "-" }}</td>
                             <td>
-                                {% if item.status == "nao_avaliado" %}
+                                {% if item.exec_status == "nao_avaliado" %}
                                     <span class="tag nao_avaliado" title="Frequencia '{{ item.frequencia_verificacao }}' nao reconhecida">NAO AVALIADO</span>
-                                {% elif item.status == "ok" %}
+                                {% elif item.exec_status == "ok" %}
                                     <span class="tag ok">OK</span>
                                 {% else %}
                                     <span class="tag atrasado">ATRASADO</span>
@@ -147,8 +115,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-        {% else %}
-            <p class="vazio">Nenhum cliente para validar.</p>
         {% endif %}
     </div>
 </div>
@@ -271,14 +237,16 @@
 </div>
 
 <script>
-function filtrarResumo() {
-    const cliente = document.getElementById("filtroClienteResumo").value.toLowerCase();
-    const status = document.getElementById("filtroStatus").value.toLowerCase();
-    const linhas = document.querySelectorAll("#tabelaResumo tbody tr");
+function filtrarValidacao() {
+    const cliente = document.getElementById("filtroCliente").value.toLowerCase();
+    const statusBad = document.getElementById("filtroStatusBad").value.toLowerCase();
+    const statusExec = document.getElementById("filtroStatusExec").value.toLowerCase();
+    const linhas = document.querySelectorAll("#tabelaValidacao tbody tr");
 
     linhas.forEach(function (linha) {
         const clienteLinha = linha.dataset.cliente || "";
-        const statusLinha = linha.dataset.status || "";
+        const statusBadLinha = linha.dataset.statusBad || "";
+        const statusExecLinha = linha.dataset.statusExec || "";
 
         let mostrar = true;
 
@@ -286,7 +254,11 @@ function filtrarResumo() {
             mostrar = false;
         }
 
-        if (status && statusLinha !== status) {
+        if (statusBad && statusBadLinha !== statusBad) {
+            mostrar = false;
+        }
+
+        if (statusExec && statusExecLinha !== statusExec) {
             mostrar = false;
         }
 
@@ -317,7 +289,7 @@ function filtrarDetalhe() {
     });
 }
 
-document.querySelectorAll("#tabelaResumo th, #tabelaDetalhe th").forEach(function (th) {
+document.querySelectorAll("#tabelaValidacao th, #tabelaDetalhe th").forEach(function (th) {
     th.addEventListener("click", function () {
         const tabela = th.closest("table");
         const tbody = tabela.querySelector("tbody");

@@ -1,7 +1,7 @@
 import re
 
 from config import ERROS_DIRETORIO, ERROS_EXTENSAO
-from services.arquivo_service import buscar_arquivos
+from services.arquivo_service import arquivos_em_pastas, buscar_arquivos, listar_pastas, localizar_pastas_cliente
 
 PADRAO_TIPO = re.compile(r"_([FI])\d", re.IGNORECASE)
 
@@ -27,9 +27,7 @@ class ErrorFileService:
         return "FULL" if match.group(1).upper() == "F" else "INCREMENTAL"
 
     @classmethod
-    def buscar_arquivos_cliente(cls, nome_cliente):
-        arquivos = buscar_arquivos(ERROS_DIRETORIO, ERROS_EXTENSAO, nome_cliente)
-
+    def _completar_arquivos(cls, arquivos):
         for arquivo in arquivos:
             arquivo["quantidade_linhas"] = cls.contar_linhas(arquivo["caminho"])
             arquivo["tipo"] = cls.classificar_tipo(arquivo["arquivo"])
@@ -37,35 +35,71 @@ class ErrorFileService:
         return arquivos
 
     @classmethod
+    def buscar_arquivos_cliente(cls, nome_cliente):
+        """Retorna TODOS os arquivos BAD do cliente (usado no envio de
+        e-mail de erro, que gera uma mensagem por arquivo -- nao usar para
+        o resumo do Monitoramento, que olha so o mais recente)."""
+        arquivos = buscar_arquivos(ERROS_DIRETORIO, ERROS_EXTENSAO, nome_cliente)
+        return cls._completar_arquivos(arquivos)
+
+    @classmethod
     def resumo_por_cliente(cls, clientes):
-        """Retorna, para TODOS os clientes cadastrados, um resumo dos
-        arquivos BAD: contagens, tipos encontrados, ultima ocorrencia e
-        status (ok / aviso / bad)."""
+        """Retorna, para TODOS os clientes cadastrados, o status baseado
+        APENAS no arquivo BAD mais recente da pasta do cliente (nao soma/
+        conta os demais). So le o conteudo (contar linhas) desse unico
+        arquivo -- os outros so tem a data de modificacao consultada,
+        sem abrir o arquivo. Essencial para performance em rede."""
+        pastas = listar_pastas(ERROS_DIRETORIO)
         resumo = []
 
         for cliente in clientes.values():
-            arquivos = cls.buscar_arquivos_cliente(cliente["nome"])
-            arquivos_com_registros = [a for a in arquivos if a["quantidade_linhas"] > 0]
-            registros_bad = sum(a["quantidade_linhas"] for a in arquivos)
-            tipos = sorted({a["tipo"] for a in arquivos})
+            pastas_cliente = localizar_pastas_cliente(pastas, cliente["nome"])
+            arquivos = arquivos_em_pastas(pastas_cliente, ERROS_EXTENSAO)
+            ultimo = max(arquivos, key=lambda arquivo: arquivo["modificado_em"], default=None)
 
-            if not arquivos:
+            if ultimo is None:
                 status = "ok"
-            elif not arquivos_com_registros:
-                status = "aviso"
+                quantidade_linhas = 0
+                tipo = "-"
             else:
-                status = "bad"
+                quantidade_linhas = cls.contar_linhas(ultimo["caminho"])
+                tipo = cls.classificar_tipo(ultimo["arquivo"])
+                status = "aviso" if quantidade_linhas == 0 else "bad"
 
             resumo.append({
                 "cliente": cliente["nome"],
                 "frequencia_verificacao": cliente.get("frequencia_verificacao", "-"),
-                "tipo": ", ".join(tipos) if tipos else "-",
-                "arquivos_bad": len(arquivos),
-                "arquivos_com_registros": len(arquivos_com_registros),
-                "registros_bad": registros_bad,
-                "ultima_ocorrencia": max((a["modificado_em"] for a in arquivos), default=None),
+                "arquivo": ultimo["arquivo"] if ultimo else None,
+                "modificado_em": ultimo["modificado_em"] if ultimo else None,
+                "tipo": tipo,
+                "quantidade_linhas": quantidade_linhas,
                 "status": status,
-                "arquivos": arquivos,
             })
 
         return resumo
+
+    @classmethod
+    def detalhamento_por_cliente(cls, clientes):
+        """Lista TODOS os arquivos BAD de TODOS os clientes (mais recente
+        primeiro) -- usado só na tabela de detalhamento/drill-down, mais
+        pesada pois le o conteudo de cada arquivo encontrado."""
+        pastas = listar_pastas(ERROS_DIRETORIO)
+        detalhamento = []
+
+        for cliente in clientes.values():
+            pastas_cliente = localizar_pastas_cliente(pastas, cliente["nome"])
+            arquivos = cls._completar_arquivos(arquivos_em_pastas(pastas_cliente, ERROS_EXTENSAO))
+
+            for arquivo in arquivos:
+                detalhamento.append({
+                    "cliente": cliente["nome"],
+                    "arquivo": arquivo["arquivo"],
+                    "tipo": arquivo["tipo"],
+                    "quantidade_linhas": arquivo["quantidade_linhas"],
+                    "modificado_em": arquivo["modificado_em"],
+                    "caminho": arquivo["caminho"],
+                })
+
+        detalhamento.sort(key=lambda item: item["modificado_em"], reverse=True)
+
+        return detalhamento

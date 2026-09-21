@@ -5,7 +5,7 @@ from services.error_file_service import ErrorFileService
 from services.execucao_service import ExecucaoService
 from services.historico_service import HistoricoService
 from services.monitoramento_service import (
-    montar_detalhamento,
+    combinar_validacoes,
     montar_kpis,
     preparar_grafico_historico,
     preparar_grafico_resumo,
@@ -35,10 +35,12 @@ def monitoramento():
     resumo = []
     erro_backup = None
     execucoes = []
+    detalhamento = []
 
     if not erro_clientes:
         try:
             resumo = ErrorFileService.resumo_por_cliente(clientes)
+            detalhamento = ErrorFileService.detalhamento_por_cliente(clientes)
         except FileNotFoundError as exc:
             erro_diretorio = str(exc)
 
@@ -55,10 +57,10 @@ def monitoramento():
         erro_diretorio=erro_diretorio,
         erro_clientes=erro_clientes,
         erro_backup=erro_backup,
-        kpis=montar_kpis(resumo),
+        kpis=montar_kpis(resumo, execucoes),
         resumo=preparar_grafico_resumo(resumo),
-        detalhamento=montar_detalhamento(resumo),
-        execucoes=execucoes,
+        validacoes=combinar_validacoes(resumo, execucoes),
+        detalhamento=detalhamento,
         historico=historico,
         grafico_historico=preparar_grafico_historico(historico),
     )

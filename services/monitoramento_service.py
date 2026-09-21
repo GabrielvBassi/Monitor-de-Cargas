@@ -4,44 +4,48 @@ QTD_EVENTOS_GRAFICO = 8
 
 
 def preparar_grafico_resumo(resumo):
-    """Adiciona a cada item do resumo o percentual (0-100) de registros BAD
-    em relacao ao maior valor, para a barra horizontal."""
-    maior_total = max((item["registros_bad"] for item in resumo), default=0)
+    """Adiciona a cada item do resumo o percentual (0-100) de registros do
+    arquivo BAD mais recente em relacao ao maior valor, para a barra
+    horizontal."""
+    maior_total = max((item["quantidade_linhas"] for item in resumo), default=0)
 
     for item in resumo:
-        item["percentual"] = (item["registros_bad"] / maior_total * 100) if maior_total else 0
+        item["percentual"] = (item["quantidade_linhas"] / maior_total * 100) if maior_total else 0
 
     return resumo
 
 
-def montar_detalhamento(resumo):
-    """Achata os arquivos de cada cliente numa lista unica (mais recente
-    primeiro) para a tabela de detalhamento por arquivo."""
-    detalhamento = []
-
-    for item in resumo:
-        for arquivo in item["arquivos"]:
-            detalhamento.append({
-                "cliente": item["cliente"],
-                "arquivo": arquivo["arquivo"],
-                "tipo": arquivo["tipo"],
-                "quantidade_linhas": arquivo["quantidade_linhas"],
-                "modificado_em": arquivo["modificado_em"],
-                "caminho": arquivo["caminho"],
-            })
-
-    detalhamento.sort(key=lambda item: item["modificado_em"], reverse=True)
-
-    return detalhamento
-
-
-def montar_kpis(resumo):
+def montar_kpis(resumo, execucoes):
     return {
         "total_clientes": len(resumo),
         "clientes_bad": sum(1 for item in resumo if item["status"] == "bad"),
-        "arquivos_bad": sum(item["arquivos_bad"] for item in resumo),
-        "registros_bad": sum(item["registros_bad"] for item in resumo),
+        "clientes_aviso": sum(1 for item in resumo if item["status"] == "aviso"),
+        "clientes_atrasados": sum(1 for item in execucoes if item["status"] == "atrasado"),
     }
+
+
+def combinar_validacoes(resumo, execucoes):
+    """Junta, por cliente, o status do arquivo BAD mais recente com o status
+    da execucao (backup) mais recente, numa unica linha para o painel."""
+    execucoes_por_cliente = {item["cliente"]: item for item in execucoes}
+    combinado = []
+
+    for item in resumo:
+        execucao = execucoes_por_cliente.get(item["cliente"], {})
+
+        combinado.append({
+            "cliente": item["cliente"],
+            "frequencia_verificacao": item["frequencia_verificacao"],
+            "bad_arquivo": item["arquivo"],
+            "bad_modificado_em": item["modificado_em"],
+            "bad_tipo": item["tipo"],
+            "bad_status": item["status"],
+            "exec_arquivo": execucao.get("arquivo"),
+            "exec_modificado_em": execucao.get("modificado_em"),
+            "exec_status": execucao.get("status", "nao_avaliado"),
+        })
+
+    return combinado
 
 
 def preparar_grafico_historico(historico):

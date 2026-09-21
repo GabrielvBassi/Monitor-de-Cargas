@@ -2,41 +2,42 @@ import os
 from datetime import datetime
 
 
-def _localizar_pastas_cliente(diretorio, nome_cliente):
-    """Encontra, dentro de `diretorio`, a(s) subpasta(s) cujo nome bate com
-    `nome_cliente` (comparacao tolerante a maiusculas/minusculas e a nomes
-    parciais, ex: cliente 'C6Bank' casa com a pasta 'C6Bank' ou 'c6bank_bad')."""
+def listar_pastas(diretorio):
+    """Lista, uma UNICA vez, as subpastas de primeiro nivel de `diretorio`.
+
+    Chamado uma vez por diretorio (nao uma vez por cliente) -- em
+    compartilhamentos de rede, listar o diretorio repetidamente para cada
+    cliente e o que deixa a pagina lenta/parada esperando resposta."""
+    if not os.path.isdir(diretorio):
+        raise FileNotFoundError(f"Diretorio nao encontrado: {diretorio}")
+
     pastas = []
 
     for nome_entrada in os.listdir(diretorio):
         caminho_entrada = os.path.join(diretorio, nome_entrada)
 
-        if not os.path.isdir(caminho_entrada):
-            continue
-
-        if nome_cliente.lower() not in nome_entrada.lower():
-            continue
-
-        pastas.append(caminho_entrada)
+        if os.path.isdir(caminho_entrada):
+            pastas.append((nome_entrada, caminho_entrada))
 
     return pastas
 
 
-def buscar_arquivos(diretorio, extensao, nome_cliente):
-    """Lista os arquivos com `extensao` dentro da subpasta do cliente
-    (diretorio/<pasta do cliente>/*), usada tanto para os arquivos de erro
-    (BAD) quanto para os arquivos de backup (execucoes com sucesso).
+def localizar_pastas_cliente(pastas, nome_cliente):
+    """Filtra, dentre as pastas ja listadas (via listar_pastas), as que
+    batem com `nome_cliente` -- nao acessa o disco/rede, so filtra em
+    memoria a lista recebida."""
+    nome_cliente_lower = nome_cliente.lower()
+    return [caminho for nome, caminho in pastas if nome_cliente_lower in nome.lower()]
 
-    Retorna lista vazia quando o cliente nao tem pasta (ainda sem
-    ocorrencias) -- so levanta erro quando o diretorio base nao existe."""
-    if not os.path.isdir(diretorio):
-        raise FileNotFoundError(f"Diretorio nao encontrado: {diretorio}")
 
+def arquivos_em_pastas(pastas_cliente, extensao):
+    """Lista os arquivos com `extensao` dentro das pastas ja resolvidas de
+    um cliente (uma por cliente, normalmente)."""
     encontrados = []
 
-    for pasta_cliente in _localizar_pastas_cliente(diretorio, nome_cliente):
-        for nome_arquivo in os.listdir(pasta_cliente):
-            caminho_completo = os.path.join(pasta_cliente, nome_arquivo)
+    for pasta in pastas_cliente:
+        for nome_arquivo in os.listdir(pasta):
+            caminho_completo = os.path.join(pasta, nome_arquivo)
 
             if not os.path.isfile(caminho_completo):
                 continue
@@ -51,3 +52,14 @@ def buscar_arquivos(diretorio, extensao, nome_cliente):
             })
 
     return encontrados
+
+
+def buscar_arquivos(diretorio, extensao, nome_cliente):
+    """Busca de um unico cliente (le o diretorio base + a(s) pasta(s) do
+    cliente). Para varrer TODOS os clientes de uma vez, use listar_pastas()
+    uma vez e depois localizar_pastas_cliente()/arquivos_em_pastas() por
+    cliente, para nao relistar o diretorio base repetidamente."""
+    pastas = listar_pastas(diretorio)
+    pastas_cliente = localizar_pastas_cliente(pastas, nome_cliente)
+
+    return arquivos_em_pastas(pastas_cliente, extensao)
