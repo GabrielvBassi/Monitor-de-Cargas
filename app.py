@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 from models.cliente_model import ClienteModel
-from services.error_file_service import ErrorFileService
-from services.execucao_service import ExecucaoService
 from services.historico_service import HistoricoService
-from services.monitoramento_service import combinar_validacoes, montar_kpis, preparar_grafico_historico
+from services.monitoramento_cache import obter_detalhamento, obter_principal
+from services.monitoramento_service import preparar_grafico_historico
 from services.processamento_service import processar_envio
 
 app = Flask(__name__)
@@ -18,46 +17,41 @@ def index():
 
 @app.route("/monitoramento")
 def monitoramento():
-    erro_diretorio = None
-    erro_clientes = None
-
-    try:
-        clientes = ClienteModel.todos()
-    except (FileNotFoundError, ValueError) as exc:
-        clientes = {}
-        erro_clientes = str(exc)
-
-    resumo = []
-    erro_backup = None
-    execucoes = []
-    detalhamento = []
-
-    if not erro_clientes:
-        try:
-            resumo = ErrorFileService.resumo_por_cliente(clientes)
-            detalhamento = ErrorFileService.detalhamento_por_cliente(clientes)
-        except FileNotFoundError as exc:
-            erro_diretorio = str(exc)
-
-        try:
-            execucoes = ExecucaoService.validar_clientes(clientes)
-        except FileNotFoundError as exc:
-            erro_backup = str(exc)
+    """Le do cache (services/monitoramento_cache.py): a validacao dos
+    diretorios so roda de verdade na primeira vez, ou quando o botao
+    "Atualizar" manda ?atualizar=1 -- trocar de aba e voltar nao recalcula."""
+    forcar = request.args.get("atualizar") == "1"
+    dados, atualizado_em = obter_principal(forcar=forcar)
 
     historico = HistoricoService.listar()
-    validacoes = combinar_validacoes(resumo, execucoes)
 
     return render_template(
         "monitoramento.html",
         pagina_ativa="monitoramento",
-        erro_diretorio=erro_diretorio,
-        erro_clientes=erro_clientes,
-        erro_backup=erro_backup,
-        kpis=montar_kpis(validacoes),
-        validacoes=validacoes,
-        detalhamento=detalhamento,
+        erro_diretorio=dados["erro_diretorio"],
+        erro_clientes=dados["erro_clientes"],
+        erro_backup=dados["erro_backup"],
+        kpis=dados["kpis"],
+        validacoes=dados["validacoes"],
+        atualizado_em=atualizado_em,
         historico=historico,
         grafico_historico=preparar_grafico_historico(historico),
+    )
+
+
+@app.route("/monitoramento/detalhamento")
+def monitoramento_detalhamento():
+    """Detalhamento por arquivo (le o conteudo de cada arquivo BAD para
+    contar linhas) -- carregado sob demanda via fetch(), e tambem cacheado:
+    so recalcula na primeira vez ou quando o Atualizar geral invalida o
+    cache principal."""
+    dados = obter_detalhamento()
+
+    return render_template(
+        "_detalhamento.html",
+        erro_clientes=dados["erro_clientes"],
+        erro_diretorio=dados["erro_diretorio"],
+        detalhamento=dados["detalhamento"],
     )
 
 

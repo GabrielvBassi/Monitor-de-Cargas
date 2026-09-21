@@ -1,0 +1,47 @@
+{% if erro_clientes %}
+    <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
+{% elif erro_diretorio %}
+    <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
+{% elif detalhamento %}
+    <div class="filtros">
+        <input
+            id="filtroClienteDetalhe"
+            type="text"
+            placeholder="Filtrar cliente..."
+            onkeyup="filtrarDetalhe()"
+        >
+        <select id="filtroTipo" onchange="filtrarDetalhe()">
+            <option value="">FULL + INCREMENTAL</option>
+            <option value="full">FULL</option>
+            <option value="incremental">INCREMENTAL</option>
+            <option value="nao identificado">Nao identificado</option>
+        </select>
+    </div>
+
+    <table id="tabelaDetalhe">
+        <thead>
+            <tr>
+                <th class="ordenavel">Cliente</th>
+                <th class="ordenavel">Arquivo</th>
+                <th class="ordenavel">Tipo</th>
+                <th class="ordenavel">Qtd. BAD</th>
+                <th class="ordenavel">Data do arquivo</th>
+                <th>Caminho</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in detalhamento %}
+                <tr data-cliente="{{ item.cliente | lower }}" data-tipo="{{ item.tipo | lower }}">
+                    <td>{{ item.cliente }}</td>
+                    <td>{{ item.arquivo }}</td>
+                    <td>{{ item.tipo }}</td>
+                    <td class="num destaque-num">{{ item.quantidade_linhas }}</td>
+                    <td>{{ item.modificado_em.strftime("%d/%m/%Y %H:%M") }}</td>
+                    <td class="caminho" title="{{ item.caminho }}">{{ item.caminho }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="vazio">Nenhum arquivo de erro encontrado.</p>
+{% endif %}

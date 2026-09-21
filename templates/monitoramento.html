@@ -5,6 +5,17 @@
 {% block conteudo %}
 <div class="viz-root">
 
+<div class="barra-atualizacao">
+    <span class="atualizado-em">
+        {% if atualizado_em %}
+            Ultima checagem: {{ atualizado_em.strftime("%d/%m/%Y %H:%M:%S") }}
+        {% else %}
+            Ainda nao verificado
+        {% endif %}
+    </span>
+    <a href="{{ url_for('monitoramento') }}?atualizar=1" class="btn-atualizar">Atualizar</a>
+</div>
+
 <div class="kpis">
     <button type="button" class="kpi" onclick="aplicarFiltroKpi([], [])" title="Limpar filtros e ver todos os clientes">
         <div class="kpi-rotulo">Clientes monitorados</div>
@@ -128,53 +139,16 @@
 <div class="card">
     <h2>Detalhamento dos arquivos BAD</h2>
     <div class="card-body">
-        {% if erro_clientes %}
-            <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
-        {% elif erro_diretorio %}
-            <p class="vazio">Nao foi possivel ler a pasta de erros: {{ erro_diretorio }}</p>
-        {% elif detalhamento %}
-            <div class="filtros">
-                <input
-                    id="filtroClienteDetalhe"
-                    type="text"
-                    placeholder="Filtrar cliente..."
-                    onkeyup="filtrarDetalhe()"
-                >
-                <select id="filtroTipo" onchange="filtrarDetalhe()">
-                    <option value="">FULL + INCREMENTAL</option>
-                    <option value="full">FULL</option>
-                    <option value="incremental">INCREMENTAL</option>
-                    <option value="nao identificado">Nao identificado</option>
-                </select>
-            </div>
-
-            <table id="tabelaDetalhe">
-                <thead>
-                    <tr>
-                        <th class="ordenavel">Cliente</th>
-                        <th class="ordenavel">Arquivo</th>
-                        <th class="ordenavel">Tipo</th>
-                        <th class="ordenavel">Qtd. BAD</th>
-                        <th class="ordenavel">Data do arquivo</th>
-                        <th>Caminho</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in detalhamento %}
-                        <tr data-cliente="{{ item.cliente | lower }}" data-tipo="{{ item.tipo | lower }}">
-                            <td>{{ item.cliente }}</td>
-                            <td>{{ item.arquivo }}</td>
-                            <td>{{ item.tipo }}</td>
-                            <td class="num destaque-num">{{ item.quantidade_linhas }}</td>
-                            <td>{{ item.modificado_em.strftime("%d/%m/%Y %H:%M") }}</td>
-                            <td class="caminho" title="{{ item.caminho }}">{{ item.caminho }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="vazio">Nenhum arquivo de erro encontrado.</p>
-        {% endif %}
+        <div id="detalhamentoInicial">
+            <p class="vazio">
+                Lista todo arquivo BAD de todo cliente (le o conteudo de cada um para contar linhas) --
+                mais pesado que o painel principal, por isso carrega so quando voce pedir.
+            </p>
+            <button type="button" class="btn-visualizar" style="max-width: 220px;" onclick="carregarDetalhamento()">
+                Carregar detalhamento
+            </button>
+        </div>
+        <div id="detalhamentoConteudo"></div>
     </div>
 </div>
 
@@ -317,34 +291,58 @@ function filtrarDetalhe() {
     });
 }
 
-document.querySelectorAll("#tabelaValidacao th, #tabelaDetalhe th").forEach(function (th) {
-    th.addEventListener("click", function () {
-        const tabela = th.closest("table");
-        const tbody = tabela.querySelector("tbody");
-        const coluna = Array.from(th.parentNode.children).indexOf(th);
-        const linhas = Array.from(tbody.querySelectorAll("tr"));
+function ativarOrdenacao(seletorThs) {
+    document.querySelectorAll(seletorThs).forEach(function (th) {
+        th.addEventListener("click", function () {
+            const tabela = th.closest("table");
+            const tbody = tabela.querySelector("tbody");
+            const coluna = Array.from(th.parentNode.children).indexOf(th);
+            const linhas = Array.from(tbody.querySelectorAll("tr"));
 
-        const asc = th.dataset.asc !== "true";
-        th.dataset.asc = asc ? "true" : "false";
+            const asc = th.dataset.asc !== "true";
+            th.dataset.asc = asc ? "true" : "false";
 
-        linhas.sort(function (a, b) {
-            const va = a.children[coluna].innerText.trim();
-            const vb = b.children[coluna].innerText.trim();
+            linhas.sort(function (a, b) {
+                const va = a.children[coluna].innerText.trim();
+                const vb = b.children[coluna].innerText.trim();
 
-            const na = Number(va.replace(",", "."));
-            const nb = Number(vb.replace(",", "."));
+                const na = Number(va.replace(",", "."));
+                const nb = Number(vb.replace(",", "."));
 
-            if (!isNaN(na) && !isNaN(nb) && va !== "" && vb !== "") {
-                return asc ? na - nb : nb - na;
-            }
+                if (!isNaN(na) && !isNaN(nb) && va !== "" && vb !== "") {
+                    return asc ? na - nb : nb - na;
+                }
 
-            return asc ? va.localeCompare(vb, "pt-BR") : vb.localeCompare(va, "pt-BR");
-        });
+                return asc ? va.localeCompare(vb, "pt-BR") : vb.localeCompare(va, "pt-BR");
+            });
 
-        linhas.forEach(function (linha) {
-            tbody.appendChild(linha);
+            linhas.forEach(function (linha) {
+                tbody.appendChild(linha);
+            });
         });
     });
-});
+}
+
+function carregarDetalhamento() {
+    const inicial = document.getElementById("detalhamentoInicial");
+    const conteudo = document.getElementById("detalhamentoConteudo");
+
+    inicial.innerHTML = "<p class=\"vazio\">Carregando...</p>";
+
+    fetch("{{ url_for('monitoramento_detalhamento') }}")
+        .then(function (resposta) {
+            return resposta.text();
+        })
+        .then(function (html) {
+            inicial.remove();
+            conteudo.innerHTML = html;
+            ativarOrdenacao("#tabelaDetalhe th");
+        })
+        .catch(function () {
+            inicial.innerHTML = "<p class=\"vazio\">Falha ao carregar o detalhamento. Tente novamente.</p>";
+        });
+}
+
+ativarOrdenacao("#tabelaValidacao th");
 </script>
 {% endblock %}

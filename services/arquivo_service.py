@@ -7,17 +7,19 @@ def listar_pastas(diretorio):
 
     Chamado uma vez por diretorio (nao uma vez por cliente) -- em
     compartilhamentos de rede, listar o diretorio repetidamente para cada
-    cliente e o que deixa a pagina lenta/parada esperando resposta."""
+    cliente e o que deixa a pagina lenta/parada esperando resposta. Usa
+    os.scandir (nao os.listdir) para reaproveitar os metadados que o
+    Windows ja retorna junto da listagem, evitando uma chamada de rede
+    extra por entrada."""
     if not os.path.isdir(diretorio):
         raise FileNotFoundError(f"Diretorio nao encontrado: {diretorio}")
 
     pastas = []
 
-    for nome_entrada in os.listdir(diretorio):
-        caminho_entrada = os.path.join(diretorio, nome_entrada)
-
-        if os.path.isdir(caminho_entrada):
-            pastas.append((nome_entrada, caminho_entrada))
+    with os.scandir(diretorio) as entradas:
+        for entrada in entradas:
+            if entrada.is_dir():
+                pastas.append((entrada.name, entrada.path))
 
     return pastas
 
@@ -51,24 +53,28 @@ def arquivos_em_pastas(pastas_cliente, extensao=None):
     por cliente, normalmente). Se `extensao` for informada, filtra por ela;
     se for None, lista TODOS os arquivos da pasta, sem avaliar o nome --
     usado quando so a pasta importa e o criterio de escolha e a data de
-    modificacao mais recente, nao o nome do arquivo."""
+    modificacao mais recente, nao o nome do arquivo.
+
+    Usa os.scandir: em compartilhamentos de rede (Windows/SMB), a data de
+    modificacao ja vem junto da listagem da pasta, entao entrada.stat() nao
+    dispara uma chamada de rede adicional por arquivo como os.path.getmtime
+    dispararia -- essencial quando a pasta tem muitos arquivos."""
     encontrados = []
 
     for pasta in pastas_cliente:
-        for nome_arquivo in os.listdir(pasta):
-            caminho_completo = os.path.join(pasta, nome_arquivo)
+        with os.scandir(pasta) as entradas:
+            for entrada in entradas:
+                if not entrada.is_file():
+                    continue
 
-            if not os.path.isfile(caminho_completo):
-                continue
+                if extensao and not entrada.name.lower().endswith(extensao.lower()):
+                    continue
 
-            if extensao and not nome_arquivo.lower().endswith(extensao.lower()):
-                continue
-
-            encontrados.append({
-                "arquivo": nome_arquivo,
-                "caminho": caminho_completo,
-                "modificado_em": datetime.fromtimestamp(os.path.getmtime(caminho_completo)),
-            })
+                encontrados.append({
+                    "arquivo": entrada.name,
+                    "caminho": entrada.path,
+                    "modificado_em": datetime.fromtimestamp(entrada.stat().st_mtime),
+                })
 
     return encontrados
 
