@@ -50,6 +50,7 @@ def monitoramento():
             erro_backup = str(exc)
 
     historico = HistoricoService.listar()
+    validacoes = combinar_validacoes(resumo, execucoes)
 
     return render_template(
         "monitoramento.html",
@@ -57,9 +58,9 @@ def monitoramento():
         erro_diretorio=erro_diretorio,
         erro_clientes=erro_clientes,
         erro_backup=erro_backup,
-        kpis=montar_kpis(resumo, execucoes),
+        kpis=montar_kpis(validacoes),
         resumo=preparar_grafico_resumo(resumo),
-        validacoes=combinar_validacoes(resumo, execucoes),
+        validacoes=validacoes,
         detalhamento=detalhamento,
         historico=historico,
         grafico_historico=preparar_grafico_historico(historico),

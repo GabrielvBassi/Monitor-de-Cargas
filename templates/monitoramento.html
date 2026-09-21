@@ -6,22 +6,30 @@
 <div class="viz-root">
 
 <div class="kpis">
-    <div class="kpi">
+    <button type="button" class="kpi" onclick="aplicarFiltroKpi('', '')" title="Limpar filtros e ver todos os clientes">
         <div class="kpi-rotulo">Clientes monitorados</div>
         <div class="kpi-valor">{{ kpis.total_clientes }}</div>
-    </div>
-    <div class="kpi destaque">
+    </button>
+    <button type="button" class="kpi kpi-ok" onclick="aplicarFiltroKpi('ok', 'ok')" title="Ver clientes 100% OK (BAD e processamento)">
+        <div class="kpi-rotulo">Clientes OK</div>
+        <div class="kpi-valor">{{ kpis.clientes_ok }}</div>
+        <div class="kpi-percentual">{{ kpis.percentual_ok }}% do total</div>
+    </button>
+    <button type="button" class="kpi kpi-bad" onclick="aplicarFiltroKpi('bad', '')" title="Ver clientes com registros BAD">
         <div class="kpi-rotulo">Clientes com BAD</div>
         <div class="kpi-valor">{{ kpis.clientes_bad }}</div>
-    </div>
-    <div class="kpi">
+        <div class="kpi-percentual">{{ kpis.percentual_bad }}% do total</div>
+    </button>
+    <button type="button" class="kpi kpi-aviso" onclick="aplicarFiltroKpi('aviso', '')" title="Ver clientes com arquivo BAD vazio">
         <div class="kpi-rotulo">Clientes com aviso</div>
         <div class="kpi-valor">{{ kpis.clientes_aviso }}</div>
-    </div>
-    <div class="kpi destaque">
-        <div class="kpi-rotulo">Clientes atrasados (execucao)</div>
+        <div class="kpi-percentual">{{ kpis.percentual_aviso }}% do total</div>
+    </button>
+    <button type="button" class="kpi kpi-atrasado" onclick="aplicarFiltroKpi('', 'atrasado')" title="Ver clientes com processamento atrasado">
+        <div class="kpi-rotulo">Processamento atrasado</div>
         <div class="kpi-valor">{{ kpis.clientes_atrasados }}</div>
-    </div>
+        <div class="kpi-percentual">{{ kpis.percentual_atrasados }}% do total</div>
+    </button>
 </div>
 
 <div class="card card-largo">
@@ -264,6 +272,14 @@ function filtrarValidacao() {
 
         linha.style.display = mostrar ? "" : "none";
     });
+}
+
+function aplicarFiltroKpi(statusBad, statusExec) {
+    document.getElementById("filtroCliente").value = "";
+    document.getElementById("filtroStatusBad").value = statusBad;
+    document.getElementById("filtroStatusExec").value = statusExec;
+    filtrarValidacao();
+    document.getElementById("tabelaValidacao").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function filtrarDetalhe() {

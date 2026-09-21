@@ -15,12 +15,29 @@ def preparar_grafico_resumo(resumo):
     return resumo
 
 
-def montar_kpis(resumo, execucoes):
+def montar_kpis(validacoes):
+    """Calcula os KPIs a partir das validacoes ja combinadas (BAD +
+    execucao) -- mesma fonte de dados da tabela, para nunca divergir dela."""
+    total = len(validacoes)
+
+    def percentual(quantidade):
+        return round(quantidade / total * 100) if total else 0
+
+    clientes_ok = sum(1 for item in validacoes if item["bad_status"] == "ok" and item["exec_status"] == "ok")
+    clientes_bad = sum(1 for item in validacoes if item["bad_status"] == "bad")
+    clientes_aviso = sum(1 for item in validacoes if item["bad_status"] == "aviso")
+    clientes_atrasados = sum(1 for item in validacoes if item["exec_status"] == "atrasado")
+
     return {
-        "total_clientes": len(resumo),
-        "clientes_bad": sum(1 for item in resumo if item["status"] == "bad"),
-        "clientes_aviso": sum(1 for item in resumo if item["status"] == "aviso"),
-        "clientes_atrasados": sum(1 for item in execucoes if item["status"] == "atrasado"),
+        "total_clientes": total,
+        "clientes_ok": clientes_ok,
+        "percentual_ok": percentual(clientes_ok),
+        "clientes_bad": clientes_bad,
+        "percentual_bad": percentual(clientes_bad),
+        "clientes_aviso": clientes_aviso,
+        "percentual_aviso": percentual(clientes_aviso),
+        "clientes_atrasados": clientes_atrasados,
+        "percentual_atrasados": percentual(clientes_atrasados),
     }
 
 
