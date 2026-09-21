@@ -4,12 +4,7 @@ from models.cliente_model import ClienteModel
 from services.error_file_service import ErrorFileService
 from services.execucao_service import ExecucaoService
 from services.historico_service import HistoricoService
-from services.monitoramento_service import (
-    combinar_validacoes,
-    montar_kpis,
-    preparar_grafico_historico,
-    preparar_grafico_resumo,
-)
+from services.monitoramento_service import combinar_validacoes, montar_kpis, preparar_grafico_historico
 from services.processamento_service import processar_envio
 
 app = Flask(__name__)
@@ -59,7 +54,6 @@ def monitoramento():
         erro_clientes=erro_clientes,
         erro_backup=erro_backup,
         kpis=montar_kpis(validacoes),
-        resumo=preparar_grafico_resumo(resumo),
         validacoes=validacoes,
         detalhamento=detalhamento,
         historico=historico,

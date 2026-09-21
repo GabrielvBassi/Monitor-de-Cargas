@@ -6,29 +6,24 @@
 <div class="viz-root">
 
 <div class="kpis">
-    <button type="button" class="kpi" onclick="aplicarFiltroKpi('', '')" title="Limpar filtros e ver todos os clientes">
+    <button type="button" class="kpi" onclick="aplicarFiltroKpi([], [])" title="Limpar filtros e ver todos os clientes">
         <div class="kpi-rotulo">Clientes monitorados</div>
         <div class="kpi-valor">{{ kpis.total_clientes }}</div>
     </button>
-    <button type="button" class="kpi kpi-ok" onclick="aplicarFiltroKpi('ok', 'ok')" title="Ver clientes 100% OK (BAD e processamento)">
+    <button type="button" class="kpi kpi-ok" onclick="aplicarFiltroKpi(['nao_bad'], ['ok'])" title="Ver clientes que nao geraram BAD e com processamento OK">
         <div class="kpi-rotulo">Clientes OK</div>
         <div class="kpi-valor">{{ kpis.clientes_ok }}</div>
         <div class="kpi-percentual">{{ kpis.percentual_ok }}% do total</div>
     </button>
-    <button type="button" class="kpi kpi-bad" onclick="aplicarFiltroKpi('bad', '')" title="Ver clientes com registros BAD">
+    <button type="button" class="kpi kpi-bad" onclick="aplicarFiltroKpi(['bad'], [])" title="Ver clientes com arquivos que geraram BAD">
         <div class="kpi-rotulo">Clientes com BAD</div>
         <div class="kpi-valor">{{ kpis.clientes_bad }}</div>
         <div class="kpi-percentual">{{ kpis.percentual_bad }}% do total</div>
     </button>
-    <button type="button" class="kpi kpi-aviso" onclick="aplicarFiltroKpi('aviso', '')" title="Ver clientes com arquivo BAD vazio">
-        <div class="kpi-rotulo">Clientes com aviso</div>
-        <div class="kpi-valor">{{ kpis.clientes_aviso }}</div>
-        <div class="kpi-percentual">{{ kpis.percentual_aviso }}% do total</div>
-    </button>
-    <button type="button" class="kpi kpi-atrasado" onclick="aplicarFiltroKpi('', 'atrasado')" title="Ver clientes com processamento atrasado">
-        <div class="kpi-rotulo">Processamento atrasado</div>
-        <div class="kpi-valor">{{ kpis.clientes_atrasados }}</div>
-        <div class="kpi-percentual">{{ kpis.percentual_atrasados }}% do total</div>
+    <button type="button" class="kpi kpi-atrasado" onclick="aplicarFiltroKpi([], ['pendente'])" title="Ver clientes com processamento pendente">
+        <div class="kpi-rotulo">Processamento pendente</div>
+        <div class="kpi-valor">{{ kpis.clientes_pendentes }}</div>
+        <div class="kpi-percentual">{{ kpis.percentual_pendentes }}% do total</div>
     </button>
 </div>
 
@@ -42,25 +37,6 @@
         {% elif erro_backup %}
             <p class="vazio">Nao foi possivel ler a pasta de backups: {{ erro_backup }}</p>
         {% else %}
-            {% set com_registros = resumo | selectattr("quantidade_linhas", "gt", 0) | list %}
-            {% if com_registros %}
-                <div class="grafico-pendentes">
-                    {% for item in com_registros %}
-                        <div class="barra-h-linha">
-                            <span class="barra-h-label">{{ item.cliente }}</span>
-                            <div class="barra-h-trilho">
-                                <div
-                                    class="barra-h-fill"
-                                    style="width: {{ item.percentual }}%;"
-                                    title="{{ item.cliente }}: {{ item.quantidade_linhas }} registro(s) no ultimo arquivo BAD"
-                                ></div>
-                            </div>
-                            <span class="barra-h-valor">{{ item.quantidade_linhas }}</span>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
             <div class="filtros">
                 <input
                     id="filtroCliente"
@@ -68,19 +44,33 @@
                     placeholder="Filtrar cliente..."
                     onkeyup="filtrarValidacao()"
                 >
-                <select id="filtroStatusBad" onchange="filtrarValidacao()">
-                    <option value="">BAD: todos os status</option>
-                    <option value="bad">Somente BAD</option>
-                    <option value="aviso">Somente aviso (vazio)</option>
-                    <option value="ok">Somente OK</option>
-                </select>
-                <select id="filtroStatusExec" onchange="filtrarValidacao()">
-                    <option value="">Processamento: todos os status</option>
-                    <option value="ok">Somente OK</option>
-                    <option value="atrasado">Somente atrasado</option>
-                    <option value="nao_avaliado">Somente nao avaliado</option>
-                </select>
+
+                <div class="filtro-grupo">
+                    <span class="filtro-grupo-titulo">BAD:</span>
+                    <label class="filtro-check">
+                        <input type="checkbox" class="filtro-bad" value="bad" onchange="filtrarValidacao()">
+                        Arquivos que geraram BAD
+                    </label>
+                    <label class="filtro-check">
+                        <input type="checkbox" class="filtro-bad" value="nao_bad" onchange="filtrarValidacao()">
+                        Arquivos que nao geraram BAD
+                    </label>
+                </div>
+
+                <div class="filtro-grupo">
+                    <span class="filtro-grupo-titulo">Processamento:</span>
+                    <label class="filtro-check">
+                        <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
+                        Arquivos com processamento PENDENTE
+                    </label>
+                    <label class="filtro-check">
+                        <input type="checkbox" class="filtro-exec" value="ok" onchange="filtrarValidacao()">
+                        Arquivos com processamento OK
+                    </label>
+                </div>
             </div>
+
+            <p class="vazio">Marque uma ou mais opcoes de cada grupo para combinar filtros (ex: "geraram BAD" + "processamento PENDENTE").</p>
 
             <div class="legenda">
                 <span class="legenda-item"><i class="cor-falha"></i> BAD: possui registros no arquivo mais recente</span>
@@ -95,21 +85,29 @@
                         <th class="ordenavel">Cliente</th>
                         <th class="ordenavel">Frequencia</th>
                         <th class="ordenavel">Arquivo BAD (mais recente)</th>
-                        <th class="ordenavel">Tipo</th>
+                        <th class="ordenavel">Data BAD</th>
+                        <th class="ordenavel">Registros BAD</th>
                         <th>Status BAD</th>
                         <th class="ordenavel">Arquivo de Backup (mais recente)</th>
+                        <th class="ordenavel">Data Processamento</th>
                         <th>Status Processamento</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in validacoes %}
-                        <tr data-cliente="{{ item.cliente | lower }}" data-status-bad="{{ item.bad_status }}" data-status-exec="{{ item.exec_status }}">
+                        <tr
+                            data-cliente="{{ item.cliente | lower }}"
+                            data-bad-grupo="{{ item.bad_grupo }}"
+                            data-exec-grupo="{{ item.exec_grupo }}"
+                        >
                             <td>{{ item.cliente }}</td>
                             <td>{{ item.frequencia_verificacao }}</td>
-                            <td title="{{ item.bad_modificado_em.strftime('%d/%m/%Y %H:%M') if item.bad_modificado_em else '' }}">{{ item.bad_arquivo or "-" }}</td>
-                            <td>{{ item.bad_tipo }}</td>
+                            <td>{{ item.bad_arquivo or "-" }}</td>
+                            <td>{{ item.bad_modificado_em.strftime("%d/%m/%Y") if item.bad_modificado_em else "-" }}</td>
+                            <td class="num">{{ item.bad_registros }}</td>
                             <td><span class="tag {{ item.bad_status }}">{{ item.bad_status | upper }}</span></td>
-                            <td title="{{ item.exec_modificado_em.strftime('%d/%m/%Y %H:%M') if item.exec_modificado_em else '' }}">{{ item.exec_arquivo or "-" }}</td>
+                            <td>{{ item.exec_arquivo or "-" }}</td>
+                            <td>{{ item.exec_modificado_em.strftime("%d/%m/%Y") if item.exec_modificado_em else "-" }}</td>
                             <td>
                                 {% if item.exec_status == "nao_avaliado" %}
                                     <span class="tag nao_avaliado" title="Frequencia '{{ item.frequencia_verificacao }}' nao reconhecida">NAO AVALIADO</span>
@@ -247,14 +245,18 @@
 <script>
 function filtrarValidacao() {
     const cliente = document.getElementById("filtroCliente").value.toLowerCase();
-    const statusBad = document.getElementById("filtroStatusBad").value.toLowerCase();
-    const statusExec = document.getElementById("filtroStatusExec").value.toLowerCase();
+    const badSelecionados = Array.from(document.querySelectorAll(".filtro-bad:checked")).map(function (cb) {
+        return cb.value;
+    });
+    const execSelecionados = Array.from(document.querySelectorAll(".filtro-exec:checked")).map(function (cb) {
+        return cb.value;
+    });
     const linhas = document.querySelectorAll("#tabelaValidacao tbody tr");
 
     linhas.forEach(function (linha) {
         const clienteLinha = linha.dataset.cliente || "";
-        const statusBadLinha = linha.dataset.statusBad || "";
-        const statusExecLinha = linha.dataset.statusExec || "";
+        const badGrupoLinha = linha.dataset.badGrupo || "";
+        const execGrupoLinha = linha.dataset.execGrupo || "";
 
         let mostrar = true;
 
@@ -262,11 +264,14 @@ function filtrarValidacao() {
             mostrar = false;
         }
 
-        if (statusBad && statusBadLinha !== statusBad) {
+        // Dentro de cada grupo, os filtros marcados se combinam com OU;
+        // entre os dois grupos (BAD / Processamento), com E -- isso e o
+        // que permite compor filtros como "geraram BAD" + "pendente".
+        if (badSelecionados.length && !badSelecionados.includes(badGrupoLinha)) {
             mostrar = false;
         }
 
-        if (statusExec && statusExecLinha !== statusExec) {
+        if (execSelecionados.length && !execSelecionados.includes(execGrupoLinha)) {
             mostrar = false;
         }
 
@@ -274,10 +279,17 @@ function filtrarValidacao() {
     });
 }
 
-function aplicarFiltroKpi(statusBad, statusExec) {
+function aplicarFiltroKpi(badValores, execValores) {
     document.getElementById("filtroCliente").value = "";
-    document.getElementById("filtroStatusBad").value = statusBad;
-    document.getElementById("filtroStatusExec").value = statusExec;
+
+    document.querySelectorAll(".filtro-bad").forEach(function (cb) {
+        cb.checked = badValores.includes(cb.value);
+    });
+
+    document.querySelectorAll(".filtro-exec").forEach(function (cb) {
+        cb.checked = execValores.includes(cb.value);
+    });
+
     filtrarValidacao();
     document.getElementById("tabelaValidacao").scrollIntoView({ behavior: "smooth", block: "start" });
 }
