@@ -115,8 +115,23 @@ class ClienteModel:
     """
 
     FATURAMENTO_DESTINATARIOS = {
-        "to": ["faturamento@empresa.com"],
-        "cc": [],
+        "to": [
+            "financeiro@mawdy.com",
+            "AFSILVA@mawdy.com",
+            "maolive@mawdy.com",
+            "STELL1@mawdy.com",
+            "EDRAMOS@mawdy.com",
+            "CEDUAR3@mawdy.com",
+            "guperei@mawdy.com",
+            "patyfer@mawdy.com"],
+        "cc": [
+            "ffava@mapfre.com.br",
+            "Dimiranda@mapfre.com.br",
+            "malgarci@mapfre.com.br",
+            "Lfigueredo@mapfre.com.br",
+            "lbaldino@mapfre.com.br"
+
+],
     }
 
     @classmethod
