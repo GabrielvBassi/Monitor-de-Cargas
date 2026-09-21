@@ -48,12 +48,17 @@ def localizar_pastas_cliente(pastas, nome_cliente):
     return [caminho for nome, caminho in pastas if nome_cliente_normalizado in nome.strip().lower()]
 
 
-def arquivos_em_pastas(pastas_cliente, extensao=None):
+def arquivos_em_pastas(pastas_cliente, marcador=None):
     """Lista os arquivos dentro das pastas ja resolvidas de um cliente (uma
-    por cliente, normalmente). Se `extensao` for informada, filtra por ela;
-    se for None, lista TODOS os arquivos da pasta, sem avaliar o nome --
-    usado quando so a pasta importa e o criterio de escolha e a data de
-    modificacao mais recente, nao o nome do arquivo.
+    por cliente, normalmente).
+
+    `marcador`, quando informado, e um texto que precisa aparecer em
+    QUALQUER parte do nome do arquivo (nao so no final/extensao) -- ex:
+    "BAD" casa com "CLIENTE_I202411011_BAD.TXT", cuja extensao real e
+    ".TXT" e "BAD" fica no meio do nome. Se `marcador` for None, lista
+    TODOS os arquivos da pasta, sem avaliar o nome -- usado quando so a
+    pasta importa e o criterio de escolha e a data de modificacao mais
+    recente (Monitoramento).
 
     Usa os.scandir: em compartilhamentos de rede (Windows/SMB), a data de
     modificacao ja vem junto da listagem da pasta, entao entrada.stat() nao
@@ -67,7 +72,7 @@ def arquivos_em_pastas(pastas_cliente, extensao=None):
                 if not entrada.is_file():
                     continue
 
-                if extensao and not entrada.name.lower().endswith(extensao.lower()):
+                if marcador and marcador.lower() not in entrada.name.lower():
                     continue
 
                 encontrados.append({
@@ -86,7 +91,7 @@ def arquivo_mais_recente(pastas_cliente):
     return max(arquivos, key=lambda arquivo: arquivo["modificado_em"], default=None)
 
 
-def buscar_arquivos(diretorio, extensao, nome_cliente):
+def buscar_arquivos(diretorio, marcador, nome_cliente):
     """Busca de um unico cliente (le o diretorio base + a(s) pasta(s) do
     cliente). Para varrer TODOS os clientes de uma vez, use listar_pastas()
     uma vez e depois localizar_pastas_cliente()/arquivos_em_pastas() por
@@ -94,4 +99,4 @@ def buscar_arquivos(diretorio, extensao, nome_cliente):
     pastas = listar_pastas(diretorio)
     pastas_cliente = localizar_pastas_cliente(pastas, nome_cliente)
 
-    return arquivos_em_pastas(pastas_cliente, extensao)
+    return arquivos_em_pastas(pastas_cliente, marcador)

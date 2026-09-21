@@ -9,7 +9,10 @@ ERROS_DIRETORIO = os.environ.get(
     "ERROS_DIRETORIO",
     r"\\VBR006001-002.int.mapfre.net\base$\_ BKP Bases\_BKP Erros",
 )
-ERROS_EXTENSAO = os.environ.get("ERROS_EXTENSAO", ".bad")
+# Nao e uma extensao de arquivo -- e um texto que precisa aparecer em
+# QUALQUER parte do nome do arquivo (ex: "BAD" casa com
+# "CLIENTE_I202411011_BAD.TXT", cuja extensao real e ".TXT").
+ERROS_EXTENSAO = os.environ.get("ERROS_EXTENSAO", "BAD")
 
 # Diretorio com os backups dos arquivos processados com SUCESSO (movidos
 # apos a execucao). Usado para validar se cada cliente teve execucao dentro
