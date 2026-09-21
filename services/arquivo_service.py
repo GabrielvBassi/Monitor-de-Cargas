@@ -24,10 +24,26 @@ def listar_pastas(diretorio):
 
 def localizar_pastas_cliente(pastas, nome_cliente):
     """Filtra, dentre as pastas ja listadas (via listar_pastas), as que
-    batem com `nome_cliente` -- nao acessa o disco/rede, so filtra em
-    memoria a lista recebida."""
-    nome_cliente_lower = nome_cliente.lower()
-    return [caminho for nome, caminho in pastas if nome_cliente_lower in nome.lower()]
+    pertencem a `nome_cliente` -- nao acessa o disco/rede, so filtra em
+    memoria a lista recebida.
+
+    Prioriza nome EXATO da pasta (sem diferenciar maiusculas/minusculas ou
+    espacos nas pontas). Isso evita que um cliente cujo nome e prefixo de
+    outro (ex: "STARR COMPANIES" vs "STARR COMPANIES 01"/"02", que sao
+    clientes DIFERENTES) acabe casando com a pasta errada. So cai para
+    "pasta contem o nome do cliente" quando nenhuma pasta exata e encontrada,
+    como reserva para pastas com nomenclatura levemente diferente."""
+    nome_cliente_normalizado = nome_cliente.strip().lower()
+
+    exatas = [
+        caminho for nome, caminho in pastas
+        if nome.strip().lower() == nome_cliente_normalizado
+    ]
+
+    if exatas:
+        return exatas
+
+    return [caminho for nome, caminho in pastas if nome_cliente_normalizado in nome.strip().lower()]
 
 
 def arquivos_em_pastas(pastas_cliente, extensao):
