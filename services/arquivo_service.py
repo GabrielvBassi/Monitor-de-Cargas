@@ -46,9 +46,12 @@ def localizar_pastas_cliente(pastas, nome_cliente):
     return [caminho for nome, caminho in pastas if nome_cliente_normalizado in nome.strip().lower()]
 
 
-def arquivos_em_pastas(pastas_cliente, extensao):
-    """Lista os arquivos com `extensao` dentro das pastas ja resolvidas de
-    um cliente (uma por cliente, normalmente)."""
+def arquivos_em_pastas(pastas_cliente, extensao=None):
+    """Lista os arquivos dentro das pastas ja resolvidas de um cliente (uma
+    por cliente, normalmente). Se `extensao` for informada, filtra por ela;
+    se for None, lista TODOS os arquivos da pasta, sem avaliar o nome --
+    usado quando so a pasta importa e o criterio de escolha e a data de
+    modificacao mais recente, nao o nome do arquivo."""
     encontrados = []
 
     for pasta in pastas_cliente:
@@ -58,7 +61,7 @@ def arquivos_em_pastas(pastas_cliente, extensao):
             if not os.path.isfile(caminho_completo):
                 continue
 
-            if not nome_arquivo.lower().endswith(extensao.lower()):
+            if extensao and not nome_arquivo.lower().endswith(extensao.lower()):
                 continue
 
             encontrados.append({
@@ -68,6 +71,13 @@ def arquivos_em_pastas(pastas_cliente, extensao):
             })
 
     return encontrados
+
+
+def arquivo_mais_recente(pastas_cliente):
+    """Retorna o arquivo com data de modificacao mais recente dentre TODOS
+    os arquivos das pastas informadas, independente do nome/extensao."""
+    arquivos = arquivos_em_pastas(pastas_cliente)
+    return max(arquivos, key=lambda arquivo: arquivo["modificado_em"], default=None)
 
 
 def buscar_arquivos(diretorio, extensao, nome_cliente):

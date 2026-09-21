@@ -1,7 +1,13 @@
 import re
 
 from config import ERROS_DIRETORIO, ERROS_EXTENSAO
-from services.arquivo_service import arquivos_em_pastas, buscar_arquivos, listar_pastas, localizar_pastas_cliente
+from services.arquivo_service import (
+    arquivo_mais_recente,
+    arquivos_em_pastas,
+    buscar_arquivos,
+    listar_pastas,
+    localizar_pastas_cliente,
+)
 
 PADRAO_TIPO = re.compile(r"_([FI])\d", re.IGNORECASE)
 
@@ -45,17 +51,17 @@ class ErrorFileService:
     @classmethod
     def resumo_por_cliente(cls, clientes):
         """Retorna, para TODOS os clientes cadastrados, o status baseado
-        APENAS no arquivo BAD mais recente da pasta do cliente (nao soma/
-        conta os demais). So le o conteudo (contar linhas) desse unico
-        arquivo -- os outros so tem a data de modificacao consultada,
-        sem abrir o arquivo. Essencial para performance em rede."""
+        APENAS no arquivo mais recente (qualquer nome/extensao) da pasta do
+        cliente -- so a pasta identifica o cliente, o nome do arquivo nao e
+        avaliado. So le o conteudo (contar linhas) desse unico arquivo -- os
+        outros so tem a data de modificacao consultada, sem abrir o arquivo.
+        Essencial para performance em rede."""
         pastas = listar_pastas(ERROS_DIRETORIO)
         resumo = []
 
         for cliente in clientes.values():
             pastas_cliente = localizar_pastas_cliente(pastas, cliente["nome"])
-            arquivos = arquivos_em_pastas(pastas_cliente, ERROS_EXTENSAO)
-            ultimo = max(arquivos, key=lambda arquivo: arquivo["modificado_em"], default=None)
+            ultimo = arquivo_mais_recente(pastas_cliente)
 
             if ultimo is None:
                 status = "ok"
