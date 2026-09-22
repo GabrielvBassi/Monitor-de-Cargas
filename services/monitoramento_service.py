@@ -6,16 +6,22 @@ QTD_EVENTOS_GRAFICO = 8
 def montar_kpis(validacoes):
     """Calcula os KPIs a partir das validacoes ja combinadas (BAD +
     execucao) -- mesma fonte de dados da tabela, para nunca divergir dela.
-    Alinhado com os grupos de filtro (bad_grupo/exec_grupo): 'OK' aqui
-    significa 'nao gerou BAD' + 'processamento OK'."""
+
+    Cada card reflete uma unica dimensao/status, sem combinar BAD com
+    execucao:
+    - Cliente OK: processamento (execucao) OK.
+    - Clientes com BAD: arquivo BAD mais recente com registros.
+    - Processamento Pendente: processamento que ainda nao ocorreu nenhuma vez.
+    - Atrasados: processamento que ja ocorreu antes, mas esta fora do prazo."""
     total = len(validacoes)
 
     def percentual(quantidade):
         return round(quantidade / total * 100) if total else 0
 
-    clientes_ok = sum(1 for item in validacoes if item["bad_grupo"] == "nao_bad" and item["exec_grupo"] == "ok")
-    clientes_bad = sum(1 for item in validacoes if item["bad_grupo"] == "bad")
-    clientes_pendentes = sum(1 for item in validacoes if item["exec_grupo"] == "pendente")
+    clientes_ok = sum(1 for item in validacoes if item["exec_status"] == "ok")
+    clientes_bad = sum(1 for item in validacoes if item["bad_status"] == "bad")
+    clientes_pendentes = sum(1 for item in validacoes if item["exec_status"] == "pendente")
+    clientes_atrasados = sum(1 for item in validacoes if item["exec_status"] == "atrasado")
 
     return {
         "total_clientes": total,
@@ -25,22 +31,21 @@ def montar_kpis(validacoes):
         "percentual_bad": percentual(clientes_bad),
         "clientes_pendentes": clientes_pendentes,
         "percentual_pendentes": percentual(clientes_pendentes),
+        "clientes_atrasados": clientes_atrasados,
+        "percentual_atrasados": percentual(clientes_atrasados),
     }
 
 
 def combinar_validacoes(resumo, execucoes):
     """Junta, por cliente, o status do arquivo BAD mais recente com o status
-    da execucao (backup) mais recente, numa unica linha para o painel.
-
-    bad_grupo / exec_grupo sao os agrupamentos binarios usados nos filtros
-    compostos da tela: "geraram BAD" x "nao geraram BAD", e "processamento
-    pendente" (atrasado ou frequencia nao reconhecida) x "processamento OK"."""
+    da execucao (backup) mais recente, numa unica linha para o painel. Os
+    filtros da tela comparam direto contra bad_status/exec_status (ok /
+    aviso / bad, e ok / pendente / atrasado / nao_avaliado)."""
     execucoes_por_cliente = {item["cliente"]: item for item in execucoes}
     combinado = []
 
     for item in resumo:
         execucao = execucoes_por_cliente.get(item["cliente"], {})
-        exec_status = execucao.get("status", "nao_avaliado")
 
         combinado.append({
             "cliente": item["cliente"],
@@ -50,11 +55,9 @@ def combinar_validacoes(resumo, execucoes):
             "bad_registros": item["quantidade_linhas"],
             "bad_tipo": item["tipo"],
             "bad_status": item["status"],
-            "bad_grupo": "bad" if item["status"] == "bad" else "nao_bad",
             "exec_arquivo": execucao.get("arquivo"),
             "exec_modificado_em": execucao.get("modificado_em"),
-            "exec_status": exec_status,
-            "exec_grupo": "ok" if exec_status == "ok" else "pendente",
+            "exec_status": execucao.get("status", "nao_avaliado"),
         })
 
     return combinado

@@ -68,7 +68,12 @@ class ExecucaoService:
 
             if periodo is None:
                 status = "nao_avaliado"
-            elif ultimo and (datetime.now() - ultimo["modificado_em"]) <= periodo:
+            elif ultimo is None:
+                # Nunca houve backup para este cliente -- processamento
+                # ainda nao ocorreu (diferente de "atrasado", que pressupoe
+                # que ja ocorreu antes e agora esta fora do prazo).
+                status = "pendente"
+            elif (datetime.now() - ultimo["modificado_em"]) <= periodo:
                 status = "ok"
             else:
                 status = "atrasado"

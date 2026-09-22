@@ -199,7 +199,8 @@
             color: #991b1b;
         }
 
-        .tag.aviso {
+        .tag.aviso,
+        .tag.pendente {
             background: #fef9c3;
             color: #854d0e;
         }
@@ -293,7 +294,8 @@
             border-left-color: #d03b3b;
         }
 
-        .kpi.kpi-aviso {
+        .kpi.kpi-aviso,
+        .kpi.kpi-pendente {
             border-left-color: #eda100;
         }
 
@@ -322,7 +324,8 @@
             color: #991b1b;
         }
 
-        .kpi-aviso .kpi-valor {
+        .kpi-aviso .kpi-valor,
+        .kpi-pendente .kpi-valor {
             color: #854d0e;
         }
 
@@ -507,11 +510,26 @@
             box-shadow: 0 1px 3px rgba(22, 101, 52, 0.15);
         }
 
-        .filtro-check.chip-pendente:has(input:checked) {
+        .filtro-check.chip-pendente:has(input:checked),
+        .filtro-check.chip-aviso:has(input:checked) {
             background: #fef9c3;
             border-color: #f3de85;
             color: #854d0e;
             box-shadow: 0 1px 3px rgba(133, 77, 14, 0.15);
+        }
+
+        .filtro-check.chip-atrasado:has(input:checked) {
+            background: #fee2e2;
+            border-color: #f3a9a9;
+            color: #991b1b;
+            box-shadow: 0 1px 3px rgba(153, 27, 27, 0.15);
+        }
+
+        .filtro-check.chip-nao-avaliado:has(input:checked) {
+            background: #e5e7eb;
+            border-color: #cbd5e1;
+            color: #374151;
+            box-shadow: 0 1px 3px rgba(55, 65, 81, 0.15);
         }
 
         .grafico-historico {
