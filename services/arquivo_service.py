@@ -3,36 +3,48 @@ import re
 from datetime import datetime
 
 
-def resolver_pasta_configurada(diretorio_base, caminho_configurado):
-    """Tenta resolver um caminho configurado na planilha (pode vir de outra
+def resolver_candidatos_pasta(diretorio_base, caminho_configurado):
+    """Resolve um caminho configurado na planilha (pode vir de outra
     maquina/drive, ex: "Z:\\_BKP Cargas\\Auto_+_Casa\\Mapfre") contra o
-    `diretorio_base` real usado por este app.
+    `diretorio_base` real usado por este app. Retorna uma LISTA de
+    candidatos, do mais preciso pro mais generico -- o chamador deve testar
+    cada um com os.path.isdir e usar o primeiro que existir de fato (nenhum
+    candidato e usado sem confirmar que a pasta existe).
 
-    A logica: acha, dentro do caminho configurado, o segmento cujo nome
-    bate com o nome final de `diretorio_base` (que deve ser o mesmo nos
-    dois ambientes, ja que e a mesma pasta de rede vista por mapeamentos
-    diferentes) -- e junta o que vier DEPOIS disso (podendo ser mais de um
-    nivel, ex: "Auto_+_Casa\\Mapfre") no `diretorio_base` real.
-
-    Retorna o caminho absoluto resolvido (o chamador deve confirmar com
-    os.path.isdir antes de usar), ou None se nao for possivel relacionar
-    os dois caminhos."""
+    1. Precisao: acha, dentro do caminho configurado, o segmento cujo nome
+       bate com o nome final de `diretorio_base` -- e junta o que vier
+       DEPOIS disso (podendo ser mais de um nivel, ex: "Auto_+_Casa\\Mapfre").
+    2. Generico: mesmo que o segmento marcador nao bata com este
+       `diretorio_base` (ex: a planilha só documenta o caminho do
+       compartilhamento de BACKUP, mas a estrutura por cliente se repete
+       tambem no de ERROS), assume o formato "<raiz>\\<marcador>\\<relativo>"
+       e tenta o relativo mesmo assim. So e usado se a pasta resultante
+       existir de verdade -- se a suposicao estiver errada, simplesmente
+       nao encontra nada e quem chama cai no proximo criterio de busca."""
     if not caminho_configurado or not diretorio_base:
-        return None
+        return []
 
     nome_base = os.path.basename(os.path.normpath(diretorio_base)).strip().lower()
     segmentos = [segmento for segmento in re.split(r"[\\/]+", caminho_configurado.strip()) if segmento]
+
+    candidatos = []
 
     for indice, segmento in enumerate(segmentos):
         if segmento.strip().lower() == nome_base:
             resto = segmentos[indice + 1:]
 
-            if not resto:
-                return None
+            if resto:
+                candidatos.append(os.path.join(diretorio_base, *resto))
 
-            return os.path.join(diretorio_base, *resto)
+            break
 
-    return None
+    if len(segmentos) > 2:
+        generico = os.path.join(diretorio_base, *segmentos[2:])
+
+        if generico not in candidatos:
+            candidatos.append(generico)
+
+    return candidatos
 
 
 def listar_pastas(diretorio):
@@ -84,17 +96,26 @@ def localizar_pastas_cliente(pastas, nome_cliente, pastas_configuradas=None, dir
         resolvidas = []
 
         for caminho_configurado in pastas_configuradas:
-            resolvido = resolver_pasta_configurada(diretorio_base, caminho_configurado)
-
-            if resolvido and os.path.isdir(resolvido):
-                resolvidas.append(resolvido)
+            for candidato in resolver_candidatos_pasta(diretorio_base, caminho_configurado):
+                if os.path.isdir(candidato):
+                    resolvidas.append(candidato)
+                    break
 
         if resolvidas:
             return resolvidas
 
-        configuradas_normalizadas = {
-            pasta.strip().lower() for pasta in pastas_configuradas if pasta and pasta.strip()
-        }
+        configuradas_normalizadas = set()
+
+        for pasta in pastas_configuradas:
+            if not pasta or not pasta.strip():
+                continue
+
+            configuradas_normalizadas.add(pasta.strip().lower())
+
+            segmentos_pasta = [segmento for segmento in re.split(r"[\\/]+", pasta.strip()) if segmento]
+
+            if segmentos_pasta:
+                configuradas_normalizadas.add(segmentos_pasta[-1].strip().lower())
 
         encontradas = [
             caminho for nome, caminho in pastas
