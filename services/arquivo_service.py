@@ -24,17 +24,37 @@ def listar_pastas(diretorio):
     return pastas
 
 
-def localizar_pastas_cliente(pastas, nome_cliente):
+def localizar_pastas_cliente(pastas, nome_cliente, pastas_configuradas=None):
     """Filtra, dentre as pastas ja listadas (via listar_pastas), as que
     pertencem a `nome_cliente` -- nao acessa o disco/rede, so filtra em
     memoria a lista recebida.
 
-    Prioriza nome EXATO da pasta (sem diferenciar maiusculas/minusculas ou
-    espacos nas pontas). Isso evita que um cliente cujo nome e prefixo de
-    outro (ex: "STARR COMPANIES" vs "STARR COMPANIES 01"/"02", que sao
-    clientes DIFERENTES) acabe casando com a pasta errada. So cai para
-    "pasta contem o nome do cliente" quando nenhuma pasta exata e encontrada,
-    como reserva para pastas com nomenclatura levemente diferente."""
+    Ordem de prioridade:
+    1. `pastas_configuradas` (lista de nomes de pasta vindos da planilha de
+       clientes, coluna de diretorio) -- match EXATO contra qualquer nome
+       da lista. Existe pra cobrir casos onde o nome da pasta nao tem
+       relacao obvia com o nome do cliente (ex: cliente "Psicologica" mora
+       na pasta "MAPFRE - PSICOLOGICA"). Se nada da lista for encontrado,
+       cai pro comportamento padrao abaixo -- nao para de buscar.
+    2. Nome EXATO da pasta = nome do cliente (sem diferenciar maiusculas/
+       minusculas ou espacos nas pontas). Evita que um cliente cujo nome e
+       prefixo de outro (ex: "STARR COMPANIES" vs "STARR COMPANIES 01"/"02",
+       que sao clientes DIFERENTES) acabe casando com a pasta errada.
+    3. "pasta contem o nome do cliente" -- reserva final para pastas com
+       nomenclatura levemente diferente."""
+    if pastas_configuradas:
+        configuradas_normalizadas = {
+            pasta.strip().lower() for pasta in pastas_configuradas if pasta and pasta.strip()
+        }
+
+        encontradas = [
+            caminho for nome, caminho in pastas
+            if nome.strip().lower() in configuradas_normalizadas
+        ]
+
+        if encontradas:
+            return encontradas
+
     nome_cliente_normalizado = nome_cliente.strip().lower()
 
     exatas = [

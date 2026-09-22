@@ -81,7 +81,13 @@
                 </div>
             </div>
 
-            <p class="vazio">Combine os filtros marcando mais de uma opcao (ex: "Com BAD" + "Pendente").</p>
+            <div class="filtros-rodape">
+                <span>Combine os filtros marcando mais de uma opcao (ex: "Com BAD" + "Pendente").</span>
+                <span>
+                    <span id="contadorValidacao"></span>
+                    <button type="button" class="btn-limpar-filtros" onclick="aplicarFiltroKpi([], [])">Limpar filtros</button>
+                </span>
+            </div>
 
             <div class="legenda">
                 <span class="legenda-item"><i class="cor-falha"></i> BAD: possui registros no arquivo mais recente</span>
@@ -226,6 +232,7 @@ function filtrarValidacao() {
         return cb.value;
     });
     const linhas = document.querySelectorAll("#tabelaValidacao tbody tr");
+    let visiveis = 0;
 
     linhas.forEach(function (linha) {
         const clienteLinha = linha.dataset.cliente || "";
@@ -250,7 +257,16 @@ function filtrarValidacao() {
         }
 
         linha.style.display = mostrar ? "" : "none";
+
+        if (mostrar) {
+            visiveis += 1;
+        }
     });
+
+    const contador = document.getElementById("contadorValidacao");
+    if (contador) {
+        contador.textContent = visiveis + " de " + linhas.length + " clientes";
+    }
 }
 
 function aplicarFiltroKpi(badValores, execValores) {
@@ -344,5 +360,9 @@ function carregarDetalhamento() {
 }
 
 ativarOrdenacao("#tabelaValidacao th");
+
+if (document.getElementById("tabelaValidacao")) {
+    filtrarValidacao();
+}
 </script>
 {% endblock %}

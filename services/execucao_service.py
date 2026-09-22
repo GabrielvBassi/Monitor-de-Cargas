@@ -56,7 +56,9 @@ class ExecucaoService:
         resultado = []
 
         for cliente in clientes.values():
-            pastas_cliente = localizar_pastas_cliente(pastas, cliente["nome"])
+            pastas_cliente = localizar_pastas_cliente(
+                pastas, cliente["nome"], cliente.get("pastas_configuradas")
+            )
             ultimo = arquivo_mais_recente(pastas_cliente)
 
             frequencia = cliente.get("frequencia_verificacao", "")

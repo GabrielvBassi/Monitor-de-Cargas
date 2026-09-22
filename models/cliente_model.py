@@ -20,12 +20,16 @@ def _slugify(nome):
     return slug or "cliente"
 
 
-def _dividir_emails(valor):
+def _dividir_lista(valor):
     if not valor:
         return []
 
     partes = re.split(r"[;,]", str(valor))
     return [parte.strip() for parte in partes if parte.strip()]
+
+
+# Alias por clareza de leitura nos pontos onde a lista e de e-mails.
+_dividir_emails = _dividir_lista
 
 
 def _interpretar_ativo(valor):
@@ -97,6 +101,8 @@ def _mapear_colunas(linha_cabecalho):
             colunas["acompanhamento_diario"] = indice
         elif "ativo" in palavras:
             colunas["ativo"] = indice
+        elif "pasta" in palavras or "diretorio" in palavras:
+            colunas["pastas_configuradas"] = indice
         elif "erro" in palavras and "to" in palavras:
             colunas["erro_to"] = indice
         elif "erro" in palavras and "cc" in palavras:
@@ -193,6 +199,14 @@ class ClienteModel:
                     valor("acompanhamento_semanal"),
                     valor("acompanhamento_mensal"),
                 ),
+                # Nomes de pasta configurados manualmente na planilha (coluna
+                # com "Pasta"/"Diretorio" no titulo), para clientes cuja pasta
+                # real nao tem relacao obvia com o nome do cliente (ex:
+                # "Psicologica" mora em "MAPFRE - PSICOLOGICA"). Se vazia ou
+                # se nenhum nome da lista for encontrado, a busca cai para o
+                # comportamento padrao (nome exato do cliente, depois "pasta
+                # contem o nome do cliente").
+                "pastas_configuradas": _dividir_lista(valor("pastas_configuradas")),
                 "destinatarios": {
                     "erro": {
                         "to": _dividir_emails(valor("erro_to")),
