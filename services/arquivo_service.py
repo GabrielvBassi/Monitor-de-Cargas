@@ -1,5 +1,38 @@
 import os
+import re
 from datetime import datetime
+
+
+def resolver_pasta_configurada(diretorio_base, caminho_configurado):
+    """Tenta resolver um caminho configurado na planilha (pode vir de outra
+    maquina/drive, ex: "Z:\\_BKP Cargas\\Auto_+_Casa\\Mapfre") contra o
+    `diretorio_base` real usado por este app.
+
+    A logica: acha, dentro do caminho configurado, o segmento cujo nome
+    bate com o nome final de `diretorio_base` (que deve ser o mesmo nos
+    dois ambientes, ja que e a mesma pasta de rede vista por mapeamentos
+    diferentes) -- e junta o que vier DEPOIS disso (podendo ser mais de um
+    nivel, ex: "Auto_+_Casa\\Mapfre") no `diretorio_base` real.
+
+    Retorna o caminho absoluto resolvido (o chamador deve confirmar com
+    os.path.isdir antes de usar), ou None se nao for possivel relacionar
+    os dois caminhos."""
+    if not caminho_configurado or not diretorio_base:
+        return None
+
+    nome_base = os.path.basename(os.path.normpath(diretorio_base)).strip().lower()
+    segmentos = [segmento for segmento in re.split(r"[\\/]+", caminho_configurado.strip()) if segmento]
+
+    for indice, segmento in enumerate(segmentos):
+        if segmento.strip().lower() == nome_base:
+            resto = segmentos[indice + 1:]
+
+            if not resto:
+                return None
+
+            return os.path.join(diretorio_base, *resto)
+
+    return None
 
 
 def listar_pastas(diretorio):
@@ -24,25 +57,41 @@ def listar_pastas(diretorio):
     return pastas
 
 
-def localizar_pastas_cliente(pastas, nome_cliente, pastas_configuradas=None):
+def localizar_pastas_cliente(pastas, nome_cliente, pastas_configuradas=None, diretorio_base=None):
     """Filtra, dentre as pastas ja listadas (via listar_pastas), as que
     pertencem a `nome_cliente` -- nao acessa o disco/rede, so filtra em
-    memoria a lista recebida.
+    memoria a lista recebida (exceto o passo 1, que faz um os.path.isdir
+    pontual so quando ha caminho configurado pra resolver).
 
     Ordem de prioridade:
-    1. `pastas_configuradas` (lista de nomes de pasta vindos da planilha de
-       clientes, coluna de diretorio) -- match EXATO contra qualquer nome
-       da lista. Existe pra cobrir casos onde o nome da pasta nao tem
-       relacao obvia com o nome do cliente (ex: cliente "Psicologica" mora
-       na pasta "MAPFRE - PSICOLOGICA"). Se nada da lista for encontrado,
-       cai pro comportamento padrao abaixo -- nao para de buscar.
-    2. Nome EXATO da pasta = nome do cliente (sem diferenciar maiusculas/
+    1. `pastas_configuradas` como CAMINHO (pode vir de outra maquina/drive,
+       ex: "Z:\\_BKP Cargas\\Auto_+_Casa\\Mapfre", inclusive aninhado em
+       mais de um nivel) -- resolvido contra `diretorio_base` via
+       resolver_pasta_configurada(). So confirma pastas que realmente
+       existem no disco.
+    2. `pastas_configuradas` como NOME simples de pasta de primeiro nivel
+       (ex: "MAPFRE - PSICOLOGICA") -- match exato contra as pastas ja
+       listadas, sem tocar o disco de novo.
+       Se nada dos passos 1/2 encontrar nada, cai pro comportamento padrao
+       abaixo -- nao para de buscar.
+    3. Nome EXATO da pasta = nome do cliente (sem diferenciar maiusculas/
        minusculas ou espacos nas pontas). Evita que um cliente cujo nome e
        prefixo de outro (ex: "STARR COMPANIES" vs "STARR COMPANIES 01"/"02",
        que sao clientes DIFERENTES) acabe casando com a pasta errada.
-    3. "pasta contem o nome do cliente" -- reserva final para pastas com
+    4. "pasta contem o nome do cliente" -- reserva final para pastas com
        nomenclatura levemente diferente."""
     if pastas_configuradas:
+        resolvidas = []
+
+        for caminho_configurado in pastas_configuradas:
+            resolvido = resolver_pasta_configurada(diretorio_base, caminho_configurado)
+
+            if resolvido and os.path.isdir(resolvido):
+                resolvidas.append(resolvido)
+
+        if resolvidas:
+            return resolvidas
+
         configuradas_normalizadas = {
             pasta.strip().lower() for pasta in pastas_configuradas if pasta and pasta.strip()
         }

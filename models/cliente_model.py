@@ -101,7 +101,7 @@ def _mapear_colunas(linha_cabecalho):
             colunas["acompanhamento_diario"] = indice
         elif "ativo" in palavras:
             colunas["ativo"] = indice
-        elif "pasta" in palavras or "diretorio" in palavras:
+        elif any(palavra.startswith("pasta") or palavra.startswith("diretorio") for palavra in palavras):
             colunas["pastas_configuradas"] = indice
         elif "erro" in palavras and "to" in palavras:
             colunas["erro_to"] = indice

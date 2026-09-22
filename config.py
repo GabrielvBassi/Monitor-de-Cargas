@@ -24,13 +24,14 @@ BACKUP_DIRETORIO = os.environ.get(
 BACKUP_EXTENSAO = os.environ.get("BACKUP_EXTENSAO", ".txt")
 
 # Planilha de clientes: basta abrir, editar e salvar para atualizar a lista
-# usada pelo app (colunas: Cliente, Sistema, Ambiente, Periodo, Frequencia de
-# Verificacao, Email Erro To, Email Erro CC, Ativo). Nao precisa reiniciar o
-# app -- a planilha e relida a cada requisicao.
+# usada pelo app (colunas: Cliente, Sistema, Ambiente, Periodo, Frequencia ou
+# Acompanhamento Diario/Semanal/Mensal, Diretorios (pasta real do cliente,
+# usada como prioridade na busca), Email Erro To, Email Erro CC, Ativo). Nao
+# precisa reiniciar o app -- a planilha e relida a cada requisicao.
 
 CLIENTES_XLSX_PATH = os.environ.get(
     "CLIENTES_XLSX_PATH",
-    os.path.join(os.path.dirname(__file__), "faturados.xlsx"),
+    os.path.join(os.path.dirname(__file__), "AcompanhamentoFaturados 1.xlsx"),
 )
 
 # Automacao de UI para o envio (botao Enviar da janela de composicao aberta

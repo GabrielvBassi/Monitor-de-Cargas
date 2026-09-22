@@ -7,6 +7,8 @@ from services.arquivo_service import arquivo_mais_recente, listar_pastas, locali
 _PERIODOS_FIXOS = {
     "diaria": timedelta(days=1),
     "diária": timedelta(days=1),
+    "diario": timedelta(days=1),
+    "diário": timedelta(days=1),
     "semanal": timedelta(weeks=1),
     "quinzenal": timedelta(days=15),
     "mensal": timedelta(days=31),
@@ -57,7 +59,7 @@ class ExecucaoService:
 
         for cliente in clientes.values():
             pastas_cliente = localizar_pastas_cliente(
-                pastas, cliente["nome"], cliente.get("pastas_configuradas")
+                pastas, cliente["nome"], cliente.get("pastas_configuradas"), config.BACKUP_DIRETORIO
             )
             ultimo = arquivo_mais_recente(pastas_cliente)
 

@@ -61,7 +61,7 @@ class ErrorFileService:
 
         for cliente in clientes.values():
             pastas_cliente = localizar_pastas_cliente(
-                pastas, cliente["nome"], cliente.get("pastas_configuradas")
+                pastas, cliente["nome"], cliente.get("pastas_configuradas"), ERROS_DIRETORIO
             )
             ultimo = arquivo_mais_recente(pastas_cliente)
 
@@ -96,7 +96,7 @@ class ErrorFileService:
 
         for cliente in clientes.values():
             pastas_cliente = localizar_pastas_cliente(
-                pastas, cliente["nome"], cliente.get("pastas_configuradas")
+                pastas, cliente["nome"], cliente.get("pastas_configuradas"), ERROS_DIRETORIO
             )
             arquivos = cls._completar_arquivos(arquivos_em_pastas(pastas_cliente, ERROS_EXTENSAO))
 
