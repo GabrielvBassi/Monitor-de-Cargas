@@ -1,6 +1,17 @@
 import os
 import re
+import unicodedata
 from datetime import datetime
+
+
+def _normalizar_nome(texto):
+    """Minusculo, sem espacos nas pontas e sem acentos -- pra "Amém Saúde"
+    bater com "AMEM SAUDE" na hora de comparar nome de cliente com nome de
+    pasta. So usado pra COMPARACAO; caminhos de disco de verdade (resolver_
+    candidatos_pasta, os.path.isdir) continuam com o nome exato, sem tocar
+    nisso."""
+    texto = str(texto or "").strip().lower()
+    return unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
 
 
 def resolver_candidatos_pasta(diretorio_base, caminho_configurado):
@@ -110,32 +121,32 @@ def localizar_pastas_cliente(pastas, nome_cliente, pastas_configuradas=None, dir
             if not pasta or not pasta.strip():
                 continue
 
-            configuradas_normalizadas.add(pasta.strip().lower())
+            configuradas_normalizadas.add(_normalizar_nome(pasta))
 
             segmentos_pasta = [segmento for segmento in re.split(r"[\\/]+", pasta.strip()) if segmento]
 
             if segmentos_pasta:
-                configuradas_normalizadas.add(segmentos_pasta[-1].strip().lower())
+                configuradas_normalizadas.add(_normalizar_nome(segmentos_pasta[-1]))
 
         encontradas = [
             caminho for nome, caminho in pastas
-            if nome.strip().lower() in configuradas_normalizadas
+            if _normalizar_nome(nome) in configuradas_normalizadas
         ]
 
         if encontradas:
             return encontradas
 
-    nome_cliente_normalizado = nome_cliente.strip().lower()
+    nome_cliente_normalizado = _normalizar_nome(nome_cliente)
 
     exatas = [
         caminho for nome, caminho in pastas
-        if nome.strip().lower() == nome_cliente_normalizado
+        if _normalizar_nome(nome) == nome_cliente_normalizado
     ]
 
     if exatas:
         return exatas
 
-    return [caminho for nome, caminho in pastas if nome_cliente_normalizado in nome.strip().lower()]
+    return [caminho for nome, caminho in pastas if nome_cliente_normalizado in _normalizar_nome(nome)]
 
 
 def arquivos_em_pastas(pastas_cliente, marcador=None):

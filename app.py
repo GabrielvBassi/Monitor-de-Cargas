@@ -1,4 +1,12 @@
+import calendar
+from datetime import date
+
 from flask import Flask, render_template, request, redirect, url_for, flash
+
+MESES_PT = [
+    "Janeiro", "Fevereiro", "Marco", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+]
 
 from models.cliente_model import ClienteModel
 from services.historico_service import HistoricoService
@@ -34,6 +42,15 @@ def monitoramento():
         kpis=dados["kpis"],
         validacoes=dados["validacoes"],
         atualizado_em=atualizado_em,
+        # Previa visual do seletor de "dia base" -- ainda nao afeta o calculo
+        # de status; so desenha o calendario com o mes atual e hoje marcado.
+        calendario_semanas=calendar.Calendar(firstweekday=6).monthdayscalendar(
+            date.today().year, date.today().month
+        ),
+        data_base_dia=date.today().day,
+        data_base_label=date.today().strftime("%d/%m/%Y"),
+        hoje_dia=date.today().day,
+        mes_ano_label=f"{MESES_PT[date.today().month - 1]} {date.today().year}",
         historico=historico,
         grafico_historico=preparar_grafico_historico(historico),
     )
