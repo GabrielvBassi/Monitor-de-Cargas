@@ -21,10 +21,17 @@ def _slugify(nome):
 
 
 def _dividir_lista(valor):
+    """Divide um campo com varios valores separados por ; ou , -- e trata
+    "-" (convencao usada nas planilhas pra 'sem informacao') como vazio."""
     if not valor:
         return []
 
-    partes = re.split(r"[;,]", str(valor))
+    texto = str(valor).strip()
+
+    if not texto or texto == "-":
+        return []
+
+    partes = re.split(r"[;,]", texto)
     return [parte.strip() for parte in partes if parte.strip()]
 
 
@@ -47,35 +54,22 @@ def _interpretar_ativo(valor):
     return True
 
 
-def _marcado_sim(valor):
-    return _normalizar(valor) == "sim"
-
-
-def _derivar_frequencia(frequencia_explicita, diario, semanal, mensal):
-    """Usa a coluna 'Frequencia de Verificacao' quando existir; senao deriva
-    das colunas 'Acompanhamento Diario/Semanal/Mensal' (formato da planilha
-    de controle de faturamento), priorizando a mais frequente quando mais de
-    uma estiver marcada 'SIM'."""
-    if frequencia_explicita and str(frequencia_explicita).strip():
+def _derivar_frequencia(frequencia_explicita):
+    if frequencia_explicita and str(frequencia_explicita).strip() and str(frequencia_explicita).strip() != "-":
         return str(frequencia_explicita).strip()
-
-    if _marcado_sim(diario):
-        return "Diaria"
-
-    if _marcado_sim(semanal):
-        return "Semanal"
-
-    if _marcado_sim(mensal):
-        return "Mensal"
 
     return "-"
 
 
-def _mapear_colunas(linha_cabecalho):
-    """Identifica, pela palavra-chave no titulo de cada coluna, qual campo
-    ela representa. Tolerante a acentos, maiusculas/minusculas e pequenas
-    variacoes de redacao no cabecalho da planilha."""
+def _mapear_colunas_monitor(linha_cabecalho):
+    """A aba 'Monitor' tem uma coluna 'CLIENTE' duplicada: a primeira (junto
+    com FREQUENCIA) NAO fica na mesma linha da segunda (que traz contatos e
+    diretorios) -- sao duas tabelas coladas lado a lado, cada uma na sua
+    propria ordem. Por decisao do usuario: a 1a coluna 'CLIENTE'+FREQUENCIA
+    vira uma tabela de consulta por NOME (nao por posicao de linha); a 2a
+    coluna 'CLIENTE' em diante define a lista de clientes de verdade."""
     colunas = {}
+    ocorrencias_cliente = []
 
     for indice, celula in enumerate(linha_cabecalho):
         palavras = set(_normalizar(celula).split())
@@ -84,41 +78,58 @@ def _mapear_colunas(linha_cabecalho):
             continue
 
         if "cliente" in palavras:
-            colunas["nome"] = indice
+            ocorrencias_cliente.append(indice)
+        elif "frequencia" in palavras:
+            colunas["frequencia_lookup"] = indice
+        elif "email" in palavras and "comercial" in palavras:
+            colunas["erro_to"] = indice
+        elif "email" in palavras and "parceiro" in palavras:
+            colunas["erro_cc"] = indice
+        elif "diretorios" in palavras and "bads" in palavras:
+            colunas["pastas_bad"] = indice
+        elif "diretorios" in palavras:
+            colunas["pastas_backup"] = indice
+        elif "ativo" in palavras:
+            colunas["ativo"] = indice
         elif "sistema" in palavras:
             colunas["sistema"] = indice
         elif "ambiente" in palavras:
             colunas["ambiente"] = indice
         elif "periodo" in palavras:
             colunas["periodo"] = indice
-        elif "frequencia" in palavras:
-            colunas["frequencia_verificacao"] = indice
-        elif "acompanhamento" in palavras and "semanal" in palavras:
-            colunas["acompanhamento_semanal"] = indice
-        elif "acompanhamento" in palavras and "mensal" in palavras:
-            colunas["acompanhamento_mensal"] = indice
-        elif "acompanhamento" in palavras:
-            colunas["acompanhamento_diario"] = indice
-        elif "ativo" in palavras:
-            colunas["ativo"] = indice
-        elif any(palavra.startswith("pasta") or palavra.startswith("diretorio") for palavra in palavras):
-            colunas["pastas_configuradas"] = indice
-        elif "erro" in palavras and "to" in palavras:
-            colunas["erro_to"] = indice
-        elif "erro" in palavras and "cc" in palavras:
-            colunas["erro_cc"] = indice
+
+    if len(ocorrencias_cliente) >= 2:
+        colunas["cliente_frequencia"] = ocorrencias_cliente[0]
+        colunas["nome"] = ocorrencias_cliente[1]
+    elif ocorrencias_cliente:
+        colunas["cliente_frequencia"] = ocorrencias_cliente[0]
+        colunas["nome"] = ocorrencias_cliente[0]
 
     return colunas
 
 
+def _valor(linha, colunas, chave):
+    indice = colunas.get(chave)
+
+    if indice is None or indice >= len(linha):
+        return None
+
+    return linha[indice]
+
+
 class ClienteModel:
-    """Cadastro de clientes, carregado a partir da planilha configurada em
-    config.CLIENTES_XLSX_PATH -- basta editar e salvar o arquivo para
-    atualizar a lista, sem precisar mexer no codigo.
+    """Cadastro de clientes, carregado da aba 'Monitor' da planilha
+    configurada em config.CLIENTES_XLSX_PATH -- basta editar e salvar o
+    arquivo para atualizar a lista, sem precisar mexer no codigo. A aba e
+    fixada pelo NOME ("Monitor"), nao pela aba ativa do arquivo -- assim,
+    abas diarias novas (ex: "23_09", criadas a cada dia) nunca acabam sendo
+    lidas por engano no lugar dela.
 
     Os destinatarios de faturamento nao variam por cliente, por isso
     continuam com uma unica definicao em FATURAMENTO_DESTINATARIOS.
     """
+
+    ABA_CLIENTES = "Monitor"
 
     FATURAMENTO_DESTINATARIOS = {
         "to": [
@@ -149,39 +160,50 @@ class ClienteModel:
                 f"Planilha de clientes nao encontrada: {config.CLIENTES_XLSX_PATH}"
             ) from exc
 
-        aba = planilha.active
-        linhas = aba.iter_rows(values_only=True)
+        if cls.ABA_CLIENTES not in planilha.sheetnames:
+            raise ValueError(
+                f"Planilha de clientes precisa de uma aba chamada '{cls.ABA_CLIENTES}' "
+                f"(abas encontradas: {', '.join(planilha.sheetnames)})"
+            )
 
-        try:
-            cabecalho = next(linhas)
-        except StopIteration:
-            raise ValueError(f"Planilha de clientes esta vazia: {config.CLIENTES_XLSX_PATH}")
+        linhas = list(planilha[cls.ABA_CLIENTES].iter_rows(values_only=True))
 
-        colunas = _mapear_colunas(cabecalho)
+        if not linhas:
+            raise ValueError(f"Aba '{cls.ABA_CLIENTES}' esta vazia: {config.CLIENTES_XLSX_PATH}")
+
+        colunas = _mapear_colunas_monitor(linhas[0])
 
         if "nome" not in colunas:
             raise ValueError(
-                "Planilha de clientes precisa de uma coluna 'Cliente' com o nome de cada cliente."
+                f"Aba '{cls.ABA_CLIENTES}' precisa de uma coluna 'Cliente' com o nome de cada cliente."
             )
+
+        linhas_dados = linhas[1:]
+
+        # Tabela de consulta de frequencia por NOME (1a coluna Cliente +
+        # Frequencia) -- independente da ordem de linha em relacao ao resto
+        # dos dados (2a coluna Cliente em diante).
+        frequencia_por_nome = {}
+
+        if "cliente_frequencia" in colunas and "frequencia_lookup" in colunas:
+            for linha in linhas_dados:
+                nome_freq = _valor(linha, colunas, "cliente_frequencia")
+
+                if nome_freq and str(nome_freq).strip():
+                    frequencia_por_nome[_normalizar(nome_freq)] = _valor(linha, colunas, "frequencia_lookup")
 
         clientes = {}
         ids_usados = set()
 
-        for linha in linhas:
-            nome = linha[colunas["nome"]] if colunas["nome"] < len(linha) else None
+        for linha in linhas_dados:
+            nome = _valor(linha, colunas, "nome")
 
             if not nome or not str(nome).strip():
                 continue
 
             nome = str(nome).strip()
 
-            def valor(chave):
-                indice = colunas.get(chave)
-                if indice is None or indice >= len(linha):
-                    return None
-                return linha[indice]
-
-            if not _interpretar_ativo(valor("ativo")):
+            if not _interpretar_ativo(_valor(linha, colunas, "ativo")):
                 continue
 
             id_cliente = _slugify(nome)
@@ -191,32 +213,28 @@ class ClienteModel:
                 sufixo += 1
             ids_usados.add(id_cliente)
 
+            frequencia_explicita = frequencia_por_nome.get(_normalizar(nome))
+
             clientes[id_cliente] = {
                 "nome": nome,
-                "frequencia_verificacao": _derivar_frequencia(
-                    valor("frequencia_verificacao"),
-                    valor("acompanhamento_diario"),
-                    valor("acompanhamento_semanal"),
-                    valor("acompanhamento_mensal"),
-                ),
-                # Nomes de pasta configurados manualmente na planilha (coluna
-                # com "Pasta"/"Diretorio" no titulo), para clientes cuja pasta
-                # real nao tem relacao obvia com o nome do cliente (ex:
-                # "Psicologica" mora em "MAPFRE - PSICOLOGICA"). Se vazia ou
-                # se nenhum nome da lista for encontrado, a busca cai para o
-                # comportamento padrao (nome exato do cliente, depois "pasta
-                # contem o nome do cliente").
-                "pastas_configuradas": _dividir_lista(valor("pastas_configuradas")),
+                "frequencia_verificacao": _derivar_frequencia(frequencia_explicita),
+                # Diretorios configurados na planilha, um campo por
+                # compartilhamento (erros e backup tem pastas diferentes por
+                # cliente, entao nao dá pra reaproveitar um so campo pros
+                # dois). Vazio ou nao encontrado cai pro casamento padrao por
+                # nome (exato, depois "pasta contem o nome do cliente").
+                "pastas_configuradas_backup": _dividir_lista(_valor(linha, colunas, "pastas_backup")),
+                "pastas_configuradas_bad": _dividir_lista(_valor(linha, colunas, "pastas_bad")),
                 "destinatarios": {
                     "erro": {
-                        "to": _dividir_emails(valor("erro_to")),
-                        "cc": _dividir_emails(valor("erro_cc")),
+                        "to": _dividir_emails(_valor(linha, colunas, "erro_to")),
+                        "cc": _dividir_emails(_valor(linha, colunas, "erro_cc")),
                     },
                 },
                 "variaveis": {
-                    "sistema": (valor("sistema") or "").strip(),
-                    "ambiente": (valor("ambiente") or "").strip(),
-                    "periodo": (valor("periodo") or "").strip(),
+                    "sistema": (_valor(linha, colunas, "sistema") or "").strip(),
+                    "ambiente": (_valor(linha, colunas, "ambiente") or "").strip(),
+                    "periodo": (_valor(linha, colunas, "periodo") or "").strip(),
                 },
             }
 

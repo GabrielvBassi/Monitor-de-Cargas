@@ -59,7 +59,7 @@ class ExecucaoService:
 
         for cliente in clientes.values():
             pastas_cliente = localizar_pastas_cliente(
-                pastas, cliente["nome"], cliente.get("pastas_configuradas"), config.BACKUP_DIRETORIO
+                pastas, cliente["nome"], cliente.get("pastas_configuradas_backup"), config.BACKUP_DIRETORIO
             )
             ultimo = arquivo_mais_recente(pastas_cliente)
 
