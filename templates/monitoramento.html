@@ -54,47 +54,51 @@
             <p class="vazio">Nao foi possivel ler a pasta de backups: {{ erro_backup }}</p>
         {% else %}
             <div class="filtros">
-                <input
-                    id="filtroCliente"
-                    type="text"
-                    placeholder="Filtrar cliente..."
-                    onkeyup="filtrarValidacao()"
-                >
+                <div class="filtros-linha">
+                    <input
+                        id="filtroCliente"
+                        type="text"
+                        placeholder="Filtrar cliente..."
+                        onkeyup="filtrarValidacao()"
+                    >
 
-                <div class="filtro-grupo">
-                    <span class="filtro-grupo-titulo">BAD</span>
-                    <label class="filtro-check chip-bad">
-                        <input type="checkbox" class="filtro-bad" value="bad" onchange="filtrarValidacao()">
-                        Com BAD
-                    </label>
-                    <label class="filtro-check chip-aviso">
-                        <input type="checkbox" class="filtro-bad" value="aviso" onchange="filtrarValidacao()">
-                        Aviso (vazio)
-                    </label>
-                    <label class="filtro-check chip-ok">
-                        <input type="checkbox" class="filtro-bad" value="ok" onchange="filtrarValidacao()">
-                        Sem BAD
-                    </label>
+                    <div class="filtro-grupo">
+                        <span class="filtro-grupo-titulo">BAD</span>
+                        <label class="filtro-check chip-bad">
+                            <input type="checkbox" class="filtro-bad" value="bad" onchange="filtrarValidacao()">
+                            Com BAD
+                        </label>
+                        <label class="filtro-check chip-aviso">
+                            <input type="checkbox" class="filtro-bad" value="aviso" onchange="filtrarValidacao()">
+                            Aviso
+                        </label>
+                        <label class="filtro-check chip-ok">
+                            <input type="checkbox" class="filtro-bad" value="ok" onchange="filtrarValidacao()">
+                            Sem BAD
+                        </label>
+                    </div>
                 </div>
 
-                <div class="filtro-grupo">
-                    <span class="filtro-grupo-titulo">Processamento</span>
-                    <label class="filtro-check chip-ok">
-                        <input type="checkbox" class="filtro-exec" value="ok" onchange="filtrarValidacao()">
-                        OK
-                    </label>
-                    <label class="filtro-check chip-pendente">
-                        <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
-                        Pendente
-                    </label>
-                    <label class="filtro-check chip-atrasado">
-                        <input type="checkbox" class="filtro-exec" value="atrasado" onchange="filtrarValidacao()">
-                        Atrasado
-                    </label>
-                    <label class="filtro-check chip-nao-avaliado">
-                        <input type="checkbox" class="filtro-exec" value="nao_avaliado" onchange="filtrarValidacao()">
-                        Nao avaliado
-                    </label>
+                <div class="filtros-linha">
+                    <div class="filtro-grupo">
+                        <span class="filtro-grupo-titulo">Processamento</span>
+                        <label class="filtro-check chip-ok">
+                            <input type="checkbox" class="filtro-exec" value="ok" onchange="filtrarValidacao()">
+                            OK
+                        </label>
+                        <label class="filtro-check chip-pendente">
+                            <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
+                            Pendente
+                        </label>
+                        <label class="filtro-check chip-atrasado">
+                            <input type="checkbox" class="filtro-exec" value="atrasado" onchange="filtrarValidacao()">
+                            Atrasado
+                        </label>
+                        <label class="filtro-check chip-nao-avaliado">
+                            <input type="checkbox" class="filtro-exec" value="nao_avaliado" onchange="filtrarValidacao()">
+                            Nao avaliado
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -137,7 +141,14 @@
                             <td>{{ item.cliente }}</td>
                             <td>{{ item.frequencia_verificacao }}</td>
                             <td>{{ item.exec_arquivo or "-" }}</td>
-                            <td>{{ item.exec_modificado_em.strftime("%d/%m/%Y") if item.exec_modificado_em else "-" }}</td>
+                            <td>
+                                {% if item.exec_modificado_em %}
+                                    {{ item.exec_modificado_em.strftime("%d/%m/%Y") }}
+                                    <span class="hora-execucao">{{ item.exec_modificado_em.strftime("%H:%M") }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if item.exec_status == "nao_avaliado" %}
                                     <span class="tag nao_avaliado" title="Frequencia '{{ item.frequencia_verificacao }}' nao reconhecida">NAO AVALIADO</span>
