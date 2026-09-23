@@ -85,13 +85,20 @@ def erros():
     # cliente -- aqui so exibimos quando foi a ultima checagem e permitimos
     # forcar uma nova (?atualizar=1) sem precisar ir ate o Monitoramento.
     forcar = request.args.get("atualizar") == "1"
-    _, atualizado_em = obter_principal(forcar=forcar)
+    dados, atualizado_em = obter_principal(forcar=forcar)
+
+    # Pre-marca (e sinaliza) quem tem BAD na ultima varredura -- o usuario
+    # ainda pode desmarcar livremente, isso so agiliza o caso comum.
+    clientes_com_bad = {
+        item["cliente"] for item in dados["validacoes"] if item["bad_status"] == "bad"
+    }
 
     return render_template(
         "erros.html",
         pagina_ativa="erros",
         clientes=clientes,
         atualizado_em=atualizado_em,
+        clientes_com_bad=clientes_com_bad,
     )
 
 

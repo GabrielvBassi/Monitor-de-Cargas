@@ -26,11 +26,21 @@
             <input type="hidden" name="modelo" value="erro">
 
             <label>Clientes</label>
+            {% if clientes_com_bad %}
+                <p class="vazio">
+                    Clientes com BAD na ultima checagem ja vem marcados (destacados abaixo) -- pode desmarcar
+                    livremente se nao quiser incluir algum.
+                </p>
+            {% endif %}
             <div class="clientes">
                 {% for id_cliente, cliente in clientes.items() %}
-                    <label>
-                        <input type="checkbox" name="clientes" value="{{ id_cliente }}">
+                    {% set tem_bad = cliente.nome in clientes_com_bad %}
+                    <label class="{{ 'cliente-com-bad' if tem_bad else '' }}">
+                        <input type="checkbox" name="clientes" value="{{ id_cliente }}" {{ "checked" if tem_bad else "" }}>
                         {{ cliente.nome }}
+                        {% if tem_bad %}
+                            <span class="tag bad">BAD</span>
+                        {% endif %}
                     </label>
                 {% endfor %}
             </div>
