@@ -1012,34 +1012,62 @@
             margin-top: 4px;
         }
 
+        .cards-grade[hidden] {
+            display: none;
+        }
+
         .card-cliente {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 12px 14px;
             background: #fff;
+            box-sizing: border-box;
+            overflow-wrap: break-word;
+            min-width: 0;
         }
 
         .card-cliente-topo {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
+            gap: 8px;
             margin-bottom: 8px;
+        }
+
+        .card-cliente-topo .tag {
+            flex-shrink: 0;
         }
 
         .card-cliente-nome {
             font-weight: 700;
             font-size: 13px;
             color: #1f2d3d;
+            min-width: 0;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .card-cliente-linha {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
+            gap: 8px;
             font-size: 12px;
             color: #64748b;
             padding: 3px 0;
             border-top: 1px dashed #eef1f5;
+        }
+
+        .card-cliente-linha span:first-child {
+            flex-shrink: 0;
+            color: #94a3b8;
+        }
+
+        .card-cliente-linha span:last-child {
+            min-width: 0;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            text-align: right;
         }
 
         .card-cliente-linha:first-of-type {

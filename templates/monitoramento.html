@@ -359,7 +359,6 @@
             <div class="filtros-ativos" id="filtrosAtivosContainer" hidden>
                 <span class="filtros-ativos-titulo">Filtros aplicados:</span>
                 <div class="filtros-ativos-chips" id="filtrosAtivosChips"></div>
-                <button type="button" class="btn-limpar-filtros" onclick="limparTodosFiltros()">Limpar filtros</button>
             </div>
 
             <div class="barra-selecao" id="barraSelecao" hidden>
@@ -845,7 +844,7 @@ function criarElementoChip(chip) {
     return elemento;
 }
 
-function aplicarFiltroKpi(badValores, execValores) {
+function definirFiltros(badValores, execValores) {
     document.getElementById("filtroCliente").value = "";
     document.getElementById("filtroArquivo").value = "";
     document.getElementById("filtroPeriodoDe").value = "";
@@ -868,11 +867,18 @@ function aplicarFiltroKpi(badValores, execValores) {
     });
 
     filtrarValidacao();
+}
+
+function aplicarFiltroKpi(badValores, execValores) {
+    definirFiltros(badValores, execValores);
     document.getElementById("tabelaValidacao").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function limparTodosFiltros() {
-    aplicarFiltroKpi([], []);
+    // Ao contrario dos cliques nos cards de KPI (chamados de bem no topo da
+    // pagina, onde faz sentido rolar ate a tabela), o botao "Limpar filtros"
+    // ja fica dentro da area de filtros -- nao deve mexer no scroll.
+    definirFiltros([], []);
 }
 
 function aplicarAtalhoPeriodo(atalho) {
