@@ -89,6 +89,8 @@ def _mapear_colunas_monitor(linha_cabecalho):
             colunas["pastas_bad"] = indice
         elif "diretorios" in palavras:
             colunas["pastas_backup"] = indice
+        elif "controlm" in palavras:
+            colunas["controlm_manual"] = indice
         elif "ativo" in palavras:
             colunas["ativo"] = indice
         elif "sistema" in palavras:
@@ -204,6 +206,12 @@ class ClienteModel:
             nome = str(nome).strip()
 
             if not _interpretar_ativo(_valor(linha, colunas, "ativo")):
+                continue
+
+            # Clientes marcados como "API" na coluna CONTROLM/MANUAL nao tem
+            # pasta de backup/BAD pra monitorar (integracao e via API, nao
+            # arquivo) -- ficam de fora do cadastro, igual aos inativos.
+            if _normalizar(_valor(linha, colunas, "controlm_manual")) == "api":
                 continue
 
             id_cliente = _slugify(nome)

@@ -86,7 +86,36 @@
 </div>
 
 <div class="card card-largo">
-    <h2>Validacao de clientes (BAD + Processamento)</h2>
+    <div class="card-header-rico">
+        <div class="card-header-titulo">
+            <span class="card-header-icone">&#128737;</span>
+            <div>
+                <h2>Validacao de clientes (BAD + Processamento)</h2>
+                <p class="card-header-subtitulo">Acompanhe o status de processamento e validacao dos clientes.</p>
+            </div>
+        </div>
+        {% if not erro_clientes and not erro_diretorio and not erro_backup %}
+            <div class="card-header-acoes">
+                {% if atualizado_em %}
+                    <span class="card-header-atualizado">
+                        <span class="card-header-atualizado-rotulo">Ultima atualizacao</span>
+                        <span class="card-header-atualizado-valor">{{ atualizado_em.strftime("%d/%m/%Y %H:%M") }}</span>
+                    </span>
+                {% endif %}
+                <button type="button" class="btn-exportar" id="botaoExportar" onclick="exportarCsv()" title="Exporta as linhas selecionadas, ou todas as visiveis se nada estiver marcado">
+                    &#8681; Exportar
+                </button>
+
+                <div class="menu-kebab">
+                    <button type="button" class="btn-kebab" onclick="alternarPainel(event, 'menuKebabPainel')" title="Mais acoes" aria-label="Mais acoes">&#8942;</button>
+                    <div class="menu-kebab-painel" id="menuKebabPainel">
+                        <button type="button" onclick="imprimirTabela()">Imprimir / gerar PDF</button>
+                        <button type="button" onclick="copiarResumo()">Copiar resumo</button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
     <div class="card-body">
         {% if erro_clientes %}
             <p class="vazio">Nao foi possivel ler a planilha de clientes: {{ erro_clientes }}</p>
@@ -95,61 +124,251 @@
         {% elif erro_backup %}
             <p class="vazio">Nao foi possivel ler a pasta de backups: {{ erro_backup }}</p>
         {% else %}
-            <div class="filtros">
-                <div class="filtros-linha">
-                    <input
-                        id="filtroCliente"
-                        type="text"
-                        placeholder="Filtrar cliente..."
-                        onkeyup="filtrarValidacao()"
-                    >
+            {% set frequencias_disponiveis = validacoes | map(attribute='frequencia_verificacao') | reject('equalto', '-') | unique | sort %}
+            {% set clientes_disponiveis = validacoes | map(attribute='cliente') | sort %}
 
-                    <div class="filtro-grupo">
-                        <span class="filtro-grupo-titulo">BAD</span>
-                        <label class="filtro-check chip-bad">
-                            <input type="checkbox" class="filtro-bad" value="bad" onchange="filtrarValidacao()">
-                            Com BAD
-                        </label>
-                        <label class="filtro-check chip-aviso">
-                            <input type="checkbox" class="filtro-bad" value="aviso" onchange="filtrarValidacao()">
-                            Aviso
-                        </label>
-                        <label class="filtro-check chip-ok">
-                            <input type="checkbox" class="filtro-bad" value="ok" onchange="filtrarValidacao()">
-                            Sem BAD
-                        </label>
+            <div class="filtros-painel">
+                <div class="filtros-painel-titulo">Filtros</div>
+
+                <div class="filtros-linha filtros-linha-principal">
+                    <div class="filtros-busca">
+                        <i class="ti ti-search filtros-busca-icone" aria-hidden="true"></i>
+                        <input
+                            id="filtroCliente"
+                            type="text"
+                            placeholder="Buscar cliente, arquivo ou status..."
+                            onkeyup="filtrarValidacao()"
+                        >
                     </div>
+
+                    <div class="filtros-multiselect" id="processamentoMultiselect">
+                        <button type="button" class="filtros-campo filtros-campo-abrir" onclick="alternarPainel(event, 'processamentoPainel')">
+                            <i class="ti ti-database filtros-campo-icone" aria-hidden="true"></i>
+                            <span class="filtros-campo-rotulo">Processamento</span>
+                            <span class="filtros-campo-badge" id="processamentoValor" hidden></span>
+                            <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div class="filtros-multiselect-painel" id="processamentoPainel">
+                            <label class="filtro-check filtro-check-todos">
+                                <input type="checkbox" id="filtroExecTodos" checked onchange="marcarTodos(this, '.filtro-exec')">
+                                <span class="filtro-check-rotulo">Todos</span>
+                                <span class="filtro-check-badge badge-neutro">{{ kpis.total_clientes }}</span>
+                            </label>
+                            <label class="filtro-check">
+                                <input type="checkbox" class="filtro-exec" value="ok" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">OK</span>
+                                <span class="filtro-check-badge badge-ok">{{ kpis.clientes_ok }}</span>
+                            </label>
+                            <label class="filtro-check">
+                                <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Pendente</span>
+                                <span class="filtro-check-badge badge-pendente">{{ kpis.clientes_pendentes }}</span>
+                            </label>
+                            <label class="filtro-check">
+                                <input type="checkbox" class="filtro-exec" value="atrasado" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Atrasado</span>
+                                <span class="filtro-check-badge badge-atrasado">{{ kpis.clientes_atrasados }}</span>
+                            </label>
+                            <label class="filtro-check">
+                                <input type="checkbox" class="filtro-exec" value="nao_avaliado" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Nao avaliado</span>
+                                <span class="filtro-check-badge badge-nao-avaliado">{{ validacoes | selectattr('exec_status', 'equalto', 'nao_avaliado') | list | length }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filtros-multiselect" id="statusBadMultiselect">
+                        <button type="button" class="filtros-campo filtros-campo-abrir" onclick="alternarPainel(event, 'statusBadPainel')">
+                            <i class="ti ti-shield-exclamation filtros-campo-icone" aria-hidden="true"></i>
+                            <span class="filtros-campo-rotulo">Status BAD</span>
+                            <span class="filtros-campo-badge" id="statusBadValor" hidden></span>
+                            <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div class="filtros-multiselect-painel" id="statusBadPainel">
+                            <label class="filtro-check filtro-check-todos">
+                                <input type="checkbox" id="filtroBadTodos" checked onchange="marcarTodos(this, '.filtro-bad')">
+                                <span class="filtro-check-rotulo">Todos</span>
+                                <span class="filtro-check-badge badge-neutro">{{ kpis.total_clientes }}</span>
+                            </label>
+                            <label class="filtro-check">
+                                <input type="checkbox" class="filtro-bad" value="bad" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Com BAD</span>
+                                <span class="filtro-check-badge badge-atrasado">{{ kpis.clientes_bad }}</span>
+                            </label>
+                            <label class="filtro-check">
+                                <input type="checkbox" class="filtro-bad" value="aviso" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Aviso</span>
+                                <span class="filtro-check-badge badge-pendente">{{ validacoes | selectattr('bad_status', 'equalto', 'aviso') | list | length }}</span>
+                            </label>
+                            <label class="filtro-check">
+                                <input type="checkbox" class="filtro-bad" value="ok" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Sem BAD</span>
+                                <span class="filtro-check-badge badge-ok">{{ validacoes | selectattr('bad_status', 'equalto', 'ok') | list | length }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filtros-multiselect" id="periodoMultiselect">
+                        <button type="button" class="filtros-campo filtros-campo-abrir" onclick="alternarPainel(event, 'periodoPainel')">
+                            <i class="ti ti-calendar filtros-campo-icone" aria-hidden="true"></i>
+                            <span class="filtros-campo-rotulo">Periodo</span>
+                            <span class="filtros-multiselect-valor" id="periodoValor">Todo o periodo</span>
+                            <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div class="filtros-multiselect-painel filtros-periodo-painel" id="periodoPainel">
+                            <div class="periodo-atalhos">
+                                <button type="button" onclick="aplicarAtalhoPeriodo('hoje')">Hoje</button>
+                                <button type="button" onclick="aplicarAtalhoPeriodo('7dias')">Ultimos 7 dias</button>
+                                <button type="button" onclick="aplicarAtalhoPeriodo('30dias')">Ultimos 30 dias</button>
+                                <button type="button" onclick="aplicarAtalhoPeriodo('mes')">Este mes</button>
+                                <button type="button" onclick="aplicarAtalhoPeriodo('mes_anterior')">Mes anterior</button>
+                            </div>
+                            <div class="periodo-datas">
+                                <input type="date" id="filtroPeriodoDe" onchange="filtrarValidacao()">
+                                <span class="filtros-campo-separador">-</span>
+                                <input type="date" id="filtroPeriodoAte" onchange="filtrarValidacao()">
+                            </div>
+                            <button type="button" class="periodo-limpar" onclick="limparPeriodo()">Limpar periodo</button>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="filtros-linha">
-                    <div class="filtro-grupo">
-                        <span class="filtro-grupo-titulo">Processamento</span>
-                        <label class="filtro-check chip-ok">
-                            <input type="checkbox" class="filtro-exec" value="ok" onchange="filtrarValidacao()">
-                            OK
-                        </label>
-                        <label class="filtro-check chip-pendente">
-                            <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
-                            Pendente
-                        </label>
-                        <label class="filtro-check chip-atrasado">
-                            <input type="checkbox" class="filtro-exec" value="atrasado" onchange="filtrarValidacao()">
-                            Atrasado
-                        </label>
-                        <label class="filtro-check chip-nao-avaliado">
-                            <input type="checkbox" class="filtro-exec" value="nao_avaliado" onchange="filtrarValidacao()">
-                            Nao avaliado
-                        </label>
+                <div class="filtros-linha filtros-linha-secundaria">
+                    <div class="filtros-multiselect" id="clienteMultiselect">
+                        <button type="button" class="filtros-campo filtros-campo-abrir filtros-campo-secundario" onclick="alternarPainel(event, 'clientePainel')">
+                            <i class="ti ti-users filtros-campo-icone" aria-hidden="true"></i>
+                            <span class="filtros-campo-rotulo">Cliente</span>
+                            <span class="filtros-campo-badge" id="clienteValor" hidden></span>
+                            <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div class="filtros-multiselect-painel filtros-cliente-painel" id="clientePainel">
+                            <input type="text" class="cliente-painel-busca" id="clientePainelBusca" placeholder="Pesquisar cliente..." onkeyup="filtrarListaClientes()">
+                            <div class="cliente-painel-acoes">
+                                <button type="button" onclick="selecionarTodosClientes(true)">Selecionar todos</button>
+                                <button type="button" onclick="selecionarTodosClientes(false)">Limpar</button>
+                            </div>
+                            <div class="cliente-painel-lista" id="clientePainelLista">
+                                {% for cliente_nome in clientes_disponiveis %}
+                                    <label class="filtro-check cliente-painel-item" data-cliente-opcao="{{ cliente_nome | lower }}">
+                                        <input type="checkbox" class="filtro-cliente" value="{{ cliente_nome }}" onchange="filtrarValidacao()">
+                                        <span class="filtro-check-rotulo">{{ cliente_nome }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filtros-multiselect" id="frequenciaMultiselect">
+                        <button type="button" class="filtros-campo filtros-campo-abrir filtros-campo-secundario" onclick="alternarPainel(event, 'frequenciaMultiselectPainel')">
+                            <i class="ti ti-repeat filtros-campo-icone" aria-hidden="true"></i>
+                            <span class="filtros-campo-rotulo">Frequencia</span>
+                            <span class="filtros-campo-badge" id="frequenciaMultiselectValor" hidden></span>
+                            <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div class="filtros-multiselect-painel" id="frequenciaMultiselectPainel">
+                            <label class="filtro-check filtro-check-todos">
+                                <input type="checkbox" id="filtroFrequenciaTodos" checked onchange="marcarTodos(this, '.filtro-frequencia')">
+                                <span class="filtro-check-rotulo">Todos</span>
+                            </label>
+                            {% for freq in frequencias_disponiveis %}
+                                <label class="filtro-check">
+                                    <input type="checkbox" class="filtro-frequencia" value="{{ freq | lower }}" onchange="filtrarValidacao()">
+                                    <span class="filtro-check-rotulo">{{ freq }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="filtros-campo filtros-campo-select filtros-campo-secundario">
+                        <i class="ti ti-file filtros-campo-icone" aria-hidden="true"></i>
+                        <span class="filtros-campo-rotulo">Arquivo</span>
+                        <select id="filtroArquivo" onchange="filtrarValidacao()">
+                            <option value="">Todos</option>
+                            <option value="backup">Backup</option>
+                            <option value="bad">BAD</option>
+                        </select>
+                        <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="filtros-separador-vertical"></div>
+
+                    <div class="filtros-campo filtros-campo-select">
+                        <i class="ti ti-arrows-sort filtros-campo-icone" aria-hidden="true"></i>
+                        <span class="filtros-campo-rotulo">Ordenar por</span>
+                        <select id="filtroOrdenar" onchange="ordenarPorSelecao()">
+                            <option value="">Padrao</option>
+                            <option value="prioridade">Prioridade (atencao primeiro)</option>
+                            <optgroup label="Cliente">
+                                <option value="1-asc">A - Z</option>
+                                <option value="1-desc">Z - A</option>
+                            </optgroup>
+                            <optgroup label="Data do processamento">
+                                <option value="4-desc">Mais recente</option>
+                                <option value="4-asc">Mais antiga</option>
+                            </optgroup>
+                            <optgroup label="Data BAD">
+                                <option value="7-desc">Mais recente</option>
+                                <option value="7-asc">Mais antiga</option>
+                            </optgroup>
+                            <optgroup label="Registros BAD">
+                                <option value="8-desc">Maior - menor</option>
+                                <option value="8-asc">Menor - maior</option>
+                            </optgroup>
+                            <optgroup label="Frequencia">
+                                <option value="2-asc">A - Z</option>
+                            </optgroup>
+                            <optgroup label="Status">
+                                <option value="5-asc">A - Z</option>
+                            </optgroup>
+                        </select>
+                        <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="filtros-linha-espacador"></div>
+
+                    <button type="button" class="btn-limpar-filtros" onclick="limparTodosFiltros()"><i class="ti ti-refresh" aria-hidden="true"></i> Limpar filtros</button>
+                    <button type="button" class="btn-aplicar-filtros" onclick="filtrarValidacao()">Aplicar filtros</button>
+
+                    <div class="filtros-multiselect" id="maisFiltrosContainer">
+                        <button type="button" class="btn-mais-filtros" onclick="alternarPainel(event, 'maisFiltrosPainel')">+ Mais filtros <i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+                        <div class="filtros-multiselect-painel filtros-mais-painel" id="maisFiltrosPainel">
+                            <span class="filtros-mais-titulo">Filtros salvos</span>
+                            <div class="lista-filtros-salvos" id="listaFiltrosSalvos">
+                                <p class="vazio">Nenhum filtro salvo ainda.</p>
+                            </div>
+                            <div class="salvar-filtro-linha">
+                                <input type="text" id="nomeFiltroSalvo" placeholder="Nome do filtro...">
+                                <button type="button" class="btn-salvar-filtro" onclick="salvarFiltroAtual()">Salvar filtro atual</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="filtros-rodape">
-                <span>Combine os filtros marcando mais de uma opcao (ex: "Com BAD" + "Pendente").</span>
-                <span>
+            <div class="filtros-resumo">
+                <div class="filtros-resumo-info">
                     <span id="contadorValidacao"></span>
-                    <button type="button" class="btn-limpar-filtros" onclick="aplicarFiltroKpi([], [])">Limpar filtros</button>
-                </span>
+                </div>
+                <div class="alternador-visualizacao">
+                    <button type="button" class="alternador-botao ativo" id="botaoVisaoTabela" onclick="alternarVisualizacao('tabela')" title="Visualizacao em tabela">&#9776;</button>
+                    <button type="button" class="alternador-botao" id="botaoVisaoCards" onclick="alternarVisualizacao('cards')" title="Visualizacao em cards">&#9638;</button>
+                </div>
+            </div>
+
+            <div class="filtros-ativos" id="filtrosAtivosContainer" hidden>
+                <span class="filtros-ativos-titulo">Filtros aplicados:</span>
+                <div class="filtros-ativos-chips" id="filtrosAtivosChips"></div>
+                <button type="button" class="btn-limpar-filtros" onclick="limparTodosFiltros()">Limpar filtros</button>
+            </div>
+
+            <div class="barra-selecao" id="barraSelecao" hidden>
+                <span id="contadorSelecao">0 clientes selecionados</span>
+                <div class="barra-selecao-acoes">
+                    <button type="button" onclick="exportarCsv()">Exportar</button>
+                    <button type="button" disabled title="Em breve">Visualizar detalhes</button>
+                    <button type="button" disabled title="Em breve">Ver logs</button>
+                </div>
             </div>
 
             <div class="legenda">
@@ -162,24 +381,33 @@
             <table id="tabelaValidacao">
                 <thead>
                     <tr>
-                        <th class="ordenavel">Cliente</th>
-                        <th class="ordenavel">Frequencia</th>
-                        <th class="ordenavel">Arquivo de Backup (mais recente)</th>
-                        <th class="ordenavel">Data Processamento</th>
-                        <th>Status Processamento</th>
-                        <th class="ordenavel">Arquivo BAD (mais recente)</th>
-                        <th class="ordenavel">Data BAD</th>
-                        <th class="ordenavel">Registros BAD</th>
-                        <th>Status BAD</th>
+                        <th class="col-selecao"><input type="checkbox" id="selecionarTodos" onchange="alternarSelecaoTodos(this)" title="Selecionar todos os visiveis"></th>
+                        <th class="ordenavel">Cliente<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Frequencia<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Arquivo de Backup (mais recente)<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Data Processamento<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Status Processamento<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Arquivo BAD (mais recente)<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Data BAD<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Registros BAD<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Status BAD<span class="ordenacao-indicador"></span></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in validacoes %}
                         <tr
-                            data-cliente="{{ item.cliente | lower }}"
+                            data-cliente="{{ item.cliente }}"
+                            data-busca="{{ (item.cliente ~ ' ' ~ (item.exec_arquivo or '') ~ ' ' ~ (item.bad_arquivo or '') ~ ' ' ~ item.exec_status ~ ' ' ~ item.bad_status) | lower }}"
+                            data-frequencia="{{ item.frequencia_verificacao | lower }}"
                             data-status-bad="{{ item.bad_status }}"
                             data-status-exec="{{ item.exec_status }}"
+                            data-tem-backup="{{ '1' if item.exec_arquivo else '0' }}"
+                            data-tem-bad="{{ '1' if item.bad_arquivo else '0' }}"
+                            data-data-processamento="{{ item.exec_modificado_em.strftime('%Y-%m-%d') if item.exec_modificado_em else '' }}"
+                            data-data-bad="{{ item.bad_modificado_em.strftime('%Y-%m-%d') if item.bad_modificado_em else '' }}"
+                            data-bad-registros="{{ item.bad_registros }}"
                         >
+                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>{{ item.cliente }}</td>
                             <td>{{ item.frequencia_verificacao }}</td>
                             <td>{{ item.exec_arquivo or "-" }}</td>
@@ -210,6 +438,57 @@
                     {% endfor %}
                 </tbody>
             </table>
+
+            <div class="cards-grade" id="cardsValidacao" hidden>
+                {% for item in validacoes %}
+                    <div
+                        class="card-cliente"
+                        data-cliente="{{ item.cliente }}"
+                        data-busca="{{ (item.cliente ~ ' ' ~ (item.exec_arquivo or '') ~ ' ' ~ (item.bad_arquivo or '') ~ ' ' ~ item.exec_status ~ ' ' ~ item.bad_status) | lower }}"
+                        data-frequencia="{{ item.frequencia_verificacao | lower }}"
+                        data-status-bad="{{ item.bad_status }}"
+                        data-status-exec="{{ item.exec_status }}"
+                        data-tem-backup="{{ '1' if item.exec_arquivo else '0' }}"
+                        data-tem-bad="{{ '1' if item.bad_arquivo else '0' }}"
+                        data-data-processamento="{{ item.exec_modificado_em.strftime('%Y-%m-%d') if item.exec_modificado_em else '' }}"
+                        data-data-bad="{{ item.bad_modificado_em.strftime('%Y-%m-%d') if item.bad_modificado_em else '' }}"
+                        data-bad-registros="{{ item.bad_registros }}"
+                    >
+                        <div class="card-cliente-topo">
+                            <span class="card-cliente-nome">{{ item.cliente }}</span>
+                            <span class="tag {{ item.bad_status }}">{{ item.bad_status | upper }}</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Frequencia</span>
+                            <span>{{ item.frequencia_verificacao }}</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Backup</span>
+                            <span>{{ item.exec_arquivo or "-" }}</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Processamento</span>
+                            {% if item.exec_status == "nao_avaliado" %}
+                                <span class="tag nao_avaliado">NAO AVALIADO</span>
+                            {% elif item.exec_status == "ok" %}
+                                <span class="tag ok">OK</span>
+                            {% elif item.exec_status == "pendente" %}
+                                <span class="tag pendente">PENDENTE</span>
+                            {% else %}
+                                <span class="tag atrasado">ATRASADO</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Arquivo BAD</span>
+                            <span>{{ item.bad_arquivo or "-" }}</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Registros BAD</span>
+                            <span>{{ item.bad_registros }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
     </div>
 </div>
@@ -299,39 +578,83 @@
 </div>
 
 <script>
+const ROTULOS_FILTRO_BAD = { bad: "Com BAD", aviso: "Aviso", ok: "Sem BAD" };
+const ROTULOS_FILTRO_EXEC = { ok: "OK", pendente: "Pendente", atrasado: "Atrasado", nao_avaliado: "Nao avaliado" };
+
+function coletarFiltros() {
+    return {
+        busca: document.getElementById("filtroCliente").value.trim().toLowerCase(),
+        frequenciaSelecionadas: Array.from(document.querySelectorAll(".filtro-frequencia:checked")).map(function (cb) { return cb.value; }),
+        clientesSelecionados: Array.from(document.querySelectorAll(".filtro-cliente:checked")).map(function (cb) { return cb.value; }),
+        arquivo: document.getElementById("filtroArquivo").value,
+        periodoDe: document.getElementById("filtroPeriodoDe").value,
+        periodoAte: document.getElementById("filtroPeriodoAte").value,
+        badSelecionados: Array.from(document.querySelectorAll(".filtro-bad:checked")).map(function (cb) { return cb.value; }),
+        execSelecionados: Array.from(document.querySelectorAll(".filtro-exec:checked")).map(function (cb) { return cb.value; }),
+    };
+}
+
+function linhaPassaFiltros(dataset, filtros) {
+    const busca = dataset.busca || "";
+    const frequencia = dataset.frequencia || "";
+    const cliente = dataset.cliente || "";
+    const statusBad = dataset.statusBad || "";
+    const statusExec = dataset.statusExec || "";
+    const temBackup = dataset.temBackup === "1";
+    const temBad = dataset.temBad === "1";
+    const dataProcessamento = dataset.dataProcessamento || "";
+    const dataBad = dataset.dataBad || "";
+
+    if (filtros.busca && !busca.includes(filtros.busca)) {
+        return false;
+    }
+
+    if (filtros.frequenciaSelecionadas.length && !filtros.frequenciaSelecionadas.includes(frequencia)) {
+        return false;
+    }
+
+    if (filtros.clientesSelecionados.length && !filtros.clientesSelecionados.includes(cliente)) {
+        return false;
+    }
+
+    if (filtros.arquivo === "backup" && !temBackup) return false;
+    if (filtros.arquivo === "bad" && !temBad) return false;
+
+    if (filtros.periodoDe || filtros.periodoAte) {
+        const datas = [dataProcessamento, dataBad].filter(Boolean);
+        const dentroPeriodo = datas.some(function (data) {
+            if (filtros.periodoDe && data < filtros.periodoDe) return false;
+            if (filtros.periodoAte && data > filtros.periodoAte) return false;
+            return true;
+        });
+
+        if (!dentroPeriodo) {
+            return false;
+        }
+    }
+
+    // Dentro de cada grupo, os filtros marcados se combinam com OU; entre
+    // grupos diferentes, com E -- isso e o que permite compor filtros como
+    // "Com BAD" + "Pendente".
+    if (filtros.badSelecionados.length && !filtros.badSelecionados.includes(statusBad)) {
+        return false;
+    }
+
+    if (filtros.execSelecionados.length && !filtros.execSelecionados.includes(statusExec)) {
+        return false;
+    }
+
+    return true;
+}
+
 function filtrarValidacao() {
-    const cliente = document.getElementById("filtroCliente").value.toLowerCase();
-    const badSelecionados = Array.from(document.querySelectorAll(".filtro-bad:checked")).map(function (cb) {
-        return cb.value;
-    });
-    const execSelecionados = Array.from(document.querySelectorAll(".filtro-exec:checked")).map(function (cb) {
-        return cb.value;
-    });
+    const filtros = coletarFiltros();
     const linhas = document.querySelectorAll("#tabelaValidacao tbody tr");
+    const cards = document.querySelectorAll("#cardsValidacao .card-cliente");
     let visiveis = 0;
 
     linhas.forEach(function (linha) {
-        const clienteLinha = linha.dataset.cliente || "";
-        const statusBadLinha = linha.dataset.statusBad || "";
-        const statusExecLinha = linha.dataset.statusExec || "";
-
-        let mostrar = true;
-
-        if (cliente && !clienteLinha.includes(cliente)) {
-            mostrar = false;
-        }
-
-        // Dentro de cada grupo, os filtros marcados se combinam com OU;
-        // entre os dois grupos (BAD / Processamento), com E -- isso e o
-        // que permite compor filtros como "Com BAD" + "Pendente".
-        if (badSelecionados.length && !badSelecionados.includes(statusBadLinha)) {
-            mostrar = false;
-        }
-
-        if (execSelecionados.length && !execSelecionados.includes(statusExecLinha)) {
-            mostrar = false;
-        }
-
+        const mostrar = linhaPassaFiltros(linha.dataset, filtros);
         linha.style.display = mostrar ? "" : "none";
 
         if (mostrar) {
@@ -339,14 +662,202 @@ function filtrarValidacao() {
         }
     });
 
+    cards.forEach(function (card) {
+        card.style.display = linhaPassaFiltros(card.dataset, filtros) ? "" : "none";
+    });
+
     const contador = document.getElementById("contadorValidacao");
     if (contador) {
-        contador.textContent = visiveis + " de " + linhas.length + " clientes";
+        contador.textContent = visiveis + " de " + linhas.length + " clientes encontrados";
     }
+
+    atualizarResumoFiltros(filtros);
+    atualizarContadorSelecao();
+
+    atualizarBadgeMultiselect("processamentoValor", filtros.execSelecionados);
+    atualizarBadgeMultiselect("statusBadValor", filtros.badSelecionados);
+    atualizarBadgeMultiselect("frequenciaMultiselectValor", filtros.frequenciaSelecionadas);
+    atualizarBadgeMultiselect("clienteValor", filtros.clientesSelecionados);
+    atualizarRotuloPeriodo(filtros.periodoDe, filtros.periodoAte);
+
+    // "Todos" fica marcado sempre que nao houver nenhuma opcao especifica
+    // selecionada no grupo -- e o proprio jeito do usuario "zerar" o filtro
+    // clicando em "Todos" (ver marcarTodos()).
+    document.getElementById("filtroExecTodos").checked = filtros.execSelecionados.length === 0;
+    document.getElementById("filtroBadTodos").checked = filtros.badSelecionados.length === 0;
+    document.getElementById("filtroFrequenciaTodos").checked = filtros.frequenciaSelecionadas.length === 0;
+}
+
+function marcarTodos(checkboxTodos, seletorGrupo) {
+    if (checkboxTodos.checked) {
+        document.querySelectorAll(seletorGrupo).forEach(function (cb) {
+            cb.checked = false;
+        });
+    }
+
+    filtrarValidacao();
+}
+
+function atualizarBadgeMultiselect(elementId, selecionados) {
+    const alvo = document.getElementById(elementId);
+
+    if (!alvo) {
+        return;
+    }
+
+    if (selecionados.length) {
+        alvo.textContent = selecionados.length;
+        alvo.hidden = false;
+    } else {
+        alvo.hidden = true;
+    }
+}
+
+function formatarDataBR(isoData) {
+    if (!isoData) {
+        return "";
+    }
+
+    const partes = isoData.split("-");
+    return partes[2] + "/" + partes[1] + "/" + partes[0];
+}
+
+function atualizarRotuloPeriodo(periodoDe, periodoAte) {
+    const alvo = document.getElementById("periodoValor");
+
+    if (!alvo) {
+        return;
+    }
+
+    if (!periodoDe && !periodoAte) {
+        alvo.textContent = "Todo o periodo";
+    } else {
+        alvo.textContent = (formatarDataBR(periodoDe) || "inicio") + " - " + (formatarDataBR(periodoAte) || "hoje");
+    }
+}
+
+function desmarcarValor(seletor, valor) {
+    document.querySelectorAll(seletor).forEach(function (cb) {
+        if (cb.value === valor) {
+            cb.checked = false;
+        }
+    });
+}
+
+function atualizarResumoFiltros(filtros) {
+    const container = document.getElementById("filtrosAtivosContainer");
+    const chipsAlvo = document.getElementById("filtrosAtivosChips");
+
+    if (!container || !chipsAlvo) {
+        return;
+    }
+
+    const chips = [];
+
+    if (filtros.busca) {
+        chips.push({ rotulo: 'Busca: "' + filtros.busca + '"', limpar: function () { document.getElementById("filtroCliente").value = ""; } });
+    }
+
+    filtros.execSelecionados.forEach(function (v) {
+        chips.push({ rotulo: "Processamento: " + (ROTULOS_FILTRO_EXEC[v] || v), limpar: function () { desmarcarValor(".filtro-exec", v); } });
+    });
+
+    filtros.badSelecionados.forEach(function (v) {
+        chips.push({ rotulo: "Status BAD: " + (ROTULOS_FILTRO_BAD[v] || v), limpar: function () { desmarcarValor(".filtro-bad", v); } });
+    });
+
+    filtros.frequenciaSelecionadas.forEach(function (v) {
+        chips.push({ rotulo: "Frequencia: " + v, limpar: function () { desmarcarValor(".filtro-frequencia", v); } });
+    });
+
+    filtros.clientesSelecionados.forEach(function (v) {
+        chips.push({ rotulo: "Cliente: " + v, limpar: function () { desmarcarValor(".filtro-cliente", v); } });
+    });
+
+    if (filtros.arquivo) {
+        const select = document.getElementById("filtroArquivo");
+        chips.push({ rotulo: "Arquivo: " + select.options[select.selectedIndex].text, limpar: function () { select.value = ""; } });
+    }
+
+    if (filtros.periodoDe || filtros.periodoAte) {
+        chips.push({
+            rotulo: "Periodo: " + (formatarDataBR(filtros.periodoDe) || "inicio") + " - " + (formatarDataBR(filtros.periodoAte) || "hoje"),
+            limpar: function () {
+                document.getElementById("filtroPeriodoDe").value = "";
+                document.getElementById("filtroPeriodoAte").value = "";
+            },
+        });
+    }
+
+    if (!chips.length) {
+        container.hidden = true;
+        chipsAlvo.innerHTML = "";
+        return;
+    }
+
+    container.hidden = false;
+    chipsAlvo.innerHTML = "";
+
+    const LIMITE_CHIPS_VISIVEIS = 5;
+    const visiveis = chips.slice(0, LIMITE_CHIPS_VISIVEIS);
+    const ocultos = chips.slice(LIMITE_CHIPS_VISIVEIS);
+
+    visiveis.forEach(function (chip) {
+        chipsAlvo.appendChild(criarElementoChip(chip));
+    });
+
+    if (ocultos.length) {
+        const grupoMais = document.createElement("span");
+        grupoMais.className = "chip-filtro-mais";
+
+        const rotuloMais = document.createElement("span");
+        rotuloMais.className = "chip-filtro-mais-rotulo";
+        rotuloMais.textContent = "+" + ocultos.length + " filtros";
+
+        const popover = document.createElement("div");
+        popover.className = "chip-filtro-mais-popover";
+
+        ocultos.forEach(function (chip) {
+            popover.appendChild(criarElementoChip(chip));
+        });
+
+        grupoMais.appendChild(rotuloMais);
+        grupoMais.appendChild(popover);
+        chipsAlvo.appendChild(grupoMais);
+    }
+}
+
+function criarElementoChip(chip) {
+    const elemento = document.createElement("span");
+    elemento.className = "chip-filtro-ativo";
+    elemento.textContent = chip.rotulo;
+
+    const remover = document.createElement("button");
+    remover.type = "button";
+    remover.textContent = "×";
+    remover.setAttribute("aria-label", "Remover filtro");
+    remover.onclick = function () {
+        chip.limpar();
+        filtrarValidacao();
+    };
+
+    elemento.appendChild(remover);
+    return elemento;
 }
 
 function aplicarFiltroKpi(badValores, execValores) {
     document.getElementById("filtroCliente").value = "";
+    document.getElementById("filtroArquivo").value = "";
+    document.getElementById("filtroPeriodoDe").value = "";
+    document.getElementById("filtroPeriodoAte").value = "";
+
+    document.querySelectorAll(".filtro-frequencia").forEach(function (cb) {
+        cb.checked = false;
+    });
+
+    document.querySelectorAll(".filtro-cliente").forEach(function (cb) {
+        cb.checked = false;
+    });
 
     document.querySelectorAll(".filtro-bad").forEach(function (cb) {
         cb.checked = badValores.includes(cb.value);
@@ -359,6 +870,225 @@ function aplicarFiltroKpi(badValores, execValores) {
     filtrarValidacao();
     document.getElementById("tabelaValidacao").scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+function limparTodosFiltros() {
+    aplicarFiltroKpi([], []);
+}
+
+function aplicarAtalhoPeriodo(atalho) {
+    const hoje = new Date();
+    let de = new Date(hoje);
+    let ate = new Date(hoje);
+
+    if (atalho === "7dias") {
+        de.setDate(de.getDate() - 6);
+    } else if (atalho === "30dias") {
+        de.setDate(de.getDate() - 29);
+    } else if (atalho === "mes") {
+        de = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    } else if (atalho === "mes_anterior") {
+        de = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+        ate = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+    }
+
+    document.getElementById("filtroPeriodoDe").value = formatarDataISO(de);
+    document.getElementById("filtroPeriodoAte").value = formatarDataISO(ate);
+    filtrarValidacao();
+}
+
+function formatarDataISO(data) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const dia = String(data.getDate()).padStart(2, "0");
+    return ano + "-" + mes + "-" + dia;
+}
+
+function limparPeriodo() {
+    document.getElementById("filtroPeriodoDe").value = "";
+    document.getElementById("filtroPeriodoAte").value = "";
+    filtrarValidacao();
+}
+
+function filtrarListaClientes() {
+    const busca = document.getElementById("clientePainelBusca").value.trim().toLowerCase();
+
+    document.querySelectorAll("#clientePainelLista .cliente-painel-item").forEach(function (item) {
+        const nome = item.dataset.clienteOpcao || "";
+        item.style.display = (!busca || nome.includes(busca)) ? "" : "none";
+    });
+}
+
+function selecionarTodosClientes(marcar) {
+    document.querySelectorAll("#clientePainelLista .cliente-painel-item").forEach(function (item) {
+        if (item.style.display !== "none") {
+            const caixa = item.querySelector(".filtro-cliente");
+
+            if (caixa) {
+                caixa.checked = marcar;
+            }
+        }
+    });
+
+    filtrarValidacao();
+}
+
+function alternarSelecaoTodos(checkbox) {
+    document.querySelectorAll("#tabelaValidacao tbody tr").forEach(function (linha) {
+        if (linha.style.display !== "none") {
+            const caixa = linha.querySelector(".linha-selecionada");
+
+            if (caixa) {
+                caixa.checked = checkbox.checked;
+            }
+        }
+    });
+
+    atualizarContadorSelecao();
+}
+
+function atualizarContadorSelecao() {
+    const selecionadas = document.querySelectorAll(".linha-selecionada:checked").length;
+    const botao = document.getElementById("botaoExportar");
+
+    if (botao) {
+        botao.textContent = selecionadas ? ("↓ Exportar (" + selecionadas + ")") : "↓ Exportar";
+    }
+
+    const barra = document.getElementById("barraSelecao");
+    const contadorSelecao = document.getElementById("contadorSelecao");
+
+    if (barra && contadorSelecao) {
+        barra.hidden = selecionadas === 0;
+        contadorSelecao.textContent = selecionadas + (selecionadas === 1 ? " cliente selecionado" : " clientes selecionados");
+    }
+}
+
+function exportarCsv() {
+    const selecionadas = Array.from(document.querySelectorAll(".linha-selecionada:checked")).map(function (cb) {
+        return cb.closest("tr");
+    });
+
+    const linhasAlvo = selecionadas.length
+        ? selecionadas
+        : Array.from(document.querySelectorAll("#tabelaValidacao tbody tr")).filter(function (linha) {
+            return linha.style.display !== "none";
+        });
+
+    if (!linhasAlvo.length) {
+        return;
+    }
+
+    const cabecalhos = Array.from(document.querySelectorAll("#tabelaValidacao thead th"))
+        .slice(1)
+        .map(function (th) { return th.innerText.trim(); });
+
+    const linhasCsv = [cabecalhos.join(";")];
+
+    linhasAlvo.forEach(function (linha) {
+        const celulas = Array.from(linha.children).slice(1).map(function (td) {
+            return '"' + td.innerText.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"';
+        });
+        linhasCsv.push(celulas.join(";"));
+    });
+
+    const blob = new Blob(["﻿" + linhasCsv.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "monitoramento_clientes.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function alternarVisualizacao(modo) {
+    const tabela = document.getElementById("tabelaValidacao");
+    const cards = document.getElementById("cardsValidacao");
+    const botaoTabela = document.getElementById("botaoVisaoTabela");
+    const botaoCards = document.getElementById("botaoVisaoCards");
+
+    const emCards = modo === "cards";
+
+    tabela.hidden = emCards;
+    cards.hidden = !emCards;
+    botaoTabela.classList.toggle("ativo", !emCards);
+    botaoCards.classList.toggle("ativo", emCards);
+}
+
+function alternarPainel(evento, painelId) {
+    evento.stopPropagation();
+    const painel = document.getElementById(painelId);
+
+    if (!painel) {
+        return;
+    }
+
+    const estavaAberto = painel.classList.contains("aberto");
+
+    document.querySelectorAll(".filtros-multiselect-painel.aberto, .menu-kebab-painel.aberto").forEach(function (p) {
+        p.classList.remove("aberto");
+        p.style.left = "";
+        p.style.right = "";
+    });
+
+    if (!estavaAberto) {
+        painel.classList.add("aberto");
+
+        // Se a ancoragem padrao (via CSS) faz o painel invadir a sidebar ou
+        // sair pela direita da tela -- comum quando a linha de filtros
+        // quebra em telas estreitas -- inverte o lado de ancoragem.
+        const retangulo = painel.getBoundingClientRect();
+        const sidebar = document.querySelector(".sidebar");
+        const limiteEsquerdo = sidebar ? sidebar.getBoundingClientRect().right + 8 : 8;
+
+        if (retangulo.left < limiteEsquerdo) {
+            painel.style.left = "0";
+            painel.style.right = "auto";
+        } else if (retangulo.right > window.innerWidth - 8) {
+            painel.style.left = "auto";
+            painel.style.right = "0";
+        }
+    }
+}
+
+function imprimirTabela() {
+    document.getElementById("menuKebabPainel").classList.remove("aberto");
+    window.print();
+}
+
+function copiarResumo() {
+    document.getElementById("menuKebabPainel").classList.remove("aberto");
+
+    const kpis = Array.from(document.querySelectorAll(".kpi")).map(function (kpi) {
+        const rotulo = kpi.querySelector(".kpi-rotulo");
+        const valor = kpi.querySelector(".kpi-valor");
+        return rotulo && valor ? (rotulo.textContent.trim() + ": " + valor.textContent.trim()) : null;
+    }).filter(Boolean);
+
+    const contador = document.getElementById("contadorValidacao");
+    const partes = [];
+
+    if (contador) {
+        partes.push(contador.textContent.trim());
+    }
+
+    partes.push(kpis.join(" | "));
+
+    const texto = partes.join(" -- ");
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(texto).catch(function () {});
+    }
+}
+
+document.addEventListener("click", function (evento) {
+    document.querySelectorAll(".filtros-multiselect-painel.aberto, .menu-kebab-painel.aberto").forEach(function (painel) {
+        const container = painel.closest(".filtros-multiselect, .menu-kebab");
+
+        if (container && !container.contains(evento.target)) {
+            painel.classList.remove("aberto");
+        }
+    });
+});
 
 function filtrarDetalhe() {
     const cliente = document.getElementById("filtroClienteDetalhe").value.toLowerCase();
@@ -383,36 +1113,124 @@ function filtrarDetalhe() {
     });
 }
 
+function ordenarLinhas(tabela, coluna, asc) {
+    const tbody = tabela.querySelector("tbody");
+    const linhas = Array.from(tbody.querySelectorAll("tr"));
+
+    linhas.sort(function (a, b) {
+        const va = a.children[coluna].innerText.trim();
+        const vb = b.children[coluna].innerText.trim();
+
+        const na = Number(va.replace(",", "."));
+        const nb = Number(vb.replace(",", "."));
+
+        if (!isNaN(na) && !isNaN(nb) && va !== "" && vb !== "") {
+            return asc ? na - nb : nb - na;
+        }
+
+        return asc ? va.localeCompare(vb, "pt-BR") : vb.localeCompare(va, "pt-BR");
+    });
+
+    linhas.forEach(function (linha) {
+        tbody.appendChild(linha);
+    });
+}
+
 function ativarOrdenacao(seletorThs) {
     document.querySelectorAll(seletorThs).forEach(function (th) {
         th.addEventListener("click", function () {
             const tabela = th.closest("table");
-            const tbody = tabela.querySelector("tbody");
             const coluna = Array.from(th.parentNode.children).indexOf(th);
-            const linhas = Array.from(tbody.querySelectorAll("tr"));
-
             const asc = th.dataset.asc !== "true";
             th.dataset.asc = asc ? "true" : "false";
-
-            linhas.sort(function (a, b) {
-                const va = a.children[coluna].innerText.trim();
-                const vb = b.children[coluna].innerText.trim();
-
-                const na = Number(va.replace(",", "."));
-                const nb = Number(vb.replace(",", "."));
-
-                if (!isNaN(na) && !isNaN(nb) && va !== "" && vb !== "") {
-                    return asc ? na - nb : nb - na;
-                }
-
-                return asc ? va.localeCompare(vb, "pt-BR") : vb.localeCompare(va, "pt-BR");
-            });
-
-            linhas.forEach(function (linha) {
-                tbody.appendChild(linha);
-            });
+            ordenarLinhas(tabela, coluna, asc);
+            marcarIndicadorOrdenacao(tabela, coluna, asc);
         });
     });
+}
+
+function limparIndicadoresOrdenacao(tabela) {
+    tabela.querySelectorAll("thead .ordenacao-indicador").forEach(function (span) {
+        span.textContent = "";
+    });
+}
+
+function marcarIndicadorOrdenacao(tabela, coluna, asc) {
+    limparIndicadoresOrdenacao(tabela);
+    const th = tabela.querySelectorAll("thead th")[coluna];
+
+    if (!th) {
+        return;
+    }
+
+    const indicador = th.querySelector(".ordenacao-indicador");
+
+    if (indicador) {
+        indicador.textContent = asc ? " ↑" : " ↓";
+    }
+}
+
+function calcularPrioridade(statusExec, statusBad) {
+    if (statusExec === "atrasado" && statusBad === "bad") return 0;
+    if (statusExec === "atrasado") return 1;
+    if (statusExec === "pendente" && statusBad === "bad") return 2;
+    if (statusExec === "pendente") return 3;
+    if (statusExec === "ok" && statusBad === "bad") return 4;
+    if (statusExec === "ok") return 5;
+    if (statusExec === "nao_avaliado" && statusBad === "bad") return 6;
+    return 7;
+}
+
+function ordenarPorPrioridade() {
+    const tabela = document.getElementById("tabelaValidacao");
+    const tbody = tabela.querySelector("tbody");
+    const linhas = Array.from(tbody.querySelectorAll("tr"));
+
+    linhas.sort(function (a, b) {
+        const pa = calcularPrioridade(a.dataset.statusExec, a.dataset.statusBad);
+        const pb = calcularPrioridade(b.dataset.statusExec, b.dataset.statusBad);
+
+        if (pa !== pb) {
+            return pa - pb;
+        }
+
+        const ra = Number(a.dataset.badRegistros || 0);
+        const rb = Number(b.dataset.badRegistros || 0);
+
+        if (ra !== rb) {
+            return rb - ra;
+        }
+
+        return a.dataset.cliente.localeCompare(b.dataset.cliente, "pt-BR");
+    });
+
+    linhas.forEach(function (linha) {
+        tbody.appendChild(linha);
+    });
+
+    limparIndicadoresOrdenacao(tabela);
+}
+
+function ordenarPorSelecao() {
+    const select = document.getElementById("filtroOrdenar");
+    const valor = select.value;
+
+    if (!valor) {
+        return;
+    }
+
+    if (valor === "prioridade") {
+        ordenarPorPrioridade();
+        return;
+    }
+
+    const partes = valor.split("-");
+    const coluna = Number(partes[0]);
+    const asc = partes[1] === "asc";
+    const tabela = document.getElementById("tabelaValidacao");
+
+    ordenarLinhas(tabela, coluna, asc);
+    marcarIndicadorOrdenacao(tabela, coluna, asc);
 }
 
 function alternarCalendario() {
@@ -470,10 +1288,155 @@ function carregarDetalhamento() {
         });
 }
 
+const CHAVE_FILTROS_SALVOS = "monitoramento_filtros_salvos";
+
+function carregarFiltrosSalvos() {
+    try {
+        return JSON.parse(localStorage.getItem(CHAVE_FILTROS_SALVOS) || "[]");
+    } catch (erro) {
+        return [];
+    }
+}
+
+function persistirFiltrosSalvos(lista) {
+    try {
+        localStorage.setItem(CHAVE_FILTROS_SALVOS, JSON.stringify(lista));
+    } catch (erro) {
+        // localStorage indisponivel (ex: navegacao privada) -- ignora silenciosamente
+    }
+}
+
+function estadoFiltrosAtual() {
+    return {
+        busca: document.getElementById("filtroCliente").value,
+        arquivo: document.getElementById("filtroArquivo").value,
+        periodoDe: document.getElementById("filtroPeriodoDe").value,
+        periodoAte: document.getElementById("filtroPeriodoAte").value,
+        bad: Array.from(document.querySelectorAll(".filtro-bad:checked")).map(function (cb) { return cb.value; }),
+        exec: Array.from(document.querySelectorAll(".filtro-exec:checked")).map(function (cb) { return cb.value; }),
+        frequencia: Array.from(document.querySelectorAll(".filtro-frequencia:checked")).map(function (cb) { return cb.value; }),
+        clientes: Array.from(document.querySelectorAll(".filtro-cliente:checked")).map(function (cb) { return cb.value; }),
+    };
+}
+
+function salvarFiltroAtual() {
+    const nomeInput = document.getElementById("nomeFiltroSalvo");
+    const nome = nomeInput.value.trim();
+
+    if (!nome) {
+        nomeInput.focus();
+        return;
+    }
+
+    const lista = carregarFiltrosSalvos();
+    lista.push({ nome: nome, favorito: false, estado: estadoFiltrosAtual() });
+    persistirFiltrosSalvos(lista);
+    nomeInput.value = "";
+    renderizarFiltrosSalvos();
+}
+
+function aplicarFiltroSalvo(indice) {
+    const lista = carregarFiltrosSalvos();
+    const item = lista[indice];
+
+    if (!item) {
+        return;
+    }
+
+    const estado = item.estado;
+
+    document.getElementById("filtroCliente").value = estado.busca || "";
+    document.getElementById("filtroArquivo").value = estado.arquivo || "";
+    document.getElementById("filtroPeriodoDe").value = estado.periodoDe || "";
+    document.getElementById("filtroPeriodoAte").value = estado.periodoAte || "";
+
+    document.querySelectorAll(".filtro-bad").forEach(function (cb) { cb.checked = (estado.bad || []).includes(cb.value); });
+    document.querySelectorAll(".filtro-exec").forEach(function (cb) { cb.checked = (estado.exec || []).includes(cb.value); });
+    document.querySelectorAll(".filtro-frequencia").forEach(function (cb) { cb.checked = (estado.frequencia || []).includes(cb.value); });
+    document.querySelectorAll(".filtro-cliente").forEach(function (cb) { cb.checked = (estado.clientes || []).includes(cb.value); });
+
+    filtrarValidacao();
+
+    const painelMais = document.getElementById("maisFiltrosPainel");
+
+    if (painelMais) {
+        painelMais.classList.remove("aberto");
+    }
+}
+
+function excluirFiltroSalvo(indice) {
+    const lista = carregarFiltrosSalvos();
+    lista.splice(indice, 1);
+    persistirFiltrosSalvos(lista);
+    renderizarFiltrosSalvos();
+}
+
+function alternarFavoritoFiltroSalvo(indice) {
+    const lista = carregarFiltrosSalvos();
+    lista.forEach(function (item, i) { item.favorito = (i === indice) ? !item.favorito : false; });
+    persistirFiltrosSalvos(lista);
+    renderizarFiltrosSalvos();
+}
+
+function renderizarFiltrosSalvos() {
+    const container = document.getElementById("listaFiltrosSalvos");
+
+    if (!container) {
+        return;
+    }
+
+    const lista = carregarFiltrosSalvos();
+
+    if (!lista.length) {
+        container.innerHTML = '<p class="vazio">Nenhum filtro salvo ainda.</p>';
+        return;
+    }
+
+    container.innerHTML = "";
+
+    lista.forEach(function (item, indice) {
+        const linha = document.createElement("div");
+        linha.className = "filtro-salvo-item";
+
+        const favorito = document.createElement("button");
+        favorito.type = "button";
+        favorito.className = "filtro-salvo-favorito" + (item.favorito ? " ativo" : "");
+        favorito.title = "Definir como favorito";
+        favorito.textContent = item.favorito ? "★" : "☆";
+        favorito.onclick = function () { alternarFavoritoFiltroSalvo(indice); };
+
+        const nome = document.createElement("button");
+        nome.type = "button";
+        nome.className = "filtro-salvo-nome";
+        nome.textContent = item.nome;
+        nome.onclick = function () { aplicarFiltroSalvo(indice); };
+
+        const excluir = document.createElement("button");
+        excluir.type = "button";
+        excluir.className = "filtro-salvo-excluir";
+        excluir.title = "Excluir filtro salvo";
+        excluir.textContent = "×";
+        excluir.onclick = function () { excluirFiltroSalvo(indice); };
+
+        linha.appendChild(favorito);
+        linha.appendChild(nome);
+        linha.appendChild(excluir);
+        container.appendChild(linha);
+    });
+}
+
 ativarOrdenacao("#tabelaValidacao th");
 
 if (document.getElementById("tabelaValidacao")) {
     filtrarValidacao();
+    renderizarFiltrosSalvos();
+
+    const filtrosSalvosIniciais = carregarFiltrosSalvos();
+    const indiceFavorito = filtrosSalvosIniciais.findIndex(function (item) { return item.favorito; });
+
+    if (indiceFavorito !== -1) {
+        aplicarFiltroSalvo(indiceFavorito);
+    }
 }
 </script>
 {% endblock %}
