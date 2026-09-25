@@ -64,6 +64,7 @@
 
         .conteudo {
             flex: 1;
+            min-width: 0;
             padding: 40px;
         }
 
@@ -217,7 +218,7 @@
         }
 
         .tag.aviso,
-        .tag.pendente {
+        .tag.sem_arquivo {
             background: #fef9c3;
             color: #854d0e;
         }
@@ -485,7 +486,7 @@
         }
 
         .kpi.kpi-aviso,
-        .kpi.kpi-pendente {
+        .kpi.kpi-sem-arquivo {
             border-left-color: #eda100;
         }
 
@@ -515,7 +516,7 @@
         }
 
         .kpi-aviso .kpi-valor,
-        .kpi-pendente .kpi-valor {
+        .kpi-sem-arquivo .kpi-valor {
             color: #854d0e;
         }
 
@@ -1425,6 +1426,10 @@
             cursor: not-allowed;
         }
 
+        .tabela-scroll {
+            overflow-x: auto;
+        }
+
         th.ordenavel {
             cursor: pointer;
             user-select: none;
@@ -1566,7 +1571,7 @@
             color: #166534;
         }
 
-        .filtro-check-badge.badge-pendente {
+        .filtro-check-badge.badge-aviso {
             background: #fef9c3;
             color: #854d0e;
         }

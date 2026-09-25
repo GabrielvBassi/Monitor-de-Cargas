@@ -58,30 +58,30 @@
     <a href="{{ url_for('monitoramento') }}?atualizar=1" class="btn-atualizar">Atualizar</a>
 </div>
 
-<div class="kpis">
+<div class="kpis" id="kpisResumo">
     <button type="button" class="kpi" onclick="aplicarFiltroKpi([], [])" title="Limpar filtros e ver todos os clientes">
         <div class="kpi-rotulo">Clientes monitorados</div>
-        <div class="kpi-valor">{{ kpis.total_clientes }}</div>
+        <div class="kpi-valor" id="kpiTotalValor">{{ kpis.total_clientes }}</div>
     </button>
     <button type="button" class="kpi kpi-ok" onclick="aplicarFiltroKpi([], ['ok'])" title="Ver clientes com processamento OK">
         <div class="kpi-rotulo">Cliente OK</div>
-        <div class="kpi-valor">{{ kpis.clientes_ok }}</div>
-        <div class="kpi-percentual">{{ kpis.percentual_ok }}% do total</div>
+        <div class="kpi-valor" id="kpiOkValor">{{ kpis.clientes_ok }}</div>
+        <div class="kpi-percentual" id="kpiOkPercentual">{{ kpis.percentual_ok }}% do total</div>
     </button>
     <button type="button" class="kpi kpi-bad" onclick="aplicarFiltroKpi(['bad'], [])" title="Ver clientes com arquivos BAD gerados">
         <div class="kpi-rotulo">Clientes com BAD</div>
-        <div class="kpi-valor">{{ kpis.clientes_bad }}</div>
-        <div class="kpi-percentual">{{ kpis.percentual_bad }}% do total</div>
+        <div class="kpi-valor" id="kpiBadValor">{{ kpis.clientes_bad }}</div>
+        <div class="kpi-percentual" id="kpiBadPercentual">{{ kpis.percentual_bad }}% do total</div>
     </button>
-    <button type="button" class="kpi kpi-pendente" onclick="aplicarFiltroKpi([], ['pendente'])" title="Ver clientes cujo processamento ainda nao ocorreu">
-        <div class="kpi-rotulo">Processamento Pendente</div>
-        <div class="kpi-valor">{{ kpis.clientes_pendentes }}</div>
-        <div class="kpi-percentual">{{ kpis.percentual_pendentes }}% do total</div>
+    <button type="button" class="kpi kpi-sem-arquivo" onclick="aplicarFiltroKpi([], ['sem_arquivo'])" title="Ver clientes cujo processamento ainda nao ocorreu">
+        <div class="kpi-rotulo">Sem Arquivo</div>
+        <div class="kpi-valor" id="kpiSemArquivoValor">{{ kpis.clientes_sem_arquivo }}</div>
+        <div class="kpi-percentual" id="kpiSemArquivoPercentual">{{ kpis.percentual_sem_arquivo }}% do total</div>
     </button>
     <button type="button" class="kpi kpi-atrasado" onclick="aplicarFiltroKpi([], ['atrasado'])" title="Ver clientes com processamento fora do periodo esperado">
         <div class="kpi-rotulo">Atrasados</div>
-        <div class="kpi-valor">{{ kpis.clientes_atrasados }}</div>
-        <div class="kpi-percentual">{{ kpis.percentual_atrasados }}% do total</div>
+        <div class="kpi-valor" id="kpiAtrasadoValor">{{ kpis.clientes_atrasados }}</div>
+        <div class="kpi-percentual" id="kpiAtrasadoPercentual">{{ kpis.percentual_atrasados }}% do total</div>
     </button>
 </div>
 
@@ -160,9 +160,9 @@
                                 <span class="filtro-check-badge badge-ok">{{ kpis.clientes_ok }}</span>
                             </label>
                             <label class="filtro-check">
-                                <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
-                                <span class="filtro-check-rotulo">Pendente</span>
-                                <span class="filtro-check-badge badge-pendente">{{ kpis.clientes_pendentes }}</span>
+                                <input type="checkbox" class="filtro-exec" value="sem_arquivo" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Sem arquivo</span>
+                                <span class="filtro-check-badge badge-aviso">{{ kpis.clientes_sem_arquivo }}</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-exec" value="atrasado" onchange="filtrarValidacao()">
@@ -198,7 +198,7 @@
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-bad" value="aviso" onchange="filtrarValidacao()">
                                 <span class="filtro-check-rotulo">Aviso</span>
-                                <span class="filtro-check-badge badge-pendente">{{ validacoes | selectattr('bad_status', 'equalto', 'aviso') | list | length }}</span>
+                                <span class="filtro-check-badge badge-aviso">{{ validacoes | selectattr('bad_status', 'equalto', 'aviso') | list | length }}</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-bad" value="ok" onchange="filtrarValidacao()">
@@ -372,11 +372,12 @@
 
             <div class="legenda">
                 <span class="legenda-item"><i class="cor-sucesso"></i> OK</span>
-                <span class="legenda-item"><i class="cor-aviso"></i> Pendente / Aviso</span>
+                <span class="legenda-item"><i class="cor-aviso"></i> Sem arquivo / Aviso</span>
                 <span class="legenda-item"><i class="cor-falha"></i> Atrasado / Com BAD</span>
-                <span class="legenda-item">Processamento: <b>Pendente</b> = nunca ocorreu · <b>Atrasado</b> = ja ocorreu antes, mas fora do prazo agora</span>
+                <span class="legenda-item">Processamento: <b>Sem arquivo</b> = nunca ocorreu · <b>Atrasado</b> = ja ocorreu antes, mas fora do prazo agora</span>
             </div>
 
+            <div class="tabela-scroll">
             <table id="tabelaValidacao">
                 <thead>
                     <tr>
@@ -423,8 +424,8 @@
                                     <span class="tag nao_avaliado" title="Frequencia '{{ item.frequencia_verificacao }}' nao reconhecida">NAO AVALIADO</span>
                                 {% elif item.exec_status == "ok" %}
                                     <span class="tag ok">OK</span>
-                                {% elif item.exec_status == "pendente" %}
-                                    <span class="tag pendente" title="Processamento ainda nao ocorreu">PENDENTE</span>
+                                {% elif item.exec_status == "sem_arquivo" %}
+                                    <span class="tag sem_arquivo" title="Processamento ainda nao ocorreu">SEM ARQUIVO</span>
                                 {% else %}
                                     <span class="tag atrasado" title="Processamento ja ocorreu antes, mas esta fora do prazo">ATRASADO</span>
                                 {% endif %}
@@ -437,6 +438,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
 
             <div class="cards-grade" id="cardsValidacao" hidden>
                 {% for item in validacoes %}
@@ -471,8 +473,8 @@
                                 <span class="tag nao_avaliado">NAO AVALIADO</span>
                             {% elif item.exec_status == "ok" %}
                                 <span class="tag ok">OK</span>
-                            {% elif item.exec_status == "pendente" %}
-                                <span class="tag pendente">PENDENTE</span>
+                            {% elif item.exec_status == "sem_arquivo" %}
+                                <span class="tag sem_arquivo">SEM ARQUIVO</span>
                             {% else %}
                                 <span class="tag atrasado">ATRASADO</span>
                             {% endif %}
@@ -578,7 +580,7 @@
 
 <script>
 const ROTULOS_FILTRO_BAD = { bad: "Com BAD", aviso: "Aviso", ok: "Sem BAD" };
-const ROTULOS_FILTRO_EXEC = { ok: "OK", pendente: "Pendente", atrasado: "Atrasado", nao_avaliado: "Nao avaliado" };
+const ROTULOS_FILTRO_EXEC = { ok: "OK", sem_arquivo: "Sem arquivo", atrasado: "Atrasado", nao_avaliado: "Nao avaliado" };
 
 function coletarFiltros() {
     return {
@@ -634,7 +636,7 @@ function linhaPassaFiltros(dataset, filtros) {
 
     // Dentro de cada grupo, os filtros marcados se combinam com OU; entre
     // grupos diferentes, com E -- isso e o que permite compor filtros como
-    // "Com BAD" + "Pendente".
+    // "Com BAD" + "Sem arquivo".
     if (filtros.badSelecionados.length && !filtros.badSelecionados.includes(statusBad)) {
         return false;
     }
@@ -652,12 +654,19 @@ function filtrarValidacao() {
     const cards = document.querySelectorAll("#cardsValidacao .card-cliente");
     let visiveis = 0;
 
+    const contagem = { ok: 0, bad: 0, sem_arquivo: 0, atrasado: 0 };
+
     linhas.forEach(function (linha) {
         const mostrar = linhaPassaFiltros(linha.dataset, filtros);
         linha.style.display = mostrar ? "" : "none";
 
         if (mostrar) {
             visiveis += 1;
+
+            if (linha.dataset.statusExec === "ok") contagem.ok += 1;
+            if (linha.dataset.statusExec === "sem_arquivo") contagem.sem_arquivo += 1;
+            if (linha.dataset.statusExec === "atrasado") contagem.atrasado += 1;
+            if (linha.dataset.statusBad === "bad") contagem.bad += 1;
         }
     });
 
@@ -670,6 +679,7 @@ function filtrarValidacao() {
         contador.textContent = visiveis + " de " + linhas.length + " clientes encontrados";
     }
 
+    atualizarKpisComFiltro(visiveis, contagem);
     atualizarResumoFiltros(filtros);
     atualizarContadorSelecao();
 
@@ -685,6 +695,26 @@ function filtrarValidacao() {
     document.getElementById("filtroExecTodos").checked = filtros.execSelecionados.length === 0;
     document.getElementById("filtroBadTodos").checked = filtros.badSelecionados.length === 0;
     document.getElementById("filtroFrequenciaTodos").checked = filtros.frequenciaSelecionadas.length === 0;
+}
+
+function atualizarKpisComFiltro(totalVisivel, contagem) {
+    function percentual(quantidade) {
+        return totalVisivel ? Math.round((quantidade / totalVisivel) * 100) : 0;
+    }
+
+    document.getElementById("kpiTotalValor").textContent = totalVisivel;
+
+    document.getElementById("kpiOkValor").textContent = contagem.ok;
+    document.getElementById("kpiOkPercentual").textContent = percentual(contagem.ok) + "% do total";
+
+    document.getElementById("kpiBadValor").textContent = contagem.bad;
+    document.getElementById("kpiBadPercentual").textContent = percentual(contagem.bad) + "% do total";
+
+    document.getElementById("kpiSemArquivoValor").textContent = contagem.sem_arquivo;
+    document.getElementById("kpiSemArquivoPercentual").textContent = percentual(contagem.sem_arquivo) + "% do total";
+
+    document.getElementById("kpiAtrasadoValor").textContent = contagem.atrasado;
+    document.getElementById("kpiAtrasadoPercentual").textContent = percentual(contagem.atrasado) + "% do total";
 }
 
 function marcarTodos(checkboxTodos, seletorGrupo) {
@@ -1179,8 +1209,8 @@ function marcarIndicadorOrdenacao(tabela, coluna, asc) {
 function calcularPrioridade(statusExec, statusBad) {
     if (statusExec === "atrasado" && statusBad === "bad") return 0;
     if (statusExec === "atrasado") return 1;
-    if (statusExec === "pendente" && statusBad === "bad") return 2;
-    if (statusExec === "pendente") return 3;
+    if (statusExec === "sem_arquivo" && statusBad === "bad") return 2;
+    if (statusExec === "sem_arquivo") return 3;
     if (statusExec === "ok" && statusBad === "bad") return 4;
     if (statusExec === "ok") return 5;
     if (statusExec === "nao_avaliado" && statusBad === "bad") return 6;

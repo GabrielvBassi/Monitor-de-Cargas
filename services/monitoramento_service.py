@@ -11,7 +11,7 @@ def montar_kpis(validacoes):
     execucao:
     - Cliente OK: processamento (execucao) OK.
     - Clientes com BAD: arquivo BAD mais recente com registros.
-    - Processamento Pendente: processamento que ainda nao ocorreu nenhuma vez.
+    - Sem Arquivo: processamento que ainda nao ocorreu nenhuma vez.
     - Atrasados: processamento que ja ocorreu antes, mas esta fora do prazo."""
     total = len(validacoes)
 
@@ -20,7 +20,7 @@ def montar_kpis(validacoes):
 
     clientes_ok = sum(1 for item in validacoes if item["exec_status"] == "ok")
     clientes_bad = sum(1 for item in validacoes if item["bad_status"] == "bad")
-    clientes_pendentes = sum(1 for item in validacoes if item["exec_status"] == "pendente")
+    clientes_sem_arquivo = sum(1 for item in validacoes if item["exec_status"] == "sem_arquivo")
     clientes_atrasados = sum(1 for item in validacoes if item["exec_status"] == "atrasado")
 
     return {
@@ -29,8 +29,8 @@ def montar_kpis(validacoes):
         "percentual_ok": percentual(clientes_ok),
         "clientes_bad": clientes_bad,
         "percentual_bad": percentual(clientes_bad),
-        "clientes_pendentes": clientes_pendentes,
-        "percentual_pendentes": percentual(clientes_pendentes),
+        "clientes_sem_arquivo": clientes_sem_arquivo,
+        "percentual_sem_arquivo": percentual(clientes_sem_arquivo),
         "clientes_atrasados": clientes_atrasados,
         "percentual_atrasados": percentual(clientes_atrasados),
     }
@@ -40,7 +40,7 @@ def combinar_validacoes(resumo, execucoes):
     """Junta, por cliente, o status do arquivo BAD mais recente com o status
     da execucao (backup) mais recente, numa unica linha para o painel. Os
     filtros da tela comparam direto contra bad_status/exec_status (ok /
-    aviso / bad, e ok / pendente / atrasado / nao_avaliado)."""
+    aviso / bad, e ok / sem_arquivo / atrasado / nao_avaliado)."""
     execucoes_por_cliente = {item["cliente"]: item for item in execucoes}
     combinado = []
 

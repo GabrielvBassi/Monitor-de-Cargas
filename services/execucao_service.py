@@ -72,7 +72,7 @@ class ExecucaoService:
                 # Nunca houve backup para este cliente -- processamento
                 # ainda nao ocorreu (diferente de "atrasado", que pressupoe
                 # que ja ocorreu antes e agora esta fora do prazo).
-                status = "pendente"
+                status = "sem_arquivo"
             elif (datetime.now() - ultimo["modificado_em"]) <= periodo:
                 status = "ok"
             else:

@@ -64,6 +64,7 @@
 
         .conteudo {
             flex: 1;
+            min-width: 0;
             padding: 40px;
         }
 
@@ -217,7 +218,7 @@
         }
 
         .tag.aviso,
-        .tag.pendente {
+        .tag.sem_arquivo {
             background: #fef9c3;
             color: #854d0e;
         }
@@ -485,7 +486,7 @@
         }
 
         .kpi.kpi-aviso,
-        .kpi.kpi-pendente {
+        .kpi.kpi-sem-arquivo {
             border-left-color: #eda100;
         }
 
@@ -515,7 +516,7 @@
         }
 
         .kpi-aviso .kpi-valor,
-        .kpi-pendente .kpi-valor {
+        .kpi-sem-arquivo .kpi-valor {
             color: #854d0e;
         }
 
@@ -1425,6 +1426,10 @@
             cursor: not-allowed;
         }
 
+        .tabela-scroll {
+            overflow-x: auto;
+        }
+
         th.ordenavel {
             cursor: pointer;
             user-select: none;
@@ -1566,7 +1571,7 @@
             color: #166534;
         }
 
-        .filtro-check-badge.badge-pendente {
+        .filtro-check-badge.badge-aviso {
             background: #fef9c3;
             color: #854d0e;
         }
@@ -1662,7 +1667,7 @@
     <div class="sidebar">
         <h1>Monitor de Cargas</h1>
         <a href="/monitoramento" class="ativo">Monitoramento</a>
-        <a href="/erros" class="">Erros nas Cargas</a>
+        <a href="/erros" class="">Notificacoes</a>
         <a href="/faturamentos" class="">Faturamentos</a>
     </div>
 
@@ -1677,7 +1682,7 @@
 <div class="barra-atualizacao">
     <span class="atualizado-em">
         
-            Ultima checagem: 23/09/2026 06:02:00
+            Ultima checagem: 25/09/2026 06:02:00
         
     </span>
 
@@ -1685,7 +1690,7 @@
     <div class="seletor-data">
         <button type="button" class="seletor-data-botao" id="botaoDataBase" onclick="alternarCalendario()">
             <span class="seletor-data-rotulo">Dia base</span>
-            <span class="seletor-data-valor" id="dataBaseTexto">24/09/2026</span>
+            <span class="seletor-data-valor" id="dataBaseTexto">25/09/2026</span>
         </button>
 
         <div class="calendario-dropdown" id="calendarioDropdown">
@@ -1903,7 +1908,7 @@
                         
                             <button
                                 type="button"
-                                class="calendario-dia selecionado hoje"
+                                class="calendario-dia"
                                 onclick="selecionarDia(this, 24)"
                             >24</button>
                         
@@ -1911,7 +1916,7 @@
                         
                             <button
                                 type="button"
-                                class="calendario-dia"
+                                class="calendario-dia selecionado hoje"
                                 onclick="selecionarDia(this, 25)"
                             >25</button>
                         
@@ -1974,7 +1979,7 @@
             </div>
 
             <div class="calendario-atalhos">
-                <button type="button" class="calendario-atalho" onclick="selecionarDia(null, 24)">Hoje</button>
+                <button type="button" class="calendario-atalho" onclick="selecionarDia(null, 25)">Hoje</button>
                 <button type="button" class="calendario-atalho-aplicar">Aplicar</button>
             </div>
         </div>
@@ -1983,30 +1988,30 @@
     <a href="/monitoramento?atualizar=1" class="btn-atualizar">Atualizar</a>
 </div>
 
-<div class="kpis">
+<div class="kpis" id="kpisResumo">
     <button type="button" class="kpi" onclick="aplicarFiltroKpi([], [])" title="Limpar filtros e ver todos os clientes">
         <div class="kpi-rotulo">Clientes monitorados</div>
-        <div class="kpi-valor">57</div>
+        <div class="kpi-valor" id="kpiTotalValor">57</div>
     </button>
     <button type="button" class="kpi kpi-ok" onclick="aplicarFiltroKpi([], ['ok'])" title="Ver clientes com processamento OK">
         <div class="kpi-rotulo">Cliente OK</div>
-        <div class="kpi-valor">47</div>
-        <div class="kpi-percentual">82% do total</div>
+        <div class="kpi-valor" id="kpiOkValor">47</div>
+        <div class="kpi-percentual" id="kpiOkPercentual">82% do total</div>
     </button>
     <button type="button" class="kpi kpi-bad" onclick="aplicarFiltroKpi(['bad'], [])" title="Ver clientes com arquivos BAD gerados">
         <div class="kpi-rotulo">Clientes com BAD</div>
-        <div class="kpi-valor">6</div>
-        <div class="kpi-percentual">11% do total</div>
+        <div class="kpi-valor" id="kpiBadValor">6</div>
+        <div class="kpi-percentual" id="kpiBadPercentual">11% do total</div>
     </button>
-    <button type="button" class="kpi kpi-pendente" onclick="aplicarFiltroKpi([], ['pendente'])" title="Ver clientes cujo processamento ainda nao ocorreu">
-        <div class="kpi-rotulo">Processamento Pendente</div>
-        <div class="kpi-valor">3</div>
-        <div class="kpi-percentual">5% do total</div>
+    <button type="button" class="kpi kpi-sem-arquivo" onclick="aplicarFiltroKpi([], ['sem_arquivo'])" title="Ver clientes cujo processamento ainda nao ocorreu">
+        <div class="kpi-rotulo">Sem Arquivo</div>
+        <div class="kpi-valor" id="kpiSemArquivoValor">3</div>
+        <div class="kpi-percentual" id="kpiSemArquivoPercentual">5% do total</div>
     </button>
     <button type="button" class="kpi kpi-atrasado" onclick="aplicarFiltroKpi([], ['atrasado'])" title="Ver clientes com processamento fora do periodo esperado">
         <div class="kpi-rotulo">Atrasados</div>
-        <div class="kpi-valor">7</div>
-        <div class="kpi-percentual">12% do total</div>
+        <div class="kpi-valor" id="kpiAtrasadoValor">7</div>
+        <div class="kpi-percentual" id="kpiAtrasadoPercentual">12% do total</div>
     </button>
 </div>
 
@@ -2024,7 +2029,7 @@
                 
                     <span class="card-header-atualizado">
                         <span class="card-header-atualizado-rotulo">Ultima atualizacao</span>
-                        <span class="card-header-atualizado-valor">23/09/2026 06:02</span>
+                        <span class="card-header-atualizado-valor">25/09/2026 06:02</span>
                     </span>
                 
                 <button type="button" class="btn-exportar" id="botaoExportar" onclick="exportarCsv()" title="Exporta as linhas selecionadas, ou todas as visiveis se nada estiver marcado">
@@ -2079,9 +2084,9 @@
                                 <span class="filtro-check-badge badge-ok">47</span>
                             </label>
                             <label class="filtro-check">
-                                <input type="checkbox" class="filtro-exec" value="pendente" onchange="filtrarValidacao()">
-                                <span class="filtro-check-rotulo">Pendente</span>
-                                <span class="filtro-check-badge badge-pendente">3</span>
+                                <input type="checkbox" class="filtro-exec" value="sem_arquivo" onchange="filtrarValidacao()">
+                                <span class="filtro-check-rotulo">Sem arquivo</span>
+                                <span class="filtro-check-badge badge-aviso">3</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-exec" value="atrasado" onchange="filtrarValidacao()">
@@ -2117,7 +2122,7 @@
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-bad" value="aviso" onchange="filtrarValidacao()">
                                 <span class="filtro-check-rotulo">Aviso</span>
-                                <span class="filtro-check-badge badge-pendente">4</span>
+                                <span class="filtro-check-badge badge-aviso">4</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-bad" value="ok" onchange="filtrarValidacao()">
@@ -2586,11 +2591,12 @@
 
             <div class="legenda">
                 <span class="legenda-item"><i class="cor-sucesso"></i> OK</span>
-                <span class="legenda-item"><i class="cor-aviso"></i> Pendente / Aviso</span>
+                <span class="legenda-item"><i class="cor-aviso"></i> Sem arquivo / Aviso</span>
                 <span class="legenda-item"><i class="cor-falha"></i> Atrasado / Com BAD</span>
-                <span class="legenda-item">Processamento: <b>Pendente</b> = nunca ocorreu · <b>Atrasado</b> = ja ocorreu antes, mas fora do prazo agora</span>
+                <span class="legenda-item">Processamento: <b>Sem arquivo</b> = nunca ocorreu · <b>Atrasado</b> = ja ocorreu antes, mas fora do prazo agora</span>
             </div>
 
+            <div class="tabela-scroll">
             <table id="tabelaValidacao">
                 <thead>
                     <tr>
@@ -2616,8 +2622,8 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-13"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-15"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="12"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -2626,7 +2632,7 @@
                             <td>backup_0.zip</td>
                             <td>
                                 
-                                    13/09/2026
+                                    15/09/2026
                                     <span class="hora-execucao">06:02</span>
                                 
                             </td>
@@ -2636,7 +2642,7 @@
                                 
                             </td>
                             <td>bad_0.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">12</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
@@ -2649,7 +2655,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2659,7 +2665,7 @@
                             <td>backup_1.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2682,7 +2688,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2692,7 +2698,7 @@
                             <td>backup_2.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2715,7 +2721,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2725,7 +2731,7 @@
                             <td>backup_3.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2748,7 +2754,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2758,7 +2764,7 @@
                             <td>backup_4.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2781,7 +2787,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2791,7 +2797,7 @@
                             <td>backup_5.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2814,7 +2820,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2824,7 +2830,7 @@
                             <td>backup_6.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2847,7 +2853,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2857,7 +2863,7 @@
                             <td>backup_7.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2880,7 +2886,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2890,7 +2896,7 @@
                             <td>backup_8.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2913,7 +2919,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-13"
+                            data-data-processamento="2026-09-15"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2923,7 +2929,7 @@
                             <td>backup_9.zip</td>
                             <td>
                                 
-                                    13/09/2026
+                                    15/09/2026
                                     <span class="hora-execucao">06:02</span>
                                 
                             </td>
@@ -2946,7 +2952,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2956,7 +2962,7 @@
                             <td>backup_10.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2979,8 +2985,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="12"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -2989,7 +2995,7 @@
                             <td>backup_11.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -2999,7 +3005,7 @@
                                 
                             </td>
                             <td>bad_11.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">12</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
@@ -3012,7 +3018,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3022,7 +3028,7 @@
                             <td>backup_12.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3045,8 +3051,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -3055,7 +3061,7 @@
                             <td>backup_13.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3065,7 +3071,7 @@
                                 
                             </td>
                             <td>bad_13.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">0</td>
                             <td><span class="tag aviso">AVISO</span></td>
                         </tr>
@@ -3078,7 +3084,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3088,7 +3094,7 @@
                             <td>backup_14.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3111,7 +3117,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3121,7 +3127,7 @@
                             <td>backup_15.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3144,7 +3150,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3154,7 +3160,7 @@
                             <td>backup_16.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3171,10 +3177,10 @@
                     
                         <tr
                             data-cliente="EFEITO"
-                            data-busca="efeito   pendente ok"
+                            data-busca="efeito   sem_arquivo ok"
                             data-frequencia="mensal"
                             data-status-bad="ok"
-                            data-status-exec="pendente"
+                            data-status-exec="sem_arquivo"
                             data-tem-backup="0"
                             data-tem-bad="0"
                             data-data-processamento=""
@@ -3192,7 +3198,7 @@
                             </td>
                             <td>
                                 
-                                    <span class="tag pendente" title="Processamento ainda nao ocorreu">PENDENTE</span>
+                                    <span class="tag sem_arquivo" title="Processamento ainda nao ocorreu">SEM ARQUIVO</span>
                                 
                             </td>
                             <td>-</td>
@@ -3209,7 +3215,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-13"
+                            data-data-processamento="2026-09-15"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3219,7 +3225,7 @@
                             <td>backup_18.zip</td>
                             <td>
                                 
-                                    13/09/2026
+                                    15/09/2026
                                     <span class="hora-execucao">06:02</span>
                                 
                             </td>
@@ -3242,7 +3248,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3252,7 +3258,7 @@
                             <td>backup_19.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3275,7 +3281,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3285,7 +3291,7 @@
                             <td>backup_20.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3308,7 +3314,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3318,7 +3324,7 @@
                             <td>backup_21.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3341,8 +3347,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="12"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -3351,7 +3357,7 @@
                             <td>backup_22.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3361,7 +3367,7 @@
                                 
                             </td>
                             <td>bad_22.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">12</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
@@ -3374,7 +3380,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3384,7 +3390,7 @@
                             <td>backup_23.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3407,7 +3413,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3417,7 +3423,7 @@
                             <td>backup_24.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3440,7 +3446,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3450,7 +3456,7 @@
                             <td>backup_25.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3473,8 +3479,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -3483,7 +3489,7 @@
                             <td>backup_26.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3493,7 +3499,7 @@
                                 
                             </td>
                             <td>bad_26.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">0</td>
                             <td><span class="tag aviso">AVISO</span></td>
                         </tr>
@@ -3506,7 +3512,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-13"
+                            data-data-processamento="2026-09-15"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3516,7 +3522,7 @@
                             <td>backup_27.zip</td>
                             <td>
                                 
-                                    13/09/2026
+                                    15/09/2026
                                     <span class="hora-execucao">06:02</span>
                                 
                             </td>
@@ -3539,7 +3545,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3549,7 +3555,7 @@
                             <td>backup_28.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3572,7 +3578,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3582,7 +3588,7 @@
                             <td>backup_29.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3605,7 +3611,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3615,7 +3621,7 @@
                             <td>backup_30.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3638,7 +3644,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3648,7 +3654,7 @@
                             <td>backup_31.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3671,7 +3677,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3681,7 +3687,7 @@
                             <td>backup_32.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3704,8 +3710,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="12"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -3714,7 +3720,7 @@
                             <td>backup_33.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3724,17 +3730,17 @@
                                 
                             </td>
                             <td>bad_33.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">12</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
                             data-cliente="METLIFE"
-                            data-busca="metlife   pendente ok"
+                            data-busca="metlife   sem_arquivo ok"
                             data-frequencia="diario"
                             data-status-bad="ok"
-                            data-status-exec="pendente"
+                            data-status-exec="sem_arquivo"
                             data-tem-backup="0"
                             data-tem-bad="0"
                             data-data-processamento=""
@@ -3752,7 +3758,7 @@
                             </td>
                             <td>
                                 
-                                    <span class="tag pendente" title="Processamento ainda nao ocorreu">PENDENTE</span>
+                                    <span class="tag sem_arquivo" title="Processamento ainda nao ocorreu">SEM ARQUIVO</span>
                                 
                             </td>
                             <td>-</td>
@@ -3769,7 +3775,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3779,7 +3785,7 @@
                             <td>backup_35.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3802,7 +3808,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-13"
+                            data-data-processamento="2026-09-15"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3812,7 +3818,7 @@
                             <td>backup_36.zip</td>
                             <td>
                                 
-                                    13/09/2026
+                                    15/09/2026
                                     <span class="hora-execucao">06:02</span>
                                 
                             </td>
@@ -3835,7 +3841,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3845,7 +3851,7 @@
                             <td>backup_37.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3868,7 +3874,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3878,7 +3884,7 @@
                             <td>backup_38.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3901,8 +3907,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -3911,7 +3917,7 @@
                             <td>backup_39.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3921,7 +3927,7 @@
                                 
                             </td>
                             <td>bad_39.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">0</td>
                             <td><span class="tag aviso">AVISO</span></td>
                         </tr>
@@ -3934,7 +3940,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3944,7 +3950,7 @@
                             <td>backup_40.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -3967,7 +3973,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3977,7 +3983,7 @@
                             <td>backup_41.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4000,7 +4006,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4010,7 +4016,7 @@
                             <td>backup_42.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4033,7 +4039,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4043,7 +4049,7 @@
                             <td>backup_43.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4066,8 +4072,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="12"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -4076,7 +4082,7 @@
                             <td>backup_44.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4086,7 +4092,7 @@
                                 
                             </td>
                             <td>bad_44.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">12</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
@@ -4099,7 +4105,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-13"
+                            data-data-processamento="2026-09-15"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4109,7 +4115,7 @@
                             <td>backup_45.zip</td>
                             <td>
                                 
-                                    13/09/2026
+                                    15/09/2026
                                     <span class="hora-execucao">06:02</span>
                                 
                             </td>
@@ -4132,7 +4138,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4142,7 +4148,7 @@
                             <td>backup_46.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4165,7 +4171,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4175,7 +4181,7 @@
                             <td>backup_47.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4198,7 +4204,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4208,7 +4214,7 @@
                             <td>backup_48.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4231,7 +4237,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4241,7 +4247,7 @@
                             <td>backup_49.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4264,7 +4270,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4274,7 +4280,7 @@
                             <td>backup_50.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4291,10 +4297,10 @@
                     
                         <tr
                             data-cliente="INSTITUTO LONGEVIDADE"
-                            data-busca="instituto longevidade   pendente ok"
+                            data-busca="instituto longevidade   sem_arquivo ok"
                             data-frequencia="api"
                             data-status-bad="ok"
-                            data-status-exec="pendente"
+                            data-status-exec="sem_arquivo"
                             data-tem-backup="0"
                             data-tem-bad="0"
                             data-data-processamento=""
@@ -4312,7 +4318,7 @@
                             </td>
                             <td>
                                 
-                                    <span class="tag pendente" title="Processamento ainda nao ocorreu">PENDENTE</span>
+                                    <span class="tag sem_arquivo" title="Processamento ainda nao ocorreu">SEM ARQUIVO</span>
                                 
                             </td>
                             <td>-</td>
@@ -4329,8 +4335,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -4339,7 +4345,7 @@
                             <td>backup_52.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4349,7 +4355,7 @@
                                 
                             </td>
                             <td>bad_52.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">0</td>
                             <td><span class="tag aviso">AVISO</span></td>
                         </tr>
@@ -4362,7 +4368,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4372,7 +4378,7 @@
                             <td>backup_53.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4395,7 +4401,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-13"
+                            data-data-processamento="2026-09-15"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4405,7 +4411,7 @@
                             <td>backup_54.zip</td>
                             <td>
                                 
-                                    13/09/2026
+                                    15/09/2026
                                     <span class="hora-execucao">06:02</span>
                                 
                             </td>
@@ -4428,8 +4434,8 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-23"
-                            data-data-bad="2026-09-22"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-24"
                             data-bad-registros="12"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -4438,7 +4444,7 @@
                             <td>backup_55.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4448,7 +4454,7 @@
                                 
                             </td>
                             <td>bad_55.txt</td>
-                            <td>22/09/2026</td>
+                            <td>24/09/2026</td>
                             <td class="num">12</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
@@ -4461,7 +4467,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-23"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4471,7 +4477,7 @@
                             <td>backup_56.zip</td>
                             <td>
                                 
-                                    23/09/2026
+                                    25/09/2026
                                     <span class="hora-execucao">00:02</span>
                                 
                             </td>
@@ -4488,6 +4494,7 @@
                     
                 </tbody>
             </table>
+            </div>
 
             <div class="cards-grade" id="cardsValidacao" hidden>
                 
@@ -4500,8 +4507,8 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-13"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-15"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="12"
                     >
                         <div class="card-cliente-topo">
@@ -4541,7 +4548,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4582,7 +4589,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4623,7 +4630,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4664,7 +4671,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4705,7 +4712,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4746,7 +4753,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4787,7 +4794,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4828,7 +4835,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4869,7 +4876,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-13"
+                        data-data-processamento="2026-09-15"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4910,7 +4917,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4951,8 +4958,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="12"
                     >
                         <div class="card-cliente-topo">
@@ -4992,7 +4999,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5033,8 +5040,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
@@ -5074,7 +5081,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5115,7 +5122,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5156,7 +5163,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5191,10 +5198,10 @@
                     <div
                         class="card-cliente"
                         data-cliente="EFEITO"
-                        data-busca="efeito   pendente ok"
+                        data-busca="efeito   sem_arquivo ok"
                         data-frequencia="mensal"
                         data-status-bad="ok"
-                        data-status-exec="pendente"
+                        data-status-exec="sem_arquivo"
                         data-tem-backup="0"
                         data-tem-bad="0"
                         data-data-processamento=""
@@ -5216,7 +5223,7 @@
                         <div class="card-cliente-linha">
                             <span>Processamento</span>
                             
-                                <span class="tag pendente">PENDENTE</span>
+                                <span class="tag sem_arquivo">SEM ARQUIVO</span>
                             
                         </div>
                         <div class="card-cliente-linha">
@@ -5238,7 +5245,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-13"
+                        data-data-processamento="2026-09-15"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5279,7 +5286,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5320,7 +5327,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5361,7 +5368,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5402,8 +5409,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="12"
                     >
                         <div class="card-cliente-topo">
@@ -5443,7 +5450,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5484,7 +5491,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5525,7 +5532,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5566,8 +5573,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
@@ -5607,7 +5614,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-13"
+                        data-data-processamento="2026-09-15"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5648,7 +5655,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5689,7 +5696,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5730,7 +5737,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5771,7 +5778,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5812,7 +5819,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5853,8 +5860,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="12"
                     >
                         <div class="card-cliente-topo">
@@ -5888,10 +5895,10 @@
                     <div
                         class="card-cliente"
                         data-cliente="METLIFE"
-                        data-busca="metlife   pendente ok"
+                        data-busca="metlife   sem_arquivo ok"
                         data-frequencia="diario"
                         data-status-bad="ok"
-                        data-status-exec="pendente"
+                        data-status-exec="sem_arquivo"
                         data-tem-backup="0"
                         data-tem-bad="0"
                         data-data-processamento=""
@@ -5913,7 +5920,7 @@
                         <div class="card-cliente-linha">
                             <span>Processamento</span>
                             
-                                <span class="tag pendente">PENDENTE</span>
+                                <span class="tag sem_arquivo">SEM ARQUIVO</span>
                             
                         </div>
                         <div class="card-cliente-linha">
@@ -5935,7 +5942,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5976,7 +5983,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-13"
+                        data-data-processamento="2026-09-15"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6017,7 +6024,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6058,7 +6065,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6099,8 +6106,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
@@ -6140,7 +6147,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6181,7 +6188,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6222,7 +6229,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6263,7 +6270,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6304,8 +6311,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="12"
                     >
                         <div class="card-cliente-topo">
@@ -6345,7 +6352,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-13"
+                        data-data-processamento="2026-09-15"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6386,7 +6393,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6427,7 +6434,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6468,7 +6475,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6509,7 +6516,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6550,7 +6557,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6585,10 +6592,10 @@
                     <div
                         class="card-cliente"
                         data-cliente="INSTITUTO LONGEVIDADE"
-                        data-busca="instituto longevidade   pendente ok"
+                        data-busca="instituto longevidade   sem_arquivo ok"
                         data-frequencia="api"
                         data-status-bad="ok"
-                        data-status-exec="pendente"
+                        data-status-exec="sem_arquivo"
                         data-tem-backup="0"
                         data-tem-bad="0"
                         data-data-processamento=""
@@ -6610,7 +6617,7 @@
                         <div class="card-cliente-linha">
                             <span>Processamento</span>
                             
-                                <span class="tag pendente">PENDENTE</span>
+                                <span class="tag sem_arquivo">SEM ARQUIVO</span>
                             
                         </div>
                         <div class="card-cliente-linha">
@@ -6632,8 +6639,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
@@ -6673,7 +6680,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6714,7 +6721,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-13"
+                        data-data-processamento="2026-09-15"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6755,8 +6762,8 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-23"
-                        data-data-bad="2026-09-22"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-24"
                         data-bad-registros="12"
                     >
                         <div class="card-cliente-topo">
@@ -6796,7 +6803,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-23"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6849,7 +6856,7 @@
 
 <script>
 const ROTULOS_FILTRO_BAD = { bad: "Com BAD", aviso: "Aviso", ok: "Sem BAD" };
-const ROTULOS_FILTRO_EXEC = { ok: "OK", pendente: "Pendente", atrasado: "Atrasado", nao_avaliado: "Nao avaliado" };
+const ROTULOS_FILTRO_EXEC = { ok: "OK", sem_arquivo: "Sem arquivo", atrasado: "Atrasado", nao_avaliado: "Nao avaliado" };
 
 function coletarFiltros() {
     return {
@@ -6905,7 +6912,7 @@ function linhaPassaFiltros(dataset, filtros) {
 
     // Dentro de cada grupo, os filtros marcados se combinam com OU; entre
     // grupos diferentes, com E -- isso e o que permite compor filtros como
-    // "Com BAD" + "Pendente".
+    // "Com BAD" + "Sem arquivo".
     if (filtros.badSelecionados.length && !filtros.badSelecionados.includes(statusBad)) {
         return false;
     }
@@ -6923,12 +6930,19 @@ function filtrarValidacao() {
     const cards = document.querySelectorAll("#cardsValidacao .card-cliente");
     let visiveis = 0;
 
+    const contagem = { ok: 0, bad: 0, sem_arquivo: 0, atrasado: 0 };
+
     linhas.forEach(function (linha) {
         const mostrar = linhaPassaFiltros(linha.dataset, filtros);
         linha.style.display = mostrar ? "" : "none";
 
         if (mostrar) {
             visiveis += 1;
+
+            if (linha.dataset.statusExec === "ok") contagem.ok += 1;
+            if (linha.dataset.statusExec === "sem_arquivo") contagem.sem_arquivo += 1;
+            if (linha.dataset.statusExec === "atrasado") contagem.atrasado += 1;
+            if (linha.dataset.statusBad === "bad") contagem.bad += 1;
         }
     });
 
@@ -6941,6 +6955,7 @@ function filtrarValidacao() {
         contador.textContent = visiveis + " de " + linhas.length + " clientes encontrados";
     }
 
+    atualizarKpisComFiltro(visiveis, contagem);
     atualizarResumoFiltros(filtros);
     atualizarContadorSelecao();
 
@@ -6956,6 +6971,26 @@ function filtrarValidacao() {
     document.getElementById("filtroExecTodos").checked = filtros.execSelecionados.length === 0;
     document.getElementById("filtroBadTodos").checked = filtros.badSelecionados.length === 0;
     document.getElementById("filtroFrequenciaTodos").checked = filtros.frequenciaSelecionadas.length === 0;
+}
+
+function atualizarKpisComFiltro(totalVisivel, contagem) {
+    function percentual(quantidade) {
+        return totalVisivel ? Math.round((quantidade / totalVisivel) * 100) : 0;
+    }
+
+    document.getElementById("kpiTotalValor").textContent = totalVisivel;
+
+    document.getElementById("kpiOkValor").textContent = contagem.ok;
+    document.getElementById("kpiOkPercentual").textContent = percentual(contagem.ok) + "% do total";
+
+    document.getElementById("kpiBadValor").textContent = contagem.bad;
+    document.getElementById("kpiBadPercentual").textContent = percentual(contagem.bad) + "% do total";
+
+    document.getElementById("kpiSemArquivoValor").textContent = contagem.sem_arquivo;
+    document.getElementById("kpiSemArquivoPercentual").textContent = percentual(contagem.sem_arquivo) + "% do total";
+
+    document.getElementById("kpiAtrasadoValor").textContent = contagem.atrasado;
+    document.getElementById("kpiAtrasadoPercentual").textContent = percentual(contagem.atrasado) + "% do total";
 }
 
 function marcarTodos(checkboxTodos, seletorGrupo) {
@@ -7450,8 +7485,8 @@ function marcarIndicadorOrdenacao(tabela, coluna, asc) {
 function calcularPrioridade(statusExec, statusBad) {
     if (statusExec === "atrasado" && statusBad === "bad") return 0;
     if (statusExec === "atrasado") return 1;
-    if (statusExec === "pendente" && statusBad === "bad") return 2;
-    if (statusExec === "pendente") return 3;
+    if (statusExec === "sem_arquivo" && statusBad === "bad") return 2;
+    if (statusExec === "sem_arquivo") return 3;
     if (statusExec === "ok" && statusBad === "bad") return 4;
     if (statusExec === "ok") return 5;
     if (statusExec === "nao_avaliado" && statusBad === "bad") return 6;
