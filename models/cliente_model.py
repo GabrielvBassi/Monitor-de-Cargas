@@ -223,6 +223,12 @@ class ClienteModel:
 
             frequencia_explicita = frequencia_por_nome.get(_normalizar(nome))
 
+            # O aviso de "atrasado" reaproveita o mesmo contato comercial/
+            # parceiro ja cadastrado pra erro -- nao ha coluna separada na
+            # planilha pra isso.
+            contato_to = _dividir_emails(_valor(linha, colunas, "erro_to"))
+            contato_cc = _dividir_emails(_valor(linha, colunas, "erro_cc"))
+
             clientes[id_cliente] = {
                 "nome": nome,
                 "frequencia_verificacao": _derivar_frequencia(frequencia_explicita),
@@ -234,10 +240,8 @@ class ClienteModel:
                 "pastas_configuradas_backup": _dividir_lista(_valor(linha, colunas, "pastas_backup")),
                 "pastas_configuradas_bad": _dividir_lista(_valor(linha, colunas, "pastas_bad")),
                 "destinatarios": {
-                    "erro": {
-                        "to": _dividir_emails(_valor(linha, colunas, "erro_to")),
-                        "cc": _dividir_emails(_valor(linha, colunas, "erro_cc")),
-                    },
+                    "erro": {"to": contato_to, "cc": contato_cc},
+                    "atrasado": {"to": contato_to, "cc": contato_cc},
                 },
                 "variaveis": {
                     "sistema": (_valor(linha, colunas, "sistema") or "").strip(),

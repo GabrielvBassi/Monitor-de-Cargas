@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block titulo %}Erros nas Cargas{% endblock %}
+{% block titulo %}Notificacoes{% endblock %}
 
 {% block conteudo %}
 <div class="barra-atualizacao">
     <span class="atualizado-em">
         {% if atualizado_em %}
-            Ultima checagem dos arquivos BAD: {{ atualizado_em.strftime("%d/%m/%Y %H:%M:%S") }}
+            Ultima checagem: {{ atualizado_em.strftime("%d/%m/%Y %H:%M:%S") }}
         {% else %}
             Ainda nao verificado
         {% endif %}
@@ -15,31 +15,43 @@
 </div>
 
 <div class="card">
-    <h2>Erros nas Cargas</h2>
+    <h2>Notificacoes</h2>
     <div class="card-body">
         <p class="vazio">
-            O envio usa o ultimo arquivo BAD encontrado na checagem acima -- clique em "Atualizar" antes de
-            enviar se quiser garantir que esta vendo o estado mais recente dos diretorios.
+            O envio usa a ultima checagem do Monitoramento (arquivo BAD ou execucao mais recente, conforme o
+            modelo escolhido) -- clique em "Atualizar" antes de enviar se quiser garantir que esta vendo o
+            estado mais recente dos diretorios.
         </p>
 
         <form method="post" action="{{ url_for('processar') }}">
-            <input type="hidden" name="modelo" value="erro">
+            <label for="modeloNotificacao">Modelo de e-mail</label>
+            <select name="modelo" id="modeloNotificacao" onchange="atualizarPreSelecaoNotificacao()">
+                {% for chave, modelo in modelos.items() %}
+                    <option value="{{ chave }}">{{ modelo.titulo }}</option>
+                {% endfor %}
+            </select>
 
             <label>Clientes</label>
-            {% if clientes_com_bad %}
-                <p class="vazio">
-                    Clientes com BAD na ultima checagem ja vem marcados (destacados abaixo) -- pode desmarcar
-                    livremente se nao quiser incluir algum.
-                </p>
-            {% endif %}
+            <p class="vazio">
+                Os clientes com BAD ou atrasados na ultima checagem ja vem marcados conforme o modelo escolhido
+                acima (destacados abaixo) -- pode desmarcar livremente se nao quiser incluir algum.
+            </p>
             <div class="clientes">
                 {% for id_cliente, cliente in clientes.items() %}
                     {% set tem_bad = cliente.nome in clientes_com_bad %}
-                    <label class="{{ 'cliente-com-bad' if tem_bad else '' }}">
-                        <input type="checkbox" name="clientes" value="{{ id_cliente }}" {{ "checked" if tem_bad else "" }}>
+                    {% set tem_atraso = cliente.nome in clientes_atrasados %}
+                    <label
+                        class="{{ 'cliente-com-bad' if tem_bad else '' }}"
+                        data-tem-bad="{{ '1' if tem_bad else '0' }}"
+                        data-tem-atraso="{{ '1' if tem_atraso else '0' }}"
+                    >
+                        <input type="checkbox" name="clientes" value="{{ id_cliente }}" class="checkbox-cliente-notificacao">
                         {{ cliente.nome }}
                         {% if tem_bad %}
                             <span class="tag bad">BAD</span>
+                        {% endif %}
+                        {% if tem_atraso %}
+                            <span class="tag atrasado">ATRASADO</span>
                         {% endif %}
                     </label>
                 {% endfor %}
@@ -56,4 +68,18 @@
         </form>
     </div>
 </div>
+
+<script>
+function atualizarPreSelecaoNotificacao() {
+    const modelo = document.getElementById("modeloNotificacao").value;
+
+    document.querySelectorAll(".checkbox-cliente-notificacao").forEach(function (caixa) {
+        const linha = caixa.closest("label");
+        const combina = modelo === "atrasado" ? linha.dataset.temAtraso === "1" : linha.dataset.temBad === "1";
+        caixa.checked = combina;
+    });
+}
+
+atualizarPreSelecaoNotificacao();
+</script>
 {% endblock %}

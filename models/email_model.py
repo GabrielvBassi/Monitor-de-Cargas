@@ -25,6 +25,28 @@ Equipe
 """,
         },
 
+        "atrasado": {
+            "titulo": "Atrasado",
+            "ativo": True,
+
+            "assunto": "Nao recebimento do arquivo - {cliente}",
+
+            "corpo": """Ola,
+
+Identificamos que o arquivo de processamento do cliente {cliente} nao foi recebido dentro do prazo esperado.
+
+Sistema: {sistema}
+Frequencia esperada: {frequencia_verificacao}
+Ultimo arquivo recebido: {arquivo} em {data_arquivo}
+Dias em atraso: {dias_atraso}
+
+Solicitamos verificar o envio o quanto antes.
+
+Atenciosamente,
+Equipe
+""",
+        },
+
         "faturamento": {
             "titulo": "Faturamento",
             "ativo": True,

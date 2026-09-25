@@ -9,6 +9,7 @@ MESES_PT = [
 ]
 
 from models.cliente_model import ClienteModel
+from models.email_model import EmailModel
 from services.historico_service import HistoricoService
 from services.monitoramento_cache import obter_detalhamento, obter_principal
 from services.monitoramento_service import preparar_grafico_historico
@@ -80,17 +81,27 @@ def erros():
         flash(str(exc), "erro")
         clientes = {}
 
-    # O envio de e-mail de erro usa a varredura cacheada (services/
-    # monitoramento_cache.py) para saber o ultimo arquivo BAD de cada
-    # cliente -- aqui so exibimos quando foi a ultima checagem e permitimos
-    # forcar uma nova (?atualizar=1) sem precisar ir ate o Monitoramento.
+    # O envio de e-mail (erro ou atrasado) usa a varredura cacheada
+    # (services/monitoramento_cache.py) para saber o ultimo arquivo BAD/
+    # execucao de cada cliente -- aqui so exibimos quando foi a ultima
+    # checagem e permitimos forcar uma nova (?atualizar=1) sem precisar ir
+    # ate o Monitoramento.
     forcar = request.args.get("atualizar") == "1"
     dados, atualizado_em = obter_principal(forcar=forcar)
 
-    # Pre-marca (e sinaliza) quem tem BAD na ultima varredura -- o usuario
-    # ainda pode desmarcar livremente, isso so agiliza o caso comum.
+    # Pre-marca (e sinaliza) quem tem BAD/esta atrasado na ultima varredura
+    # -- o usuario ainda pode desmarcar livremente, isso so agiliza o caso
+    # comum.
     clientes_com_bad = {
         item["cliente"] for item in dados["validacoes"] if item["bad_status"] == "bad"
+    }
+    clientes_atrasados = {
+        item["cliente"] for item in dados["validacoes"] if item["exec_status"] == "atrasado"
+    }
+
+    modelos = {
+        chave: EmailModel.obter(chave)
+        for chave in ("erro", "atrasado")
     }
 
     return render_template(
@@ -99,6 +110,8 @@ def erros():
         clientes=clientes,
         atualizado_em=atualizado_em,
         clientes_com_bad=clientes_com_bad,
+        clientes_atrasados=clientes_atrasados,
+        modelos=modelos,
     )
 
 
@@ -119,7 +132,7 @@ def processar():
     ids_clientes = request.form.getlist("clientes")
     acao = request.form.get("acao")
 
-    destino = "erros" if nome_modelo == "erro" else "faturamentos"
+    destino = "erros" if nome_modelo in ("erro", "atrasado") else "faturamentos"
 
     try:
         sucessos, falhas = processar_envio(nome_modelo, ids_clientes, acao)
