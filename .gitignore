@@ -5,3 +5,5 @@ venv/
 .env
 envio_automatico.log
 historico.jsonl
+~$*.xlsx
+~$*.xls

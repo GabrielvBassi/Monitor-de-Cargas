@@ -84,6 +84,11 @@ class ExecucaoService:
                 "arquivo": ultimo["arquivo"] if ultimo else None,
                 "modificado_em": ultimo["modificado_em"] if ultimo else None,
                 "status": status,
+                # Pasta(s) de backup resolvidas de verdade (config ou
+                # casamento por nome) -- usado na exportacao da planilha de
+                # controle, que precisa mostrar o caminho real, nao so o
+                # texto configurado (que pode estar vazio).
+                "pastas": pastas_cliente,
             })
 
         return resultado

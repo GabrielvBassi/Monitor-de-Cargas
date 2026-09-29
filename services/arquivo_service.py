@@ -185,10 +185,16 @@ def arquivos_em_pastas(pastas_cliente, marcador=None):
     return encontrados
 
 
-def arquivo_mais_recente(pastas_cliente):
-    """Retorna o arquivo com data de modificacao mais recente dentre TODOS
-    os arquivos das pastas informadas, independente do nome/extensao."""
-    arquivos = arquivos_em_pastas(pastas_cliente)
+def arquivo_mais_recente(pastas_cliente, marcador=None):
+    """Retorna o arquivo com data de modificacao mais recente dentre os
+    arquivos das pastas informadas. Se `marcador` for informado, so
+    considera arquivos cujo nome contenha esse texto (ver
+    arquivos_em_pastas) -- usado nas pastas de erro, que podem receber mais
+    de um tipo de arquivo por execucao (ex: o "_BAD" de verdade e um
+    "_ERRO" à parte, que nao deve contar pro monitoramento). Sem marcador,
+    considera TODOS os arquivos, independente do nome/extensao -- usado na
+    pasta de backup, onde qualquer arquivo novo indica execucao."""
+    arquivos = arquivos_em_pastas(pastas_cliente, marcador)
     return max(arquivos, key=lambda arquivo: arquivo["modificado_em"], default=None)
 
 

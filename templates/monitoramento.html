@@ -102,8 +102,8 @@
                         <span class="card-header-atualizado-valor">{{ atualizado_em.strftime("%d/%m/%Y %H:%M") }}</span>
                     </span>
                 {% endif %}
-                <button type="button" class="btn-exportar" id="botaoExportar" onclick="exportarCsv()" title="Exporta as linhas selecionadas, ou todas as visiveis se nada estiver marcado">
-                    &#8681; Exportar
+                <button type="button" class="btn-exportar" id="botaoExportarPlanilha" onclick="exportarPlanilhaControle()" title="Exporta em .xlsx: CLIENTE, FREQUENCIA, ERROS GERADOS, CONTROLM/MANUAL, EXECUTADOS. Linhas selecionadas, ou todas as visiveis (respeitando os filtros) se nada estiver marcado">
+                    &#8681; Exportar planilha
                 </button>
 
                 <div class="menu-kebab">
@@ -125,6 +125,7 @@
             <p class="vazio">Nao foi possivel ler a pasta de backups: {{ erro_backup }}</p>
         {% else %}
             {% set frequencias_disponiveis = validacoes | map(attribute='frequencia_verificacao') | reject('equalto', '-') | unique | sort %}
+            {% set horarios_disponiveis = validacoes | map(attribute='horario_execucao') | reject('equalto', '-') | unique | sort %}
             {% set clientes_disponiveis = validacoes | map(attribute='cliente') | sort %}
 
             <div class="filtros-painel">
@@ -280,6 +281,27 @@
                         </div>
                     </div>
 
+                    <div class="filtros-multiselect" id="horarioMultiselect">
+                        <button type="button" class="filtros-campo filtros-campo-abrir filtros-campo-secundario" onclick="alternarPainel(event, 'horarioMultiselectPainel')">
+                            <i class="ti ti-clock filtros-campo-icone" aria-hidden="true"></i>
+                            <span class="filtros-campo-rotulo">Horario execucao</span>
+                            <span class="filtros-campo-badge" id="horarioMultiselectValor" hidden></span>
+                            <i class="ti ti-chevron-down filtros-campo-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div class="filtros-multiselect-painel" id="horarioMultiselectPainel">
+                            <label class="filtro-check filtro-check-todos">
+                                <input type="checkbox" id="filtroHorarioTodos" checked onchange="marcarTodos(this, '.filtro-horario')">
+                                <span class="filtro-check-rotulo">Todos</span>
+                            </label>
+                            {% for horario in horarios_disponiveis %}
+                                <label class="filtro-check">
+                                    <input type="checkbox" class="filtro-horario" value="{{ horario | lower }}" onchange="filtrarValidacao()">
+                                    <span class="filtro-check-rotulo">{{ horario }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
                     <div class="filtros-campo filtros-campo-select filtros-campo-secundario">
                         <i class="ti ti-file filtros-campo-icone" aria-hidden="true"></i>
                         <span class="filtros-campo-rotulo">Arquivo</span>
@@ -317,6 +339,9 @@
                             </optgroup>
                             <optgroup label="Frequencia">
                                 <option value="2-asc">A - Z</option>
+                            </optgroup>
+                            <optgroup label="Horario execucao">
+                                <option value="10-asc">A - Z</option>
                             </optgroup>
                             <optgroup label="Status">
                                 <option value="5-asc">A - Z</option>
@@ -364,7 +389,7 @@
             <div class="barra-selecao" id="barraSelecao" hidden>
                 <span id="contadorSelecao">0 clientes selecionados</span>
                 <div class="barra-selecao-acoes">
-                    <button type="button" onclick="exportarCsv()">Exportar</button>
+                    <button type="button" onclick="exportarPlanilhaControle()">Exportar</button>
                     <button type="button" disabled title="Em breve">Visualizar detalhes</button>
                     <button type="button" disabled title="Em breve">Ver logs</button>
                 </div>
@@ -391,6 +416,7 @@
                         <th class="ordenavel">Data BAD<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Registros BAD<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Status BAD<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Horario Execucao<span class="ordenacao-indicador"></span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -406,6 +432,7 @@
                             data-data-processamento="{{ item.exec_modificado_em.strftime('%Y-%m-%d') if item.exec_modificado_em else '' }}"
                             data-data-bad="{{ item.bad_modificado_em.strftime('%Y-%m-%d') if item.bad_modificado_em else '' }}"
                             data-bad-registros="{{ item.bad_registros }}"
+                            data-horario="{{ item.horario_execucao | lower }}"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>{{ item.cliente }}</td>
@@ -434,6 +461,7 @@
                             <td>{{ item.bad_modificado_em.strftime("%d/%m/%Y") if item.bad_modificado_em else "-" }}</td>
                             <td class="num">{{ item.bad_registros }}</td>
                             <td><span class="tag {{ item.bad_status }}">{{ item.bad_status | upper }}</span></td>
+                            <td>{{ item.horario_execucao }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -454,6 +482,7 @@
                         data-data-processamento="{{ item.exec_modificado_em.strftime('%Y-%m-%d') if item.exec_modificado_em else '' }}"
                         data-data-bad="{{ item.bad_modificado_em.strftime('%Y-%m-%d') if item.bad_modificado_em else '' }}"
                         data-bad-registros="{{ item.bad_registros }}"
+                        data-horario="{{ item.horario_execucao | lower }}"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">{{ item.cliente }}</span>
@@ -486,6 +515,10 @@
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
                             <span>{{ item.bad_registros }}</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Horario execucao</span>
+                            <span>{{ item.horario_execucao }}</span>
                         </div>
                     </div>
                 {% endfor %}
@@ -586,6 +619,7 @@ function coletarFiltros() {
     return {
         busca: document.getElementById("filtroCliente").value.trim().toLowerCase(),
         frequenciaSelecionadas: Array.from(document.querySelectorAll(".filtro-frequencia:checked")).map(function (cb) { return cb.value; }),
+        horarioSelecionados: Array.from(document.querySelectorAll(".filtro-horario:checked")).map(function (cb) { return cb.value; }),
         clientesSelecionados: Array.from(document.querySelectorAll(".filtro-cliente:checked")).map(function (cb) { return cb.value; }),
         arquivo: document.getElementById("filtroArquivo").value,
         periodoDe: document.getElementById("filtroPeriodoDe").value,
@@ -598,6 +632,7 @@ function coletarFiltros() {
 function linhaPassaFiltros(dataset, filtros) {
     const busca = dataset.busca || "";
     const frequencia = dataset.frequencia || "";
+    const horario = dataset.horario || "";
     const cliente = dataset.cliente || "";
     const statusBad = dataset.statusBad || "";
     const statusExec = dataset.statusExec || "";
@@ -611,6 +646,10 @@ function linhaPassaFiltros(dataset, filtros) {
     }
 
     if (filtros.frequenciaSelecionadas.length && !filtros.frequenciaSelecionadas.includes(frequencia)) {
+        return false;
+    }
+
+    if (filtros.horarioSelecionados.length && !filtros.horarioSelecionados.includes(horario)) {
         return false;
     }
 
@@ -686,6 +725,7 @@ function filtrarValidacao() {
     atualizarBadgeMultiselect("processamentoValor", filtros.execSelecionados);
     atualizarBadgeMultiselect("statusBadValor", filtros.badSelecionados);
     atualizarBadgeMultiselect("frequenciaMultiselectValor", filtros.frequenciaSelecionadas);
+    atualizarBadgeMultiselect("horarioMultiselectValor", filtros.horarioSelecionados);
     atualizarBadgeMultiselect("clienteValor", filtros.clientesSelecionados);
     atualizarRotuloPeriodo(filtros.periodoDe, filtros.periodoAte);
 
@@ -695,6 +735,7 @@ function filtrarValidacao() {
     document.getElementById("filtroExecTodos").checked = filtros.execSelecionados.length === 0;
     document.getElementById("filtroBadTodos").checked = filtros.badSelecionados.length === 0;
     document.getElementById("filtroFrequenciaTodos").checked = filtros.frequenciaSelecionadas.length === 0;
+    document.getElementById("filtroHorarioTodos").checked = filtros.horarioSelecionados.length === 0;
 }
 
 function atualizarKpisComFiltro(totalVisivel, contagem) {
@@ -799,6 +840,10 @@ function atualizarResumoFiltros(filtros) {
         chips.push({ rotulo: "Frequencia: " + v, limpar: function () { desmarcarValor(".filtro-frequencia", v); } });
     });
 
+    filtros.horarioSelecionados.forEach(function (v) {
+        chips.push({ rotulo: "Horario: " + v, limpar: function () { desmarcarValor(".filtro-horario", v); } });
+    });
+
     filtros.clientesSelecionados.forEach(function (v) {
         chips.push({ rotulo: "Cliente: " + v, limpar: function () { desmarcarValor(".filtro-cliente", v); } });
     });
@@ -881,6 +926,10 @@ function definirFiltros(badValores, execValores) {
     document.getElementById("filtroPeriodoAte").value = "";
 
     document.querySelectorAll(".filtro-frequencia").forEach(function (cb) {
+        cb.checked = false;
+    });
+
+    document.querySelectorAll(".filtro-horario").forEach(function (cb) {
         cb.checked = false;
     });
 
@@ -984,10 +1033,10 @@ function alternarSelecaoTodos(checkbox) {
 
 function atualizarContadorSelecao() {
     const selecionadas = document.querySelectorAll(".linha-selecionada:checked").length;
-    const botao = document.getElementById("botaoExportar");
+    const botao = document.getElementById("botaoExportarPlanilha");
 
     if (botao) {
-        botao.textContent = selecionadas ? ("↓ Exportar (" + selecionadas + ")") : "↓ Exportar";
+        botao.textContent = selecionadas ? ("↓ Exportar planilha (" + selecionadas + ")") : "↓ Exportar planilha";
     }
 
     const barra = document.getElementById("barraSelecao");
@@ -999,41 +1048,30 @@ function atualizarContadorSelecao() {
     }
 }
 
-function exportarCsv() {
+function clientesParaExportar() {
     const selecionadas = Array.from(document.querySelectorAll(".linha-selecionada:checked")).map(function (cb) {
-        return cb.closest("tr");
+        return cb.closest("tr").dataset.cliente;
     });
 
-    const linhasAlvo = selecionadas.length
-        ? selecionadas
-        : Array.from(document.querySelectorAll("#tabelaValidacao tbody tr")).filter(function (linha) {
-            return linha.style.display !== "none";
-        });
+    if (selecionadas.length) {
+        return selecionadas;
+    }
 
-    if (!linhasAlvo.length) {
+    // Nada selecionado -- usa todas as linhas visiveis no momento (ja
+    // respeita os filtros aplicados na tela, inclusive o de frequencia).
+    return Array.from(document.querySelectorAll("#tabelaValidacao tbody tr"))
+        .filter(function (linha) { return linha.style.display !== "none"; })
+        .map(function (linha) { return linha.dataset.cliente; });
+}
+
+function exportarPlanilhaControle() {
+    const nomes = clientesParaExportar();
+
+    if (!nomes.length) {
         return;
     }
 
-    const cabecalhos = Array.from(document.querySelectorAll("#tabelaValidacao thead th"))
-        .slice(1)
-        .map(function (th) { return th.innerText.trim(); });
-
-    const linhasCsv = [cabecalhos.join(";")];
-
-    linhasAlvo.forEach(function (linha) {
-        const celulas = Array.from(linha.children).slice(1).map(function (td) {
-            return '"' + td.innerText.replace(/\s+/g, " ").trim().replace(/"/g, '""') + '"';
-        });
-        linhasCsv.push(celulas.join(";"));
-    });
-
-    const blob = new Blob(["﻿" + linhasCsv.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "monitoramento_clientes.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    window.location.href = "/monitoramento/exportar?clientes=" + encodeURIComponent(nomes.join(","));
 }
 
 function alternarVisualizacao(modo) {
@@ -1351,6 +1389,7 @@ function estadoFiltrosAtual() {
         bad: Array.from(document.querySelectorAll(".filtro-bad:checked")).map(function (cb) { return cb.value; }),
         exec: Array.from(document.querySelectorAll(".filtro-exec:checked")).map(function (cb) { return cb.value; }),
         frequencia: Array.from(document.querySelectorAll(".filtro-frequencia:checked")).map(function (cb) { return cb.value; }),
+        horario: Array.from(document.querySelectorAll(".filtro-horario:checked")).map(function (cb) { return cb.value; }),
         clientes: Array.from(document.querySelectorAll(".filtro-cliente:checked")).map(function (cb) { return cb.value; }),
     };
 }
@@ -1389,6 +1428,7 @@ function aplicarFiltroSalvo(indice) {
     document.querySelectorAll(".filtro-bad").forEach(function (cb) { cb.checked = (estado.bad || []).includes(cb.value); });
     document.querySelectorAll(".filtro-exec").forEach(function (cb) { cb.checked = (estado.exec || []).includes(cb.value); });
     document.querySelectorAll(".filtro-frequencia").forEach(function (cb) { cb.checked = (estado.frequencia || []).includes(cb.value); });
+    document.querySelectorAll(".filtro-horario").forEach(function (cb) { cb.checked = (estado.horario || []).includes(cb.value); });
     document.querySelectorAll(".filtro-cliente").forEach(function (cb) { cb.checked = (estado.clientes || []).includes(cb.value); });
 
     filtrarValidacao();

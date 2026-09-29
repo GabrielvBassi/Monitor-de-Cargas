@@ -1,7 +1,7 @@
 import calendar
 from datetime import date
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 
 MESES_PT = [
     "Janeiro", "Fevereiro", "Marco", "Abril", "Maio", "Junho",
@@ -11,6 +11,7 @@ MESES_PT = [
 from models.cliente_model import ClienteModel
 from models.email_model import EmailModel
 from services.historico_service import HistoricoService
+from services.exportacao_service import gerar_planilha_controle, nome_arquivo_exportacao
 from services.monitoramento_cache import obter_detalhamento, obter_principal
 from services.monitoramento_service import preparar_grafico_historico
 from services.processamento_service import processar_envio
@@ -54,6 +55,58 @@ def monitoramento():
         mes_ano_label=f"{MESES_PT[date.today().month - 1]} {date.today().year}",
         historico=historico,
         grafico_historico=preparar_grafico_historico(historico),
+    )
+
+
+@app.route("/monitoramento/exportar")
+def monitoramento_exportar():
+    """Exporta a planilha de controle (.xlsx), no mesmo formato das abas
+    diarias da planilha de clientes -- ver services/exportacao_service.py.
+
+    Filtros via querystring (combinaveis):
+    ?clientes=Nome1,Nome2  -- so esses clientes (selecao manual na tela).
+    ?frequencias=diario,semanal -- so essas frequencias (comparacao
+    sem diferenciar maiusculas/minusculas).
+    Sem nenhum filtro, exporta todos os clientes cadastrados. Usa o mesmo
+    cache do Monitoramento (nao revarre a rede)."""
+    dados, _ = obter_principal()
+
+    if dados.get("erro_clientes"):
+        flash(dados["erro_clientes"], "erro")
+        return redirect(url_for("monitoramento"))
+
+    if dados.get("erro_diretorio"):
+        flash(dados["erro_diretorio"], "erro")
+        return redirect(url_for("monitoramento"))
+
+    validacoes = dados["validacoes"]
+
+    nomes_selecionados = request.args.get("clientes")
+
+    if nomes_selecionados:
+        nomes = {nome.strip() for nome in nomes_selecionados.split(",") if nome.strip()}
+        validacoes = [item for item in validacoes if item["cliente"] in nomes]
+
+    frequencias_selecionadas = request.args.get("frequencias")
+
+    if frequencias_selecionadas:
+        frequencias = {freq.strip().lower() for freq in frequencias_selecionadas.split(",") if freq.strip()}
+        validacoes = [
+            item for item in validacoes
+            if item["frequencia_verificacao"].strip().lower() in frequencias
+        ]
+
+    if not validacoes:
+        flash("Nenhum cliente encontrado para exportar com esses filtros.", "erro")
+        return redirect(url_for("monitoramento"))
+
+    planilha = gerar_planilha_controle(validacoes, dados["clientes"])
+
+    return send_file(
+        planilha,
+        as_attachment=True,
+        download_name=nome_arquivo_exportacao(),
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
