@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import date, datetime
 
 from config import ERROS_DIRETORIO, ERROS_EXTENSAO
 from services.arquivo_service import (
@@ -9,6 +9,7 @@ from services.arquivo_service import (
     listar_pastas,
     localizar_pastas_cliente,
 )
+from services.execucao_service import periodo_frequencia
 
 PADRAO_TIPO = re.compile(r"_([FI])\d", re.IGNORECASE)
 
@@ -91,7 +92,16 @@ class ErrorFileService:
         mais recente e ser escolhido no lugar do BAD de verdade. So le o
         conteudo (contar linhas) desse unico arquivo -- os outros so tem a
         data de modificacao consultada, sem abrir o arquivo. Essencial para
-        performance em rede."""
+        performance em rede.
+
+        A varredura e coerente com a frequencia de verificacao do cliente:
+        um BAD mais velho que a janela esperada (ex: BAD de 10 dias atras
+        pra quem processa Diariamente) esta desatualizado -- ja deveria ter
+        sido superado por um processamento mais recente -- entao nao conta
+        como BAD atual (mesmo tratamento de "sem BAD"). Clientes com
+        frequencia nao reconhecida mantem o comportamento antigo (sempre
+        considera o arquivo mais recente, sem janela). Alem disso, BAD com
+        registros que nao e de HOJE tambem nao conta (ver abaixo)."""
         pastas = listar_pastas(ERROS_DIRETORIO)
         resumo = []
 
@@ -100,6 +110,11 @@ class ErrorFileService:
                 pastas, cliente["nome"], cliente.get("pastas_configuradas_bad"), ERROS_DIRETORIO
             )
             ultimo = arquivo_mais_recente(pastas_cliente, ERROS_EXTENSAO)
+
+            periodo = periodo_frequencia(cliente.get("frequencia_verificacao", ""))
+
+            if ultimo is not None and periodo is not None and (datetime.now() - ultimo["modificado_em"]) > periodo:
+                ultimo = None
 
             if ultimo is None:
                 status = "ok"

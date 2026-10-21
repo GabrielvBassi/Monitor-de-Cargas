@@ -1995,18 +1995,18 @@
     </button>
     <button type="button" class="kpi kpi-ok" onclick="aplicarFiltroKpi([], ['ok'])" title="Ver clientes com processamento OK">
         <div class="kpi-rotulo">Cliente OK</div>
-        <div class="kpi-valor" id="kpiOkValor">47</div>
-        <div class="kpi-percentual" id="kpiOkPercentual">82% do total</div>
+        <div class="kpi-valor" id="kpiOkValor">50</div>
+        <div class="kpi-percentual" id="kpiOkPercentual">88% do total</div>
     </button>
     <button type="button" class="kpi kpi-bad" onclick="aplicarFiltroKpi(['bad'], [])" title="Ver clientes com arquivos BAD gerados">
         <div class="kpi-rotulo">Clientes com BAD</div>
-        <div class="kpi-valor" id="kpiBadValor">6</div>
-        <div class="kpi-percentual" id="kpiBadPercentual">11% do total</div>
+        <div class="kpi-valor" id="kpiBadValor">15</div>
+        <div class="kpi-percentual" id="kpiBadPercentual">26% do total</div>
     </button>
     <button type="button" class="kpi kpi-sem-arquivo" onclick="aplicarFiltroKpi([], ['sem_arquivo'])" title="Ver clientes cujo processamento ainda nao ocorreu">
         <div class="kpi-rotulo">Sem Arquivo</div>
-        <div class="kpi-valor" id="kpiSemArquivoValor">3</div>
-        <div class="kpi-percentual" id="kpiSemArquivoPercentual">5% do total</div>
+        <div class="kpi-valor" id="kpiSemArquivoValor">0</div>
+        <div class="kpi-percentual" id="kpiSemArquivoPercentual">0% do total</div>
     </button>
     <button type="button" class="kpi kpi-atrasado" onclick="aplicarFiltroKpi([], ['atrasado'])" title="Ver clientes com processamento fora do periodo esperado">
         <div class="kpi-rotulo">Atrasados</div>
@@ -2081,12 +2081,12 @@
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-exec" value="ok" onchange="filtrarValidacao()">
                                 <span class="filtro-check-rotulo">OK</span>
-                                <span class="filtro-check-badge badge-ok">47</span>
+                                <span class="filtro-check-badge badge-ok">50</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-exec" value="sem_arquivo" onchange="filtrarValidacao()">
                                 <span class="filtro-check-rotulo">Sem arquivo</span>
-                                <span class="filtro-check-badge badge-aviso">3</span>
+                                <span class="filtro-check-badge badge-aviso">0</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-exec" value="atrasado" onchange="filtrarValidacao()">
@@ -2117,17 +2117,17 @@
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-bad" value="bad" onchange="filtrarValidacao()">
                                 <span class="filtro-check-rotulo">Com BAD</span>
-                                <span class="filtro-check-badge badge-atrasado">6</span>
+                                <span class="filtro-check-badge badge-atrasado">15</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-bad" value="aviso" onchange="filtrarValidacao()">
                                 <span class="filtro-check-rotulo">Aviso</span>
-                                <span class="filtro-check-badge badge-aviso">4</span>
+                                <span class="filtro-check-badge badge-aviso">0</span>
                             </label>
                             <label class="filtro-check">
                                 <input type="checkbox" class="filtro-bad" value="ok" onchange="filtrarValidacao()">
                                 <span class="filtro-check-rotulo">Sem BAD</span>
-                                <span class="filtro-check-badge badge-ok">47</span>
+                                <span class="filtro-check-badge badge-ok">42</span>
                             </label>
                         </div>
                     </div>
@@ -2616,15 +2616,15 @@
                     
                         <tr
                             data-cliente="AMAR ASSIST + AFPESP"
-                            data-busca="amar assist + afpesp backup_0.zip bad_0.txt atrasado bad"
+                            data-busca="amar assist + afpesp backup_0.zip bad_0_recente_bad.txt atrasado bad"
                             data-frequencia="-"
                             data-status-bad="bad"
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-15"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="12"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>AMAR ASSIST + AFPESP</td>
@@ -2632,8 +2632,8 @@
                             <td>backup_0.zip</td>
                             <td>
                                 
-                                    15/09/2026
-                                    <span class="hora-execucao">06:02</span>
+                                    25/09/2026
+                                    <span class="hora-execucao">05:02</span>
                                 
                             </td>
                             <td>
@@ -2641,23 +2641,23 @@
                                     <span class="tag atrasado" title="Processamento ja ocorreu antes, mas esta fora do prazo">ATRASADO</span>
                                 
                             </td>
-                            <td>bad_0.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">12</td>
+                            <td>bad_0_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
                             data-cliente="BBC DIGITAL"
-                            data-busca="bbc digital backup_1.zip  ok ok"
+                            data-busca="bbc digital backup_1.zip bad_1_antigo_bad.txt ok bad"
                             data-frequencia="api"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
+                            data-tem-bad="1"
                             data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-data-bad="2026-08-11"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>BBC DIGITAL</td>
@@ -2666,7 +2666,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">04:02</span>
                                 
                             </td>
                             <td>
@@ -2674,10 +2674,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_1_antigo_BAD.TXT</td>
+                            <td>11/08/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -2699,7 +2699,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">03:02</span>
                                 
                             </td>
                             <td>
@@ -2732,7 +2732,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">02:02</span>
                                 
                             </td>
                             <td>
@@ -2765,7 +2765,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">01:02</span>
                                 
                             </td>
                             <td>
@@ -2781,15 +2781,15 @@
                     
                         <tr
                             data-cliente="MAGPEPER"
-                            data-busca="magpeper backup_5.zip  ok ok"
+                            data-busca="magpeper backup_5.zip bad_5_recente_bad.txt ok bad"
                             data-frequencia="diario"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
+                            data-tem-bad="1"
                             data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>MAGPEPER</td>
@@ -2806,10 +2806,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_5_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -2820,7 +2820,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2830,8 +2830,8 @@
                             <td>backup_6.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">23:02</span>
                                 
                             </td>
                             <td>
@@ -2853,7 +2853,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2863,8 +2863,8 @@
                             <td>backup_7.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">22:02</span>
                                 
                             </td>
                             <td>
@@ -2886,7 +2886,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2896,8 +2896,8 @@
                             <td>backup_8.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">21:02</span>
                                 
                             </td>
                             <td>
@@ -2919,7 +2919,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-15"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -2929,8 +2929,8 @@
                             <td>backup_9.zip</td>
                             <td>
                                 
-                                    15/09/2026
-                                    <span class="hora-execucao">06:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">20:02</span>
                                 
                             </td>
                             <td>
@@ -2946,15 +2946,15 @@
                     
                         <tr
                             data-cliente="BANESTES"
-                            data-busca="banestes backup_10.zip  ok ok"
+                            data-busca="banestes backup_10.zip bad_10_recente_bad.txt ok bad"
                             data-frequencia="diario"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>BANESTES</td>
@@ -2962,8 +2962,41 @@
                             <td>backup_10.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">19:02</span>
+                                
+                            </td>
+                            <td>
+                                
+                                    <span class="tag ok">OK</span>
+                                
+                            </td>
+                            <td>bad_10_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
+                        </tr>
+                    
+                        <tr
+                            data-cliente="BERLANDA"
+                            data-busca="berlanda backup_11.zip  ok ok"
+                            data-frequencia="diario"
+                            data-status-bad="ok"
+                            data-status-exec="ok"
+                            data-tem-backup="1"
+                            data-tem-bad="0"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad=""
+                            data-bad-registros="0"
+                        >
+                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
+                            <td>BERLANDA</td>
+                            <td>DIARIO</td>
+                            <td>backup_11.zip</td>
+                            <td>
+                                
+                                    24/09/2026
+                                    <span class="hora-execucao">18:02</span>
                                 
                             </td>
                             <td>
@@ -2975,39 +3008,6 @@
                             <td>-</td>
                             <td class="num">0</td>
                             <td><span class="tag ok">OK</span></td>
-                        </tr>
-                    
-                        <tr
-                            data-cliente="BERLANDA"
-                            data-busca="berlanda backup_11.zip bad_11.txt ok bad"
-                            data-frequencia="diario"
-                            data-status-bad="bad"
-                            data-status-exec="ok"
-                            data-tem-backup="1"
-                            data-tem-bad="1"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="12"
-                        >
-                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
-                            <td>BERLANDA</td>
-                            <td>DIARIO</td>
-                            <td>backup_11.zip</td>
-                            <td>
-                                
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
-                                
-                            </td>
-                            <td>
-                                
-                                    <span class="tag ok">OK</span>
-                                
-                            </td>
-                            <td>bad_11.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">12</td>
-                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -3029,7 +3029,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">05:02</span>
                                 
                             </td>
                             <td>
@@ -3045,14 +3045,14 @@
                     
                         <tr
                             data-cliente="CENTAURO"
-                            data-busca="centauro backup_13.zip bad_13.txt ok aviso"
+                            data-busca="centauro backup_13.zip  ok ok"
                             data-frequencia="diario"
-                            data-status-bad="aviso"
+                            data-status-bad="ok"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="1"
+                            data-tem-bad="0"
                             data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
+                            data-data-bad=""
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -3062,7 +3062,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">04:02</span>
                                 
                             </td>
                             <td>
@@ -3070,10 +3070,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>bad_13.txt</td>
-                            <td>24/09/2026</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td class="num">0</td>
-                            <td><span class="tag aviso">AVISO</span></td>
+                            <td><span class="tag ok">OK</span></td>
                         </tr>
                     
                         <tr
@@ -3095,7 +3095,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">03:02</span>
                                 
                             </td>
                             <td>
@@ -3111,15 +3111,15 @@
                     
                         <tr
                             data-cliente="CREFISA"
-                            data-busca="crefisa backup_15.zip  ok ok"
+                            data-busca="crefisa backup_15.zip bad_15_recente_bad.txt ok bad"
                             data-frequencia="diario"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
+                            data-tem-bad="1"
                             data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>CREFISA</td>
@@ -3128,7 +3128,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">02:02</span>
                                 
                             </td>
                             <td>
@@ -3136,10 +3136,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_15_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -3161,7 +3161,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">01:02</span>
                                 
                             </td>
                             <td>
@@ -3177,28 +3177,29 @@
                     
                         <tr
                             data-cliente="EFEITO"
-                            data-busca="efeito   sem_arquivo ok"
+                            data-busca="efeito backup_17.zip  ok ok"
                             data-frequencia="mensal"
                             data-status-bad="ok"
-                            data-status-exec="sem_arquivo"
-                            data-tem-backup="0"
+                            data-status-exec="ok"
+                            data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento=""
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>EFEITO</td>
                             <td>MENSAL</td>
-                            <td>-</td>
+                            <td>backup_17.zip</td>
                             <td>
                                 
-                                    -
+                                    25/09/2026
+                                    <span class="hora-execucao">00:02</span>
                                 
                             </td>
                             <td>
                                 
-                                    <span class="tag sem_arquivo" title="Processamento ainda nao ocorreu">SEM ARQUIVO</span>
+                                    <span class="tag ok">OK</span>
                                 
                             </td>
                             <td>-</td>
@@ -3215,7 +3216,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-15"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3225,8 +3226,8 @@
                             <td>backup_18.zip</td>
                             <td>
                                 
-                                    15/09/2026
-                                    <span class="hora-execucao">06:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">23:02</span>
                                 
                             </td>
                             <td>
@@ -3248,7 +3249,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3258,8 +3259,8 @@
                             <td>backup_19.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">22:02</span>
                                 
                             </td>
                             <td>
@@ -3275,15 +3276,15 @@
                     
                         <tr
                             data-cliente="HELLOMED"
-                            data-busca="hellomed backup_20.zip  ok ok"
+                            data-busca="hellomed backup_20.zip bad_20_recente_bad.txt ok bad"
                             data-frequencia="diario"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>HELLOMED</td>
@@ -3291,8 +3292,8 @@
                             <td>backup_20.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">21:02</span>
                                 
                             </td>
                             <td>
@@ -3300,10 +3301,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_20_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -3314,7 +3315,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3324,8 +3325,8 @@
                             <td>backup_21.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">20:02</span>
                                 
                             </td>
                             <td>
@@ -3341,15 +3342,15 @@
                     
                         <tr
                             data-cliente="INTEGRITY"
-                            data-busca="integrity backup_22.zip bad_22.txt ok bad"
+                            data-busca="integrity backup_22.zip  ok ok"
                             data-frequencia="semanal"
-                            data-status-bad="bad"
+                            data-status-bad="ok"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="1"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="12"
+                            data-tem-bad="0"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad=""
+                            data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>INTEGRITY</td>
@@ -3357,8 +3358,8 @@
                             <td>backup_22.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">19:02</span>
                                 
                             </td>
                             <td>
@@ -3366,10 +3367,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>bad_22.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">12</td>
-                            <td><span class="tag bad">BAD</span></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td class="num">0</td>
+                            <td><span class="tag ok">OK</span></td>
                         </tr>
                     
                         <tr
@@ -3380,7 +3381,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3390,8 +3391,8 @@
                             <td>backup_23.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">18:02</span>
                                 
                             </td>
                             <td>
@@ -3424,7 +3425,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">05:02</span>
                                 
                             </td>
                             <td>
@@ -3440,8 +3441,41 @@
                     
                         <tr
                             data-cliente="MAPFRE EDUCACIONAL"
-                            data-busca="mapfre educacional backup_25.zip  ok ok"
+                            data-busca="mapfre educacional backup_25.zip bad_25_recente_bad.txt ok bad"
                             data-frequencia="diario"
+                            data-status-bad="bad"
+                            data-status-exec="ok"
+                            data-tem-backup="1"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
+                        >
+                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
+                            <td>MAPFRE EDUCACIONAL</td>
+                            <td>DIARIO</td>
+                            <td>backup_25.zip</td>
+                            <td>
+                                
+                                    25/09/2026
+                                    <span class="hora-execucao">04:02</span>
+                                
+                            </td>
+                            <td>
+                                
+                                    <span class="tag ok">OK</span>
+                                
+                            </td>
+                            <td>bad_25_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
+                        </tr>
+                    
+                        <tr
+                            data-cliente="MAPFRE NA FAVELA"
+                            data-busca="mapfre na favela backup_26.zip  ok ok"
+                            data-frequencia="semanal"
                             data-status-bad="ok"
                             data-status-exec="ok"
                             data-tem-backup="1"
@@ -3451,13 +3485,13 @@
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
-                            <td>MAPFRE EDUCACIONAL</td>
-                            <td>DIARIO</td>
-                            <td>backup_25.zip</td>
+                            <td>MAPFRE NA FAVELA</td>
+                            <td>SEMANAL</td>
+                            <td>backup_26.zip</td>
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">03:02</span>
                                 
                             </td>
                             <td>
@@ -3472,39 +3506,6 @@
                         </tr>
                     
                         <tr
-                            data-cliente="MAPFRE NA FAVELA"
-                            data-busca="mapfre na favela backup_26.zip bad_26.txt ok aviso"
-                            data-frequencia="semanal"
-                            data-status-bad="aviso"
-                            data-status-exec="ok"
-                            data-tem-backup="1"
-                            data-tem-bad="1"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="0"
-                        >
-                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
-                            <td>MAPFRE NA FAVELA</td>
-                            <td>SEMANAL</td>
-                            <td>backup_26.zip</td>
-                            <td>
-                                
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
-                                
-                            </td>
-                            <td>
-                                
-                                    <span class="tag ok">OK</span>
-                                
-                            </td>
-                            <td>bad_26.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">0</td>
-                            <td><span class="tag aviso">AVISO</span></td>
-                        </tr>
-                    
-                        <tr
                             data-cliente="MAPFRE IMOBILIARIO"
                             data-busca="mapfre imobiliario backup_27.zip  atrasado ok"
                             data-frequencia="diario"
@@ -3512,7 +3513,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-15"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3522,8 +3523,8 @@
                             <td>backup_27.zip</td>
                             <td>
                                 
-                                    15/09/2026
-                                    <span class="hora-execucao">06:02</span>
+                                    25/09/2026
+                                    <span class="hora-execucao">02:02</span>
                                 
                             </td>
                             <td>
@@ -3556,7 +3557,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">01:02</span>
                                 
                             </td>
                             <td>
@@ -3605,15 +3606,15 @@
                     
                         <tr
                             data-cliente="MAPFRE CAPITALIZAÇÃO"
-                            data-busca="mapfre capitalização backup_30.zip  ok ok"
+                            data-busca="mapfre capitalização backup_30.zip bad_30_recente_bad.txt ok bad"
                             data-frequencia="diario"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>MAPFRE CAPITALIZAÇÃO</td>
@@ -3621,8 +3622,8 @@
                             <td>backup_30.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">23:02</span>
                                 
                             </td>
                             <td>
@@ -3630,10 +3631,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_30_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -3644,7 +3645,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3654,8 +3655,8 @@
                             <td>backup_31.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">22:02</span>
                                 
                             </td>
                             <td>
@@ -3677,7 +3678,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3687,8 +3688,8 @@
                             <td>backup_32.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">21:02</span>
                                 
                             </td>
                             <td>
@@ -3704,15 +3705,15 @@
                     
                         <tr
                             data-cliente="MENTORE"
-                            data-busca="mentore backup_33.zip bad_33.txt ok bad"
+                            data-busca="mentore backup_33.zip  ok ok"
                             data-frequencia="mensal"
-                            data-status-bad="bad"
+                            data-status-bad="ok"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="1"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="12"
+                            data-tem-bad="0"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad=""
+                            data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>MENTORE</td>
@@ -3720,8 +3721,8 @@
                             <td>backup_33.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">20:02</span>
                                 
                             </td>
                             <td>
@@ -3729,36 +3730,37 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>bad_33.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">12</td>
-                            <td><span class="tag bad">BAD</span></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td class="num">0</td>
+                            <td><span class="tag ok">OK</span></td>
                         </tr>
                     
                         <tr
                             data-cliente="METLIFE"
-                            data-busca="metlife   sem_arquivo ok"
+                            data-busca="metlife backup_34.zip  ok ok"
                             data-frequencia="diario"
                             data-status-bad="ok"
-                            data-status-exec="sem_arquivo"
-                            data-tem-backup="0"
+                            data-status-exec="ok"
+                            data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento=""
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>METLIFE</td>
                             <td>DIARIO</td>
-                            <td>-</td>
+                            <td>backup_34.zip</td>
                             <td>
                                 
-                                    -
+                                    24/09/2026
+                                    <span class="hora-execucao">19:02</span>
                                 
                             </td>
                             <td>
                                 
-                                    <span class="tag sem_arquivo" title="Processamento ainda nao ocorreu">SEM ARQUIVO</span>
+                                    <span class="tag ok">OK</span>
                                 
                             </td>
                             <td>-</td>
@@ -3769,15 +3771,15 @@
                     
                         <tr
                             data-cliente="NATURGY"
-                            data-busca="naturgy backup_35.zip  ok ok"
+                            data-busca="naturgy backup_35.zip bad_35_recente_bad.txt ok bad"
                             data-frequencia="semanal"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad="2026-09-23"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>NATURGY</td>
@@ -3785,8 +3787,8 @@
                             <td>backup_35.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">18:02</span>
                                 
                             </td>
                             <td>
@@ -3794,10 +3796,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_35_recente_BAD.TXT</td>
+                            <td>23/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -3808,7 +3810,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-15"
+                            data-data-processamento="2026-09-25"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -3818,8 +3820,8 @@
                             <td>backup_36.zip</td>
                             <td>
                                 
-                                    15/09/2026
-                                    <span class="hora-execucao">06:02</span>
+                                    25/09/2026
+                                    <span class="hora-execucao">05:02</span>
                                 
                             </td>
                             <td>
@@ -3852,7 +3854,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">04:02</span>
                                 
                             </td>
                             <td>
@@ -3885,7 +3887,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">03:02</span>
                                 
                             </td>
                             <td>
@@ -3901,40 +3903,7 @@
                     
                         <tr
                             data-cliente="SAUDAPP"
-                            data-busca="saudapp backup_39.zip bad_39.txt ok aviso"
-                            data-frequencia="semanal"
-                            data-status-bad="aviso"
-                            data-status-exec="ok"
-                            data-tem-backup="1"
-                            data-tem-bad="1"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="0"
-                        >
-                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
-                            <td>SAUDAPP</td>
-                            <td>SEMANAL</td>
-                            <td>backup_39.zip</td>
-                            <td>
-                                
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
-                                
-                            </td>
-                            <td>
-                                
-                                    <span class="tag ok">OK</span>
-                                
-                            </td>
-                            <td>bad_39.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">0</td>
-                            <td><span class="tag aviso">AVISO</span></td>
-                        </tr>
-                    
-                        <tr
-                            data-cliente="SENFF"
-                            data-busca="senff backup_40.zip  ok ok"
+                            data-busca="saudapp backup_39.zip  ok ok"
                             data-frequencia="semanal"
                             data-status-bad="ok"
                             data-status-exec="ok"
@@ -3945,13 +3914,13 @@
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
-                            <td>SENFF</td>
+                            <td>SAUDAPP</td>
                             <td>SEMANAL</td>
-                            <td>backup_40.zip</td>
+                            <td>backup_39.zip</td>
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">02:02</span>
                                 
                             </td>
                             <td>
@@ -3963,6 +3932,39 @@
                             <td>-</td>
                             <td class="num">0</td>
                             <td><span class="tag ok">OK</span></td>
+                        </tr>
+                    
+                        <tr
+                            data-cliente="SENFF"
+                            data-busca="senff backup_40.zip bad_40_recente_bad.txt ok bad"
+                            data-frequencia="semanal"
+                            data-status-bad="bad"
+                            data-status-exec="ok"
+                            data-tem-backup="1"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad="2026-09-23"
+                            data-bad-registros="7"
+                        >
+                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
+                            <td>SENFF</td>
+                            <td>SEMANAL</td>
+                            <td>backup_40.zip</td>
+                            <td>
+                                
+                                    25/09/2026
+                                    <span class="hora-execucao">01:02</span>
+                                
+                            </td>
+                            <td>
+                                
+                                    <span class="tag ok">OK</span>
+                                
+                            </td>
+                            <td>bad_40_recente_BAD.TXT</td>
+                            <td>23/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -4006,7 +4008,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4016,8 +4018,8 @@
                             <td>backup_42.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">23:02</span>
                                 
                             </td>
                             <td>
@@ -4039,7 +4041,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4049,8 +4051,8 @@
                             <td>backup_43.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">22:02</span>
                                 
                             </td>
                             <td>
@@ -4066,15 +4068,15 @@
                     
                         <tr
                             data-cliente="SWILE"
-                            data-busca="swile backup_44.zip bad_44.txt ok bad"
+                            data-busca="swile backup_44.zip  ok ok"
                             data-frequencia="api"
-                            data-status-bad="bad"
+                            data-status-bad="ok"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="1"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="12"
+                            data-tem-bad="0"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad=""
+                            data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>SWILE</td>
@@ -4082,8 +4084,8 @@
                             <td>backup_44.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">21:02</span>
                                 
                             </td>
                             <td>
@@ -4091,23 +4093,23 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>bad_44.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">12</td>
-                            <td><span class="tag bad">BAD</span></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td class="num">0</td>
+                            <td><span class="tag ok">OK</span></td>
                         </tr>
                     
                         <tr
                             data-cliente="TSSERV CONVER01"
-                            data-busca="tsserv conver01 backup_45.zip  atrasado ok"
+                            data-busca="tsserv conver01 backup_45.zip bad_45_recente_bad.txt atrasado bad"
                             data-frequencia="diario"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="atrasado"
                             data-tem-backup="1"
-                            data-tem-bad="0"
-                            data-data-processamento="2026-09-15"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>TSSERV CONVER01</td>
@@ -4115,8 +4117,8 @@
                             <td>backup_45.zip</td>
                             <td>
                                 
-                                    15/09/2026
-                                    <span class="hora-execucao">06:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">20:02</span>
                                 
                             </td>
                             <td>
@@ -4124,10 +4126,10 @@
                                     <span class="tag atrasado" title="Processamento ja ocorreu antes, mas esta fora do prazo">ATRASADO</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_45_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
@@ -4138,7 +4140,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4148,8 +4150,8 @@
                             <td>backup_46.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">19:02</span>
                                 
                             </td>
                             <td>
@@ -4171,7 +4173,7 @@
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4181,8 +4183,8 @@
                             <td>backup_47.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">18:02</span>
                                 
                             </td>
                             <td>
@@ -4215,7 +4217,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">05:02</span>
                                 
                             </td>
                             <td>
@@ -4248,7 +4250,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">04:02</span>
                                 
                             </td>
                             <td>
@@ -4264,15 +4266,15 @@
                     
                         <tr
                             data-cliente="GOAL LINE"
-                            data-busca="goal line backup_50.zip  ok ok"
+                            data-busca="goal line backup_50.zip bad_50_recente_bad.txt ok bad"
                             data-frequencia="api"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
+                            data-tem-bad="1"
                             data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>GOAL LINE</td>
@@ -4281,7 +4283,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">03:02</span>
                                 
                             </td>
                             <td>
@@ -4289,54 +4291,55 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_50_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
                             data-cliente="INSTITUTO LONGEVIDADE"
-                            data-busca="instituto longevidade   sem_arquivo ok"
+                            data-busca="instituto longevidade backup_51.zip bad_51_antigo_bad.txt ok bad"
                             data-frequencia="api"
-                            data-status-bad="ok"
-                            data-status-exec="sem_arquivo"
-                            data-tem-backup="0"
-                            data-tem-bad="0"
-                            data-data-processamento=""
-                            data-data-bad=""
-                            data-bad-registros="0"
-                        >
-                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
-                            <td>INSTITUTO LONGEVIDADE</td>
-                            <td>API</td>
-                            <td>-</td>
-                            <td>
-                                
-                                    -
-                                
-                            </td>
-                            <td>
-                                
-                                    <span class="tag sem_arquivo" title="Processamento ainda nao ocorreu">SEM ARQUIVO</span>
-                                
-                            </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
-                        </tr>
-                    
-                        <tr
-                            data-cliente="SABEMI"
-                            data-busca="sabemi backup_52.zip bad_52.txt ok aviso"
-                            data-frequencia="api"
-                            data-status-bad="aviso"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
                             data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
+                            data-data-bad="2026-08-11"
+                            data-bad-registros="7"
+                        >
+                            <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
+                            <td>INSTITUTO LONGEVIDADE</td>
+                            <td>API</td>
+                            <td>backup_51.zip</td>
+                            <td>
+                                
+                                    25/09/2026
+                                    <span class="hora-execucao">02:02</span>
+                                
+                            </td>
+                            <td>
+                                
+                                    <span class="tag ok">OK</span>
+                                
+                            </td>
+                            <td>bad_51_antigo_BAD.TXT</td>
+                            <td>11/08/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
+                        </tr>
+                    
+                        <tr
+                            data-cliente="SABEMI"
+                            data-busca="sabemi backup_52.zip  ok ok"
+                            data-frequencia="api"
+                            data-status-bad="ok"
+                            data-status-exec="ok"
+                            data-tem-backup="1"
+                            data-tem-bad="0"
+                            data-data-processamento="2026-09-25"
+                            data-data-bad=""
                             data-bad-registros="0"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
@@ -4346,7 +4349,7 @@
                             <td>
                                 
                                     25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    <span class="hora-execucao">01:02</span>
                                 
                             </td>
                             <td>
@@ -4354,10 +4357,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>bad_52.txt</td>
-                            <td>24/09/2026</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td class="num">0</td>
-                            <td><span class="tag aviso">AVISO</span></td>
+                            <td><span class="tag ok">OK</span></td>
                         </tr>
                     
                         <tr
@@ -4401,7 +4404,7 @@
                             data-status-exec="atrasado"
                             data-tem-backup="1"
                             data-tem-bad="0"
-                            data-data-processamento="2026-09-15"
+                            data-data-processamento="2026-09-24"
                             data-data-bad=""
                             data-bad-registros="0"
                         >
@@ -4411,8 +4414,8 @@
                             <td>backup_54.zip</td>
                             <td>
                                 
-                                    15/09/2026
-                                    <span class="hora-execucao">06:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">23:02</span>
                                 
                             </td>
                             <td>
@@ -4428,15 +4431,15 @@
                     
                         <tr
                             data-cliente="STARR COMPANIES 02"
-                            data-busca="starr companies 02 backup_55.zip bad_55.txt ok bad"
+                            data-busca="starr companies 02 backup_55.zip bad_55_recente_bad.txt ok bad"
                             data-frequencia="mensal"
                             data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
                             data-tem-bad="1"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad="2026-09-24"
-                            data-bad-registros="12"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad="2026-09-25"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>STARR COMPANIES 02</td>
@@ -4444,8 +4447,8 @@
                             <td>backup_55.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">22:02</span>
                                 
                             </td>
                             <td>
@@ -4453,23 +4456,23 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>bad_55.txt</td>
-                            <td>24/09/2026</td>
-                            <td class="num">12</td>
+                            <td>bad_55_recente_BAD.TXT</td>
+                            <td>25/09/2026</td>
+                            <td class="num">7</td>
                             <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                         <tr
                             data-cliente="TOO SEGUROS"
-                            data-busca="too seguros backup_56.zip  ok ok"
+                            data-busca="too seguros backup_56.zip bad_56_antigo_bad.txt ok bad"
                             data-frequencia="api"
-                            data-status-bad="ok"
+                            data-status-bad="bad"
                             data-status-exec="ok"
                             data-tem-backup="1"
-                            data-tem-bad="0"
-                            data-data-processamento="2026-09-25"
-                            data-data-bad=""
-                            data-bad-registros="0"
+                            data-tem-bad="1"
+                            data-data-processamento="2026-09-24"
+                            data-data-bad="2026-08-11"
+                            data-bad-registros="7"
                         >
                             <td><input type="checkbox" class="linha-selecionada" onchange="atualizarContadorSelecao()"></td>
                             <td>TOO SEGUROS</td>
@@ -4477,8 +4480,8 @@
                             <td>backup_56.zip</td>
                             <td>
                                 
-                                    25/09/2026
-                                    <span class="hora-execucao">00:02</span>
+                                    24/09/2026
+                                    <span class="hora-execucao">21:02</span>
                                 
                             </td>
                             <td>
@@ -4486,10 +4489,10 @@
                                     <span class="tag ok">OK</span>
                                 
                             </td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="num">0</td>
-                            <td><span class="tag ok">OK</span></td>
+                            <td>bad_56_antigo_BAD.TXT</td>
+                            <td>11/08/2026</td>
+                            <td class="num">7</td>
+                            <td><span class="tag bad">BAD</span></td>
                         </tr>
                     
                 </tbody>
@@ -4501,15 +4504,15 @@
                     <div
                         class="card-cliente"
                         data-cliente="AMAR ASSIST + AFPESP"
-                        data-busca="amar assist + afpesp backup_0.zip bad_0.txt atrasado bad"
+                        data-busca="amar assist + afpesp backup_0.zip bad_0_recente_bad.txt atrasado bad"
                         data-frequencia="-"
                         data-status-bad="bad"
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-15"
-                        data-data-bad="2026-09-24"
-                        data-bad-registros="12"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">AMAR ASSIST + AFPESP</span>
@@ -4531,30 +4534,30 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_0.txt</span>
+                            <span>bad_0_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>12</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
                     <div
                         class="card-cliente"
                         data-cliente="BBC DIGITAL"
-                        data-busca="bbc digital backup_1.zip  ok ok"
+                        data-busca="bbc digital backup_1.zip bad_1_antigo_bad.txt ok bad"
                         data-frequencia="api"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
+                        data-tem-bad="1"
                         data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-data-bad="2026-08-11"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">BBC DIGITAL</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -4572,11 +4575,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_1_antigo_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
@@ -4706,19 +4709,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="MAGPEPER"
-                        data-busca="magpeper backup_5.zip  ok ok"
+                        data-busca="magpeper backup_5.zip bad_5_recente_bad.txt ok bad"
                         data-frequencia="diario"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
+                        data-tem-bad="1"
                         data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">MAGPEPER</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -4736,11 +4739,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_5_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
@@ -4753,7 +4756,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4794,7 +4797,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4835,7 +4838,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4876,7 +4879,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-15"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -4911,19 +4914,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="BANESTES"
-                        data-busca="banestes backup_10.zip  ok ok"
+                        data-busca="banestes backup_10.zip bad_10_recente_bad.txt ok bad"
                         data-frequencia="diario"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">BANESTES</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -4941,30 +4944,30 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_10_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
                     <div
                         class="card-cliente"
                         data-cliente="BERLANDA"
-                        data-busca="berlanda backup_11.zip bad_11.txt ok bad"
+                        data-busca="berlanda backup_11.zip  ok ok"
                         data-frequencia="diario"
-                        data-status-bad="bad"
+                        data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="1"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
-                        data-bad-registros="12"
+                        data-tem-bad="0"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad=""
+                        data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">BERLANDA</span>
-                            <span class="tag bad">BAD</span>
+                            <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -4982,11 +4985,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_11.txt</span>
+                            <span>-</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>12</span>
+                            <span>0</span>
                         </div>
                     </div>
                 
@@ -5034,19 +5037,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="CENTAURO"
-                        data-busca="centauro backup_13.zip bad_13.txt ok aviso"
+                        data-busca="centauro backup_13.zip  ok ok"
                         data-frequencia="diario"
-                        data-status-bad="aviso"
+                        data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="1"
+                        data-tem-bad="0"
                         data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
+                        data-data-bad=""
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">CENTAURO</span>
-                            <span class="tag aviso">AVISO</span>
+                            <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -5064,7 +5067,7 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_13.txt</span>
+                            <span>-</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
@@ -5116,19 +5119,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="CREFISA"
-                        data-busca="crefisa backup_15.zip  ok ok"
+                        data-busca="crefisa backup_15.zip bad_15_recente_bad.txt ok bad"
                         data-frequencia="diario"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
+                        data-tem-bad="1"
                         data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">CREFISA</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -5146,11 +5149,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_15_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
@@ -5198,13 +5201,13 @@
                     <div
                         class="card-cliente"
                         data-cliente="EFEITO"
-                        data-busca="efeito   sem_arquivo ok"
+                        data-busca="efeito backup_17.zip  ok ok"
                         data-frequencia="mensal"
                         data-status-bad="ok"
-                        data-status-exec="sem_arquivo"
-                        data-tem-backup="0"
+                        data-status-exec="ok"
+                        data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento=""
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5218,12 +5221,12 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Backup</span>
-                            <span>-</span>
+                            <span>backup_17.zip</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Processamento</span>
                             
-                                <span class="tag sem_arquivo">SEM ARQUIVO</span>
+                                <span class="tag ok">OK</span>
                             
                         </div>
                         <div class="card-cliente-linha">
@@ -5245,7 +5248,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-15"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5286,7 +5289,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5321,19 +5324,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="HELLOMED"
-                        data-busca="hellomed backup_20.zip  ok ok"
+                        data-busca="hellomed backup_20.zip bad_20_recente_bad.txt ok bad"
                         data-frequencia="diario"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">HELLOMED</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -5351,11 +5354,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_20_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
@@ -5368,7 +5371,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5403,19 +5406,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="INTEGRITY"
-                        data-busca="integrity backup_22.zip bad_22.txt ok bad"
+                        data-busca="integrity backup_22.zip  ok ok"
                         data-frequencia="semanal"
-                        data-status-bad="bad"
+                        data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="1"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
-                        data-bad-registros="12"
+                        data-tem-bad="0"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad=""
+                        data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">INTEGRITY</span>
-                            <span class="tag bad">BAD</span>
+                            <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -5433,11 +5436,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_22.txt</span>
+                            <span>-</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>12</span>
+                            <span>0</span>
                         </div>
                     </div>
                 
@@ -5450,7 +5453,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5526,8 +5529,49 @@
                     <div
                         class="card-cliente"
                         data-cliente="MAPFRE EDUCACIONAL"
-                        data-busca="mapfre educacional backup_25.zip  ok ok"
+                        data-busca="mapfre educacional backup_25.zip bad_25_recente_bad.txt ok bad"
                         data-frequencia="diario"
+                        data-status-bad="bad"
+                        data-status-exec="ok"
+                        data-tem-backup="1"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
+                    >
+                        <div class="card-cliente-topo">
+                            <span class="card-cliente-nome">MAPFRE EDUCACIONAL</span>
+                            <span class="tag bad">BAD</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Frequencia</span>
+                            <span>DIARIO</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Backup</span>
+                            <span>backup_25.zip</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Processamento</span>
+                            
+                                <span class="tag ok">OK</span>
+                            
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Arquivo BAD</span>
+                            <span>bad_25_recente_BAD.TXT</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Registros BAD</span>
+                            <span>7</span>
+                        </div>
+                    </div>
+                
+                    <div
+                        class="card-cliente"
+                        data-cliente="MAPFRE NA FAVELA"
+                        data-busca="mapfre na favela backup_26.zip  ok ok"
+                        data-frequencia="semanal"
                         data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
@@ -5537,16 +5581,16 @@
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
-                            <span class="card-cliente-nome">MAPFRE EDUCACIONAL</span>
+                            <span class="card-cliente-nome">MAPFRE NA FAVELA</span>
                             <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
-                            <span>DIARIO</span>
+                            <span>SEMANAL</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Backup</span>
-                            <span>backup_25.zip</span>
+                            <span>backup_26.zip</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Processamento</span>
@@ -5566,47 +5610,6 @@
                 
                     <div
                         class="card-cliente"
-                        data-cliente="MAPFRE NA FAVELA"
-                        data-busca="mapfre na favela backup_26.zip bad_26.txt ok aviso"
-                        data-frequencia="semanal"
-                        data-status-bad="aviso"
-                        data-status-exec="ok"
-                        data-tem-backup="1"
-                        data-tem-bad="1"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
-                        data-bad-registros="0"
-                    >
-                        <div class="card-cliente-topo">
-                            <span class="card-cliente-nome">MAPFRE NA FAVELA</span>
-                            <span class="tag aviso">AVISO</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Frequencia</span>
-                            <span>SEMANAL</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Backup</span>
-                            <span>backup_26.zip</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Processamento</span>
-                            
-                                <span class="tag ok">OK</span>
-                            
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Arquivo BAD</span>
-                            <span>bad_26.txt</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Registros BAD</span>
-                            <span>0</span>
-                        </div>
-                    </div>
-                
-                    <div
-                        class="card-cliente"
                         data-cliente="MAPFRE IMOBILIARIO"
                         data-busca="mapfre imobiliario backup_27.zip  atrasado ok"
                         data-frequencia="diario"
@@ -5614,7 +5617,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-15"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5731,19 +5734,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="MAPFRE CAPITALIZAÇÃO"
-                        data-busca="mapfre capitalização backup_30.zip  ok ok"
+                        data-busca="mapfre capitalização backup_30.zip bad_30_recente_bad.txt ok bad"
                         data-frequencia="diario"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">MAPFRE CAPITALIZAÇÃO</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -5761,11 +5764,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_30_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
@@ -5778,7 +5781,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5819,7 +5822,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5854,19 +5857,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="MENTORE"
-                        data-busca="mentore backup_33.zip bad_33.txt ok bad"
+                        data-busca="mentore backup_33.zip  ok ok"
                         data-frequencia="mensal"
-                        data-status-bad="bad"
+                        data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="1"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
-                        data-bad-registros="12"
+                        data-tem-bad="0"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad=""
+                        data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">MENTORE</span>
-                            <span class="tag bad">BAD</span>
+                            <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -5884,24 +5887,24 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_33.txt</span>
+                            <span>-</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>12</span>
+                            <span>0</span>
                         </div>
                     </div>
                 
                     <div
                         class="card-cliente"
                         data-cliente="METLIFE"
-                        data-busca="metlife   sem_arquivo ok"
+                        data-busca="metlife backup_34.zip  ok ok"
                         data-frequencia="diario"
                         data-status-bad="ok"
-                        data-status-exec="sem_arquivo"
-                        data-tem-backup="0"
+                        data-status-exec="ok"
+                        data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento=""
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -5915,48 +5918,7 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Backup</span>
-                            <span>-</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Processamento</span>
-                            
-                                <span class="tag sem_arquivo">SEM ARQUIVO</span>
-                            
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Arquivo BAD</span>
-                            <span>-</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Registros BAD</span>
-                            <span>0</span>
-                        </div>
-                    </div>
-                
-                    <div
-                        class="card-cliente"
-                        data-cliente="NATURGY"
-                        data-busca="naturgy backup_35.zip  ok ok"
-                        data-frequencia="semanal"
-                        data-status-bad="ok"
-                        data-status-exec="ok"
-                        data-tem-backup="1"
-                        data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
-                    >
-                        <div class="card-cliente-topo">
-                            <span class="card-cliente-nome">NATURGY</span>
-                            <span class="tag ok">OK</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Frequencia</span>
-                            <span>SEMANAL</span>
-                        </div>
-                        <div class="card-cliente-linha">
-                            <span>Backup</span>
-                            <span>backup_35.zip</span>
+                            <span>backup_34.zip</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Processamento</span>
@@ -5976,6 +5938,47 @@
                 
                     <div
                         class="card-cliente"
+                        data-cliente="NATURGY"
+                        data-busca="naturgy backup_35.zip bad_35_recente_bad.txt ok bad"
+                        data-frequencia="semanal"
+                        data-status-bad="bad"
+                        data-status-exec="ok"
+                        data-tem-backup="1"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad="2026-09-23"
+                        data-bad-registros="7"
+                    >
+                        <div class="card-cliente-topo">
+                            <span class="card-cliente-nome">NATURGY</span>
+                            <span class="tag bad">BAD</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Frequencia</span>
+                            <span>SEMANAL</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Backup</span>
+                            <span>backup_35.zip</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Processamento</span>
+                            
+                                <span class="tag ok">OK</span>
+                            
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Arquivo BAD</span>
+                            <span>bad_35_recente_BAD.TXT</span>
+                        </div>
+                        <div class="card-cliente-linha">
+                            <span>Registros BAD</span>
+                            <span>7</span>
+                        </div>
+                    </div>
+                
+                    <div
+                        class="card-cliente"
                         data-cliente="NOSSA CAIXA"
                         data-busca="nossa caixa backup_36.zip  atrasado ok"
                         data-frequencia="diario"
@@ -5983,7 +5986,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-15"
+                        data-data-processamento="2026-09-25"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6100,19 +6103,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="SAUDAPP"
-                        data-busca="saudapp backup_39.zip bad_39.txt ok aviso"
+                        data-busca="saudapp backup_39.zip  ok ok"
                         data-frequencia="semanal"
-                        data-status-bad="aviso"
+                        data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="1"
+                        data-tem-bad="0"
                         data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
+                        data-data-bad=""
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">SAUDAPP</span>
-                            <span class="tag aviso">AVISO</span>
+                            <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6130,7 +6133,7 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_39.txt</span>
+                            <span>-</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
@@ -6141,19 +6144,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="SENFF"
-                        data-busca="senff backup_40.zip  ok ok"
+                        data-busca="senff backup_40.zip bad_40_recente_bad.txt ok bad"
                         data-frequencia="semanal"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
+                        data-tem-bad="1"
                         data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-data-bad="2026-09-23"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">SENFF</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6171,11 +6174,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_40_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
@@ -6229,7 +6232,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6270,7 +6273,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6305,19 +6308,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="SWILE"
-                        data-busca="swile backup_44.zip bad_44.txt ok bad"
+                        data-busca="swile backup_44.zip  ok ok"
                         data-frequencia="api"
-                        data-status-bad="bad"
+                        data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="1"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
-                        data-bad-registros="12"
+                        data-tem-bad="0"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad=""
+                        data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">SWILE</span>
-                            <span class="tag bad">BAD</span>
+                            <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6335,30 +6338,30 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_44.txt</span>
+                            <span>-</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>12</span>
+                            <span>0</span>
                         </div>
                     </div>
                 
                     <div
                         class="card-cliente"
                         data-cliente="TSSERV CONVER01"
-                        data-busca="tsserv conver01 backup_45.zip  atrasado ok"
+                        data-busca="tsserv conver01 backup_45.zip bad_45_recente_bad.txt atrasado bad"
                         data-frequencia="diario"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="atrasado"
                         data-tem-backup="1"
-                        data-tem-bad="0"
-                        data-data-processamento="2026-09-15"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">TSSERV CONVER01</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6376,11 +6379,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_45_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
@@ -6393,7 +6396,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6434,7 +6437,7 @@
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6551,19 +6554,19 @@
                     <div
                         class="card-cliente"
                         data-cliente="GOAL LINE"
-                        data-busca="goal line backup_50.zip  ok ok"
+                        data-busca="goal line backup_50.zip bad_50_recente_bad.txt ok bad"
                         data-frequencia="api"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
+                        data-tem-bad="1"
                         data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">GOAL LINE</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6581,30 +6584,30 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_50_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
                     <div
                         class="card-cliente"
                         data-cliente="INSTITUTO LONGEVIDADE"
-                        data-busca="instituto longevidade   sem_arquivo ok"
+                        data-busca="instituto longevidade backup_51.zip bad_51_antigo_bad.txt ok bad"
                         data-frequencia="api"
-                        data-status-bad="ok"
-                        data-status-exec="sem_arquivo"
-                        data-tem-backup="0"
-                        data-tem-bad="0"
-                        data-data-processamento=""
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-status-bad="bad"
+                        data-status-exec="ok"
+                        data-tem-backup="1"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-25"
+                        data-data-bad="2026-08-11"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">INSTITUTO LONGEVIDADE</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6612,40 +6615,40 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Backup</span>
-                            <span>-</span>
+                            <span>backup_51.zip</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Processamento</span>
                             
-                                <span class="tag sem_arquivo">SEM ARQUIVO</span>
+                                <span class="tag ok">OK</span>
                             
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_51_antigo_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
                     <div
                         class="card-cliente"
                         data-cliente="SABEMI"
-                        data-busca="sabemi backup_52.zip bad_52.txt ok aviso"
+                        data-busca="sabemi backup_52.zip  ok ok"
                         data-frequencia="api"
-                        data-status-bad="aviso"
+                        data-status-bad="ok"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="1"
+                        data-tem-bad="0"
                         data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
+                        data-data-bad=""
                         data-bad-registros="0"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">SABEMI</span>
-                            <span class="tag aviso">AVISO</span>
+                            <span class="tag ok">OK</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6663,7 +6666,7 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_52.txt</span>
+                            <span>-</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
@@ -6721,7 +6724,7 @@
                         data-status-exec="atrasado"
                         data-tem-backup="1"
                         data-tem-bad="0"
-                        data-data-processamento="2026-09-15"
+                        data-data-processamento="2026-09-24"
                         data-data-bad=""
                         data-bad-registros="0"
                     >
@@ -6756,15 +6759,15 @@
                     <div
                         class="card-cliente"
                         data-cliente="STARR COMPANIES 02"
-                        data-busca="starr companies 02 backup_55.zip bad_55.txt ok bad"
+                        data-busca="starr companies 02 backup_55.zip bad_55_recente_bad.txt ok bad"
                         data-frequencia="mensal"
                         data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
                         data-tem-bad="1"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad="2026-09-24"
-                        data-bad-registros="12"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad="2026-09-25"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">STARR COMPANIES 02</span>
@@ -6786,30 +6789,30 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>bad_55.txt</span>
+                            <span>bad_55_recente_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>12</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
                     <div
                         class="card-cliente"
                         data-cliente="TOO SEGUROS"
-                        data-busca="too seguros backup_56.zip  ok ok"
+                        data-busca="too seguros backup_56.zip bad_56_antigo_bad.txt ok bad"
                         data-frequencia="api"
-                        data-status-bad="ok"
+                        data-status-bad="bad"
                         data-status-exec="ok"
                         data-tem-backup="1"
-                        data-tem-bad="0"
-                        data-data-processamento="2026-09-25"
-                        data-data-bad=""
-                        data-bad-registros="0"
+                        data-tem-bad="1"
+                        data-data-processamento="2026-09-24"
+                        data-data-bad="2026-08-11"
+                        data-bad-registros="7"
                     >
                         <div class="card-cliente-topo">
                             <span class="card-cliente-nome">TOO SEGUROS</span>
-                            <span class="tag ok">OK</span>
+                            <span class="tag bad">BAD</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Frequencia</span>
@@ -6827,11 +6830,11 @@
                         </div>
                         <div class="card-cliente-linha">
                             <span>Arquivo BAD</span>
-                            <span>-</span>
+                            <span>bad_56_antigo_BAD.TXT</span>
                         </div>
                         <div class="card-cliente-linha">
                             <span>Registros BAD</span>
-                            <span>0</span>
+                            <span>7</span>
                         </div>
                     </div>
                 
