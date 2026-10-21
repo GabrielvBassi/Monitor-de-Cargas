@@ -42,7 +42,7 @@ def _calcular_principal():
         except FileNotFoundError as exc:
             erro_backup = str(exc)
 
-    validacoes = combinar_validacoes(resumo, execucoes)
+    validacoes = combinar_validacoes(resumo, execucoes, clientes)
 
     return {
         "clientes": clientes,

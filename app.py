@@ -1,7 +1,7 @@
 import calendar
 from datetime import date
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 
 MESES_PT = [
     "Janeiro", "Fevereiro", "Marco", "Abril", "Maio", "Junho",
@@ -11,8 +11,11 @@ MESES_PT = [
 from models.cliente_model import ClienteModel
 from models.email_model import EmailModel
 from services.historico_service import HistoricoService
+from services.exportacao_service import gerar_planilha_controle, nome_arquivo_exportacao
+from services.infografico_service import montar_infografico
 from services.monitoramento_cache import obter_detalhamento, obter_principal
 from services.monitoramento_service import preparar_grafico_historico
+from services.planilha_diaria_service import atualizar_aba_diaria
 from services.processamento_service import processar_envio
 
 app = Flask(__name__)
@@ -55,6 +58,135 @@ def monitoramento():
         historico=historico,
         grafico_historico=preparar_grafico_historico(historico),
     )
+
+
+@app.route("/monitoramento/exportar")
+def monitoramento_exportar():
+    """Exporta a planilha de controle (.xlsx), no mesmo formato das abas
+    diarias da planilha de clientes -- ver services/exportacao_service.py.
+
+    Filtros via querystring (combinaveis):
+    ?clientes=Nome1,Nome2  -- so esses clientes (selecao manual na tela).
+    ?frequencias=diario,semanal -- so essas frequencias (comparacao
+    sem diferenciar maiusculas/minusculas).
+    Sem nenhum filtro, exporta todos os clientes cadastrados. Usa o mesmo
+    cache do Monitoramento (nao revarre a rede)."""
+    dados, _ = obter_principal()
+
+    if dados.get("erro_clientes"):
+        flash(dados["erro_clientes"], "erro")
+        return redirect(url_for("monitoramento"))
+
+    if dados.get("erro_diretorio"):
+        flash(dados["erro_diretorio"], "erro")
+        return redirect(url_for("monitoramento"))
+
+    validacoes = dados["validacoes"]
+
+    nomes_selecionados = request.args.get("clientes")
+
+    if nomes_selecionados:
+        nomes = {nome.strip() for nome in nomes_selecionados.split(",") if nome.strip()}
+        validacoes = [item for item in validacoes if item["cliente"] in nomes]
+
+    frequencias_selecionadas = request.args.get("frequencias")
+
+    if frequencias_selecionadas:
+        frequencias = {freq.strip().lower() for freq in frequencias_selecionadas.split(",") if freq.strip()}
+        validacoes = [
+            item for item in validacoes
+            if item["frequencia_verificacao"].strip().lower() in frequencias
+        ]
+
+    if not validacoes:
+        flash("Nenhum cliente encontrado para exportar com esses filtros.", "erro")
+        return redirect(url_for("monitoramento"))
+
+    planilha = gerar_planilha_controle(validacoes, dados["clientes"])
+
+    return send_file(
+        planilha,
+        as_attachment=True,
+        download_name=nome_arquivo_exportacao(),
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@app.route("/monitoramento/infografico")
+def monitoramento_infografico():
+    """Infografico executivo do dia, montado do zero a partir da varredura
+    atual (cache do Monitoramento) -- ver services/infografico_service.py.
+    Mesmos filtros do exportar: ?clientes=Nome1,Nome2 e/ou
+    ?frequencias=diario,semanal. A periodicidade no cabecalho vem dos
+    clientes que sobraram depois do filtro."""
+    dados, _ = obter_principal()
+
+    if dados.get("erro_clientes") or dados.get("erro_diretorio"):
+        flash(dados.get("erro_clientes") or dados["erro_diretorio"], "erro")
+        return redirect(url_for("monitoramento"))
+
+    validacoes = dados["validacoes"]
+
+    nomes_selecionados = request.args.get("clientes")
+
+    if nomes_selecionados:
+        nomes = {nome.strip() for nome in nomes_selecionados.split(",") if nome.strip()}
+        validacoes = [item for item in validacoes if item["cliente"] in nomes]
+
+    frequencias_selecionadas = request.args.get("frequencias")
+
+    if frequencias_selecionadas:
+        frequencias = {freq.strip().lower() for freq in frequencias_selecionadas.split(",") if freq.strip()}
+        validacoes = [
+            item for item in validacoes
+            if item["frequencia_verificacao"].strip().lower() in frequencias
+        ]
+
+    if not validacoes:
+        flash("Nenhum cliente encontrado para o infográfico com esses filtros.", "erro")
+        return redirect(url_for("monitoramento"))
+
+    return render_template("infografico.html", info=montar_infografico(validacoes))
+
+
+@app.route("/monitoramento/gerar-aba-diaria", methods=["POST"])
+def monitoramento_gerar_aba_diaria():
+    """Grava, na aba do dia (criando se ainda nao existir) da planilha
+    configurada em config.CLIENTES_XLSX_PATH, so os clientes informados em
+    ?clientes=Nome1,Nome2 -- pensado pra preencher aos poucos ao longo do
+    dia, por leva de horario de processamento (o botao na tela manda a
+    selecao/filtro atual, igual o "Exportar planilha"). Linhas de levas
+    anteriores no mesmo dia ficam intactas; cliente repetido tem a linha
+    atualizada, nunca duplicada -- ver services/planilha_diaria_service.py."""
+    dados, _ = obter_principal()
+
+    if dados.get("erro_clientes"):
+        flash(dados["erro_clientes"], "erro")
+        return redirect(url_for("monitoramento"))
+
+    validacoes = dados["validacoes"]
+
+    nomes_selecionados = request.args.get("clientes")
+
+    if nomes_selecionados:
+        nomes = {nome.strip() for nome in nomes_selecionados.split(",") if nome.strip()}
+        validacoes = [item for item in validacoes if item["cliente"] in nomes]
+
+    if not validacoes:
+        flash("Nenhum cliente encontrado para gravar com esses filtros.", "erro")
+        return redirect(url_for("monitoramento"))
+
+    try:
+        nome_aba, criados, atualizados = atualizar_aba_diaria(validacoes, dados["clientes"])
+    except PermissionError as exc:
+        flash(str(exc), "erro")
+        return redirect(url_for("monitoramento"))
+
+    flash(
+        f"Aba '{nome_aba}': {criados} cliente(s) novo(s) gravado(s), {atualizados} atualizado(s).",
+        "sucesso",
+    )
+    return redirect(url_for("monitoramento"))
 
 
 @app.route("/monitoramento/detalhamento")

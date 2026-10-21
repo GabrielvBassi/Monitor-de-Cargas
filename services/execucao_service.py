@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 
 import config
-from services.arquivo_service import arquivo_mais_recente, listar_pastas, localizar_pastas_cliente
+from services.arquivo_service import arquivo_mais_recente_por_nome, listar_pastas, localizar_pastas_cliente
 
 _PERIODOS_FIXOS = {
     "diaria": timedelta(days=1),
@@ -61,7 +61,7 @@ class ExecucaoService:
             pastas_cliente = localizar_pastas_cliente(
                 pastas, cliente["nome"], cliente.get("pastas_configuradas_backup"), config.BACKUP_DIRETORIO
             )
-            ultimo = arquivo_mais_recente(pastas_cliente)
+            ultimo = arquivo_mais_recente_por_nome(pastas_cliente)
 
             frequencia = cliente.get("frequencia_verificacao", "")
             periodo = periodo_frequencia(frequencia)
@@ -83,7 +83,17 @@ class ExecucaoService:
                 "frequencia_verificacao": frequencia or "-",
                 "arquivo": ultimo["arquivo"] if ultimo else None,
                 "modificado_em": ultimo["modificado_em"] if ultimo else None,
+                # Data exibida: a do NOME do arquivo (06/10/2026 em
+                # X_F202610061.TXT); sem data no nome, cai pra modificacao.
+                # O status acima continua usando modificado_em (chegada).
+                "data_arquivo": (ultimo["data_nome"] or ultimo["modificado_em"].date()) if ultimo else None,
+                "data_do_nome": bool(ultimo and ultimo["data_nome"]),
                 "status": status,
+                # Pasta(s) de backup resolvidas de verdade (config ou
+                # casamento por nome) -- usado na exportacao da planilha de
+                # controle, que precisa mostrar o caminho real, nao so o
+                # texto configurado (que pode estar vazio).
+                "pastas": pastas_cliente,
             })
 
         return resultado

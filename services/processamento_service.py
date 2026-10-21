@@ -100,7 +100,7 @@ def processar_envio(nome_modelo, ids_clientes, acao):
                     variaveis_extra={
                         "frequencia_verificacao": validacao["frequencia_verificacao"],
                         "arquivo": validacao["exec_arquivo"] or "-",
-                        "data_arquivo": modificado_em.strftime("%d/%m/%Y %H:%M") if modificado_em else "-",
+                        "data_arquivo": validacao["exec_data_arquivo"].strftime("%d/%m/%Y") if validacao.get("exec_data_arquivo") else "-",
                         "dias_atraso": dias_atraso,
                     },
                 )

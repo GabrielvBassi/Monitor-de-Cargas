@@ -91,6 +91,8 @@ def _mapear_colunas_monitor(linha_cabecalho):
             colunas["pastas_backup"] = indice
         elif "controlm" in palavras:
             colunas["controlm_manual"] = indice
+        elif "horario" in palavras:
+            colunas["horario_execucao"] = indice
         elif "ativo" in palavras:
             colunas["ativo"] = indice
         elif "sistema" in palavras:
@@ -208,10 +210,12 @@ class ClienteModel:
             if not _interpretar_ativo(_valor(linha, colunas, "ativo")):
                 continue
 
+            controlm_manual = _valor(linha, colunas, "controlm_manual")
+
             # Clientes marcados como "API" na coluna CONTROLM/MANUAL nao tem
             # pasta de backup/BAD pra monitorar (integracao e via API, nao
             # arquivo) -- ficam de fora do cadastro, igual aos inativos.
-            if _normalizar(_valor(linha, colunas, "controlm_manual")) == "api":
+            if _normalizar(controlm_manual) == "api":
                 continue
 
             id_cliente = _slugify(nome)
@@ -232,6 +236,10 @@ class ClienteModel:
             clientes[id_cliente] = {
                 "nome": nome,
                 "frequencia_verificacao": _derivar_frequencia(frequencia_explicita),
+                # Texto cru das colunas abaixo, pra exportacao (services/
+                # exportacao_service.py) -- nao usado pra logica interna.
+                "controlm_manual": (str(controlm_manual).strip() if controlm_manual else "-"),
+                "horario_execucao": _valor(linha, colunas, "horario_execucao"),
                 # Diretorios configurados na planilha, um campo por
                 # compartilhamento (erros e backup tem pastas diferentes por
                 # cliente, entao nao dá pra reaproveitar um so campo pros
@@ -259,6 +267,58 @@ class ClienteModel:
     @classmethod
     def obter(cls, id_cliente):
         return cls._carregar().get(id_cliente)
+
+    @classmethod
+    def acompanhamento(cls):
+        """Le a aba 'Mesclado' (mesma planilha) e retorna, por nome de
+        cliente NORMALIZADO, os campos ACOMPANHAMENTO DIARIO/SEMANAL/MENSAL
+        -- classificacao manual, fixa por cliente (nao muda dia a dia, ao
+        contrario do status de BAD/execucao). Usado so na exportacao da
+        planilha de controle (services/exportacao_service.py). Retorna {}
+        se a aba nao existir ou a planilha nao puder ser lida -- exportacao
+        continua funcionando, so sem esses 3 campos."""
+        try:
+            planilha = openpyxl.load_workbook(config.CLIENTES_XLSX_PATH, data_only=True)
+        except FileNotFoundError:
+            return {}
+
+        if "Mesclado" not in planilha.sheetnames:
+            return {}
+
+        linhas = list(planilha["Mesclado"].iter_rows(values_only=True))
+
+        if not linhas:
+            return {}
+
+        indices = {}
+
+        for indice, celula in enumerate(linhas[0]):
+            palavras = set(_normalizar(celula).split())
+
+            if "acompanhamento" not in palavras:
+                continue
+
+            if "diario" in palavras:
+                indices["diario"] = indice
+            elif "semanal" in palavras:
+                indices["semanal"] = indice
+            elif "mensal" in palavras:
+                indices["mensal"] = indice
+
+        resultado = {}
+
+        for linha in linhas[1:]:
+            nome = linha[0] if linha else None
+
+            if not nome or not str(nome).strip():
+                continue
+
+            resultado[_normalizar(nome)] = {
+                chave: (linha[indice] if indice < len(linha) else None)
+                for chave, indice in indices.items()
+            }
+
+        return resultado
 
     @classmethod
     def destinatarios_faturamento(cls):

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1728">
+    <title>Carga de Carteiras - Resumo {{ info.data }}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #e9edf2; font-family: "Segoe UI", Arial, sans-serif; color: #1f2d3d; }
+        .barra-acoes { width: 1728px; margin: 0 auto; padding: 12px 0; display: flex; gap: 10px; justify-content: flex-end; }
+        .barra-acoes button { border: 1px solid #1f2d3d; background: #fff; border-radius: 6px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+        .barra-acoes button.primario { background: #1f2d3d; color: #fff; }
+        #infografico { width: 1728px; margin: 0 auto 24px; background: #fff; padding: 40px 48px 48px; }
+
+        .cabecalho { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid #1f2d3d; padding-bottom: 18px; }
+        .cabecalho h1 { margin: 0; font-size: 44px; letter-spacing: -0.01em; }
+        .cabecalho .periodo { font-size: 20px; color: #5b6b7c; margin-top: 6px; }
+        .cabecalho .datas { text-align: right; font-size: 24px; font-weight: 600; line-height: 1.5; }
+        .cabecalho .datas span { color: #5b6b7c; font-weight: 400; }
+
+        .alerta-validacao { background: #fdecea; border: 2px solid #c0392b; color: #8e1b10; padding: 12px 16px; margin-top: 20px; font-size: 16px; }
+
+        .corpo { display: grid; grid-template-columns: 380px 1fr; gap: 36px; margin-top: 30px; align-items: start; }
+        .lateral { display: flex; flex-direction: column; gap: 22px; }
+        .painel { border: 1px solid #d5dbe3; border-radius: 10px; padding: 20px; background: #f8fafc; }
+        .painel h2 { margin: 0 0 14px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; color: #5b6b7c; }
+        .pct { font-size: 64px; font-weight: 700; line-height: 1; }
+        .barra { height: 16px; background: #e3e8ee; border-radius: 8px; overflow: hidden; margin: 14px 0; }
+        .barra > div { height: 100%; background: #46a35e; }
+        .duas { display: flex; justify-content: space-between; font-size: 16px; }
+        .duas b { font-size: 22px; }
+
+        .linha-status { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 16px; font-weight: 600; }
+        .linha-status b { font-size: 20px; }
+        .total { display: flex; justify-content: space-between; padding: 10px 12px 0; font-size: 16px; font-weight: 600; border-top: 2px solid #1f2d3d; margin-top: 12px; }
+        .total + .total { border-top: none; padding-top: 6px; }
+
+        .ok { background: #d4efdc; }
+        .pendente { background: #fff3bf; }
+        .atrasada { background: #f8d4d0; }
+        .vazio { background: #e6e9ed; }
+
+        .grupo { margin-bottom: 36px; }
+        .grupo-titulo { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #1f2d3d; padding-bottom: 8px; margin-bottom: 8px; }
+        .grupo-titulo h2 { margin: 0; font-size: 26px; }
+        .grupo-titulo span { font-size: 16px; color: #5b6b7c; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 17px; }
+        th { text-align: left; background: #1f2d3d; color: #fff; padding: 10px 14px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 11px 14px; border-bottom: 1px solid #e3e8ee; vertical-align: top; }
+        th.c-num, td.c-num { width: 56px; text-align: center; color: #5b6b7c; }
+        th.c-status { width: 230px; }
+        th.c-data { width: 190px; }
+        .arquivo { font-size: 13px; color: #7a8896; margin-top: 2px; word-break: break-all; }
+        .tag { display: inline-block; padding: 5px 12px; border-radius: 14px; font-size: 14px; font-weight: 700; }
+
+        .legenda { display: flex; gap: 28px; flex-wrap: wrap; align-items: center; border-top: 2px solid #1f2d3d; padding-top: 18px; margin-top: 10px; font-size: 15px; }
+        .legenda .tag { margin-right: 6px; }
+
+        @media print { body { background: #fff; } .barra-acoes { display: none; } #infografico { margin: 0; } tr { break-inside: avoid; } }
+    </style>
+</head>
+<body>
+    <div class="barra-acoes" id="barraAcoes">
+        <button type="button" onclick="window.print()">Imprimir / PDF</button>
+        <button type="button" class="primario" id="botaoPng" onclick="baixarPng()">Baixar PNG</button>
+    </div>
+
+    <div id="infografico">
+        <div class="cabecalho">
+            <div>
+                <h1>Carga de Carteiras</h1>
+                <div class="periodo">Periodicidade: {{ info.periodicidade }}</div>
+            </div>
+            <div class="datas">
+                <div><span>Resumo</span> {{ info.data }}</div>
+                <div><span>Base</span> {{ info.data }}</div>
+            </div>
+        </div>
+
+        {% if info.erros_validacao %}
+            <div class="alerta-validacao">
+                <b>Validação falhou — não use este infográfico:</b> {{ info.erros_validacao | join(" ") }}
+            </div>
+        {% endif %}
+
+        <div class="corpo">
+            <div class="lateral">
+                <div class="painel">
+                    <h2>Progresso geral do processo</h2>
+                    <div class="pct">{{ info.geral.percentual }}%</div>
+                    <div class="barra"><div style="width: {{ info.geral.percentual }}%"></div></div>
+                    <div class="duas">
+                        <div>OK<br><b>{{ info.geral.ok }}</b></div>
+                        <div style="text-align: right">Diferente de OK<br><b>{{ info.geral.nao_ok }}</b></div>
+                    </div>
+                </div>
+
+                <div class="painel">
+                    <h2>Resumo de status (geral)</h2>
+                    {% set classes = {"OK": "ok", "PENDENTE ARQUIVO": "pendente", "Atrasada": "atrasada", "Vazio": "vazio"} %}
+                    {% for rotulo in info.ordem_status %}
+                        <div class="linha-status {{ classes[rotulo] }}"><span>{{ rotulo }}</span><b>{{ info.geral.por_status[rotulo] }}</b></div>
+                    {% endfor %}
+                    <div class="total"><span>TOTAL (rastreabilidade)</span><span>{{ info.geral.total }}</span></div>
+                    <div class="total"><span>TOTAL NÃO OK</span><span>{{ info.geral.nao_ok }}</span></div>
+                </div>
+            </div>
+
+            <div class="processo">
+                {% for grupo in info.grupos %}
+                    <div class="grupo">
+                        <div class="grupo-titulo">
+                            <h2>{{ grupo.nome }}</h2>
+                            <span>{{ grupo.resumo.ok }} de {{ grupo.resumo.total }} OK — {{ grupo.resumo.percentual }}%</span>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="c-num">#</th>
+                                    <th>Código e Descrição do Processo</th>
+                                    <th class="c-status">Status</th>
+                                    <th class="c-data">Última Atualização</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in grupo.itens %}
+                                    <tr>
+                                        <td class="c-num">{{ item.numero }}</td>
+                                        <td>
+                                            {{ item.cliente }}
+                                            {% if item.arquivo %}<div class="arquivo">{{ item.arquivo }}</div>{% endif %}
+                                        </td>
+                                        <td><span class="tag {{ item.classe }}">{{ item.status }}</span></td>
+                                        <td>{{ item.ultima_atualizacao }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="legenda">
+            <b>Legenda</b>
+            <span><span class="tag ok">OK</span>processamento dentro do prazo</span>
+            <span><span class="tag pendente">PENDENTE ARQUIVO</span>ainda sem arquivo</span>
+            <span><span class="tag atrasada">Atrasada</span>fora do prazo da frequência</span>
+            <span><span class="tag vazio">Vazio</span>frequência não reconhecida</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+    function baixarPng() {
+        if (typeof html2canvas === "undefined") {
+            alert("Não foi possível carregar o gerador de imagem (precisa de internet). Use Imprimir / PDF.");
+            return;
+        }
+
+        html2canvas(document.getElementById("infografico"), { scale: 2, backgroundColor: "#ffffff" }).then(function (canvas) {
+            const link = document.createElement("a");
+            link.download = "carga_de_carteiras_{{ info.data | replace('/', '_') }}.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
+    </script>
+</body>
+</html>
