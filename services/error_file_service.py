@@ -1,4 +1,5 @@
 import re
+from datetime import date
 
 from config import ERROS_DIRETORIO, ERROS_EXTENSAO
 from services.arquivo_service import (
@@ -108,7 +109,16 @@ class ErrorFileService:
                 quantidade_linhas, tem_cabecalho = cls.ler_registros(ultimo["caminho"])
                 tipo = cls.classificar_tipo(ultimo["arquivo"])
 
-                if quantidade_linhas > 0:
+                if quantidade_linhas > 0 and ultimo["modificado_em"].date() != date.today():
+                    # BAD de um dia anterior -- nao e erro do processamento
+                    # de HOJE (que pode nem ter rodado ainda), entao nao
+                    # faz sentido acusar BAD por causa dele. Se o cliente
+                    # realmente nao processou hoje, isso ja fica coberto
+                    # pelo status de execucao (sem_arquivo/atrasado); o BAD
+                    # antigo em si fica "invisivel" aqui de proposito.
+                    status = "ok"
+                    quantidade_linhas = 0
+                elif quantidade_linhas > 0:
                     status = "bad"
                 elif tem_cabecalho:
                     # So o cabecalho, sem nenhum registro de erro: falso
