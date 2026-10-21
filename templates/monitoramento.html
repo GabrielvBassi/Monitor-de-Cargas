@@ -106,6 +106,16 @@
                     &#8681; Exportar planilha
                 </button>
 
+                <button type="button" class="btn-exportar" onclick="abrirInfografico()" title="Abre o infografico executivo do dia (clientes selecionados, ou todos os visiveis respeitando os filtros). Da pra baixar em PNG">
+                    &#128202; Infográfico
+                </button>
+
+                <form method="post" onsubmit="return confirmarGerarAbaDiaria(this)">
+                    <button type="submit" class="btn-exportar" title="Grava na aba de hoje (cria se ainda nao existir) so os clientes selecionados, ou todos os visiveis (respeitando os filtros, inclusive Horario) se nada estiver marcado. Nao apaga o que ja tinha sido gravado antes na mesma aba -- da pra ir preenchendo aos poucos, por leva de horario">
+                        &#128221; Gerar aba de hoje
+                    </button>
+                </form>
+
                 <div class="menu-kebab">
                     <button type="button" class="btn-kebab" onclick="alternarPainel(event, 'menuKebabPainel')" title="Mais acoes" aria-label="Mais acoes">&#8942;</button>
                     <div class="menu-kebab-painel" id="menuKebabPainel">
@@ -290,7 +300,7 @@
                         </button>
                         <div class="filtros-multiselect-painel" id="horarioMultiselectPainel">
                             <label class="filtro-check filtro-check-todos">
-                                <input type="checkbox" id="filtroHorarioTodos" checked onchange="marcarTodos(this, '.filtro-horario')">
+                                <input type="checkbox" id="filtroHorarioTodos" checked onchange="marcarTodosHorario(this)" title="Marca/desmarca todos os horarios de uma vez -- depois e so ir desmarcando ou marcando os que quiser individualmente">
                                 <span class="filtro-check-rotulo">Todos</span>
                             </label>
                             {% for horario in horarios_disponiveis %}
@@ -429,7 +439,7 @@
                             data-status-exec="{{ item.exec_status }}"
                             data-tem-backup="{{ '1' if item.exec_arquivo else '0' }}"
                             data-tem-bad="{{ '1' if item.bad_arquivo else '0' }}"
-                            data-data-processamento="{{ item.exec_modificado_em.strftime('%Y-%m-%d') if item.exec_modificado_em else '' }}"
+                            data-data-processamento="{{ item.exec_data_arquivo.strftime('%Y-%m-%d') if item.exec_data_arquivo else '' }}"
                             data-data-bad="{{ item.bad_modificado_em.strftime('%Y-%m-%d') if item.bad_modificado_em else '' }}"
                             data-bad-registros="{{ item.bad_registros }}"
                             data-horario="{{ item.horario_execucao | lower }}"
@@ -439,9 +449,11 @@
                             <td>{{ item.frequencia_verificacao }}</td>
                             <td>{{ item.exec_arquivo or "-" }}</td>
                             <td>
-                                {% if item.exec_modificado_em %}
-                                    {{ item.exec_modificado_em.strftime("%d/%m/%Y") }}
-                                    <span class="hora-execucao">{{ item.exec_modificado_em.strftime("%H:%M") }}</span>
+                                {% if item.exec_data_arquivo %}
+                                    {{ item.exec_data_arquivo.strftime("%d/%m/%Y") }}
+                                    {% if not item.exec_data_do_nome %}
+                                        <span class="hora-execucao">{{ item.exec_modificado_em.strftime("%H:%M") }}</span>
+                                    {% endif %}
                                 {% else %}
                                     -
                                 {% endif %}
@@ -479,7 +491,7 @@
                         data-status-exec="{{ item.exec_status }}"
                         data-tem-backup="{{ '1' if item.exec_arquivo else '0' }}"
                         data-tem-bad="{{ '1' if item.bad_arquivo else '0' }}"
-                        data-data-processamento="{{ item.exec_modificado_em.strftime('%Y-%m-%d') if item.exec_modificado_em else '' }}"
+                        data-data-processamento="{{ item.exec_data_arquivo.strftime('%Y-%m-%d') if item.exec_data_arquivo else '' }}"
                         data-data-bad="{{ item.bad_modificado_em.strftime('%Y-%m-%d') if item.bad_modificado_em else '' }}"
                         data-bad-registros="{{ item.bad_registros }}"
                         data-horario="{{ item.horario_execucao | lower }}"
@@ -735,7 +747,15 @@ function filtrarValidacao() {
     document.getElementById("filtroExecTodos").checked = filtros.execSelecionados.length === 0;
     document.getElementById("filtroBadTodos").checked = filtros.badSelecionados.length === 0;
     document.getElementById("filtroFrequenciaTodos").checked = filtros.frequenciaSelecionadas.length === 0;
-    document.getElementById("filtroHorarioTodos").checked = filtros.horarioSelecionados.length === 0;
+
+    // Horario e diferente dos outros grupos: "Todos" marcado tanto quando
+    // nada esta selecionado (sem filtro) quanto quando CADA horario foi
+    // marcado individualmente (selecao completa) -- os dois dao no mesmo
+    // resultado (mostra todo mundo), e o clique no "Todos" alterna entre os
+    // dois extremos (ver marcarTodosHorario()).
+    const totalHorarios = document.querySelectorAll(".filtro-horario").length;
+    document.getElementById("filtroHorarioTodos").checked =
+        filtros.horarioSelecionados.length === 0 || filtros.horarioSelecionados.length === totalHorarios;
 }
 
 function atualizarKpisComFiltro(totalVisivel, contagem) {
@@ -764,6 +784,19 @@ function marcarTodos(checkboxTodos, seletorGrupo) {
             cb.checked = false;
         });
     }
+
+    filtrarValidacao();
+}
+
+// Diferente de marcarTodos() (frequencia/status/processamento, que tem
+// poucas opcoes): horario pode ter dezenas de valores diferentes, entao
+// aqui "Todos" marca/desmarca CADA quadradinho de verdade -- depois disso
+// da pra ir desmarcando so os que nao quer, em vez de ter que marcar um
+// por um do zero pra combinar varios horarios.
+function marcarTodosHorario(checkboxTodos) {
+    document.querySelectorAll(".filtro-horario").forEach(function (cb) {
+        cb.checked = checkboxTodos.checked;
+    });
 
     filtrarValidacao();
 }
@@ -1062,6 +1095,44 @@ function clientesParaExportar() {
     return Array.from(document.querySelectorAll("#tabelaValidacao tbody tr"))
         .filter(function (linha) { return linha.style.display !== "none"; })
         .map(function (linha) { return linha.dataset.cliente; });
+}
+
+function confirmarGerarAbaDiaria(formulario) {
+    const nomes = clientesParaExportar();
+
+    if (!nomes.length) {
+        alert("Nenhum cliente selecionado ou visivel pra gravar. Marque algum cliente, ou ajuste os filtros (ex: Horario execucao), e tente de novo.");
+        return false;
+    }
+
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const nomeAba = dia + "_" + mes;
+
+    const confirmou = confirm(
+        "Isso vai gravar " + nomes.length + " cliente(s) na aba '" + nomeAba + "' da planilha " +
+        "AcompanhamentoFaturados.xlsx. Cliente que ja tem linha nessa aba (de uma leva anterior " +
+        "hoje) e atualizado; o resto da aba fica como estava. A planilha precisa estar fechada " +
+        "no Excel nesse momento (por voce e por qualquer outra pessoa). Continuar?"
+    );
+
+    if (!confirmou) {
+        return false;
+    }
+
+    formulario.action = "{{ url_for('monitoramento_gerar_aba_diaria') }}?clientes=" + encodeURIComponent(nomes.join(","));
+    return true;
+}
+
+function abrirInfografico() {
+    const nomes = clientesParaExportar();
+
+    if (!nomes.length) {
+        return;
+    }
+
+    window.open("/monitoramento/infografico?clientes=" + encodeURIComponent(nomes.join(",")), "_blank");
 }
 
 function exportarPlanilhaControle() {
