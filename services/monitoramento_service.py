@@ -80,6 +80,8 @@ def combinar_validacoes(resumo, execucoes, clientes=None):
             "bad_pastas": item.get("pastas") or [],
             "exec_arquivo": execucao.get("arquivo"),
             "exec_modificado_em": execucao.get("modificado_em"),
+            "exec_data_arquivo": execucao.get("data_arquivo"),
+            "exec_data_do_nome": execucao.get("data_do_nome", False),
             "exec_status": execucao.get("status", "nao_avaliado"),
             "exec_pastas": execucao.get("pastas") or [],
         })

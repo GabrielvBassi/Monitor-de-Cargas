@@ -1,8 +1,8 @@
-"""Exportacao da planilha de controle (.xlsx) -- versao reduzida, so as 5
-primeiras colunas do formato usado nas abas diarias da planilha de clientes
-(ex: '24_09'): CLIENTE, FREQUENCIA, ERROS GERADOS, CONTROLM / MANUAL,
-EXECUTADOS. Os dados vem da mesma leitura (validacoes) que alimenta a tela
-de Monitoramento, entao nunca diverge do que esta sendo mostrado la."""
+"""Exportacao da planilha de controle (.xlsx) -- versao reduzida do formato
+usado nas abas diarias da planilha de clientes (ex: '24_09'): CLIENTE,
+FREQUENCIA, ERROS GERADOS, CONTROLM / MANUAL, EXECUTADOS, ULTIMO ARQUIVO.
+Os dados vem da mesma leitura (validacoes) que alimenta a tela de
+Monitoramento, entao nunca diverge do que esta sendo mostrado la."""
 import io
 from datetime import datetime
 
@@ -16,9 +16,10 @@ CABECALHO = [
     "ERROS GERADOS",
     "CONTROLM / MANUAL",
     "EXECUTADOS",
+    "ÚLTIMO ARQUIVO",
 ]
 
-_LARGURAS = [26, 12, 14, 16, 16]
+_LARGURAS = [26, 12, 14, 16, 16, 14]
 
 
 def gerar_planilha_controle(validacoes, clientes):
@@ -47,6 +48,13 @@ def gerar_planilha_controle(validacoes, clientes):
 
         erros_gerados = "BAD GERADO" if item["bad_status"] == "bad" else "-"
         executados = "OK" if item["exec_status"] == "ok" else "PENDENTE ARQUIVO"
+        # Data do ultimo arquivo de backup, lida do NOME do arquivo (ex:
+        # X_F202610061.TXT -> 06/10/2026), nao da data de modificacao.
+        ultimo_arquivo = (
+            item["exec_data_arquivo"].strftime("%d/%m/%Y")
+            if item.get("exec_data_arquivo")
+            else "-"
+        )
 
         planilha.append([
             item["cliente"],
@@ -54,6 +62,7 @@ def gerar_planilha_controle(validacoes, clientes):
             erros_gerados,
             cliente.get("controlm_manual", "-"),
             executados,
+            ultimo_arquivo,
         ])
 
     for linha_celulas in planilha.iter_rows(min_row=2):

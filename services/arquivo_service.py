@@ -1,7 +1,7 @@
 import os
 import re
 import unicodedata
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 
 def _normalizar_nome(texto):
@@ -56,6 +56,41 @@ def resolver_candidatos_pasta(diretorio_base, caminho_configurado):
             candidatos.append(generico)
 
     return candidatos
+
+
+_SEQUENCIAS_DIGITOS = re.compile(r"\d+")
+# (quantidade de digitos da data, formato strptime), do mais especifico pro
+# menos: AAAAMMDD, DDMMAAAA, DDMMAA.
+_FORMATOS_DATA = ((8, "%Y%m%d"), (8, "%d%m%Y"), (6, "%d%m%y"))
+
+
+def data_pelo_nome(nome_arquivo):
+    """Extrai a data embutida no nome do arquivo, nos formatos usados pelos
+    clientes: AAAAMMDD (PICPAY_F202610061 -> 06/10/2026), DDMMAAAA
+    (BRASIF1BB_141020260 -> 14/10/2026) e DDMMAA (Cap_Assist_0610261 ->
+    06/10/2026). Olha cada sequencia de digitos do nome, na ordem, e usa a
+    primeira que comeca com uma data valida (ano 2000-2099) -- o que sobra
+    depois da data e so o sequencial do dia. Retorna (date, sequencial) ou
+    (None, 0) se nao achar data (ex: BV mensal, so mes/ano)."""
+    for sequencia in _SEQUENCIAS_DIGITOS.findall(nome_arquivo):
+        for tamanho, formato in _FORMATOS_DATA:
+            # DDMMAA e fraco (qualquer 6 digitos viram data), entao so vale
+            # em sequencias curtas: data + no maximo 1 digito de sequencial.
+            if len(sequencia) < tamanho or (tamanho == 6 and len(sequencia) > 7):
+                continue
+
+            try:
+                data = datetime.strptime(sequencia[:tamanho], formato).date()
+            except ValueError:
+                continue
+
+            # Data plausivel (nao mais de ~2 meses no futuro; ex: NATURGY usa
+            # o fim do mes): evita ler digitos soltos do nome como data, tipo
+            # 29062043 -> 29/06/2043.
+            if 2000 <= data.year and data <= date.today() + timedelta(days=62):
+                return data, int(sequencia[tamanho:] or 0)
+
+    return None, 0
 
 
 def listar_pastas(diretorio):
@@ -176,13 +211,36 @@ def arquivos_em_pastas(pastas_cliente, marcador=None):
                 if marcador and marcador.lower() not in entrada.name.lower():
                     continue
 
+                data_nome, sequencial = data_pelo_nome(entrada.name)
+
                 encontrados.append({
                     "arquivo": entrada.name,
                     "caminho": entrada.path,
                     "modificado_em": datetime.fromtimestamp(entrada.stat().st_mtime),
+                    "data_nome": data_nome,
+                    "sequencial_nome": sequencial,
                 })
 
     return encontrados
+
+
+def arquivo_mais_recente_por_nome(pastas_cliente):
+    """Como arquivo_mais_recente, mas o "mais recente" e o de maior data no
+    NOME (ver data_pelo_nome), desempatando por sequencial e depois por data
+    de modificacao. Arquivos sem data no nome entram pela data de
+    modificacao. Util quando o arquivo chega dias depois da data que ele
+    representa."""
+    arquivos = arquivos_em_pastas(pastas_cliente)
+
+    return max(
+        arquivos,
+        key=lambda a: (
+            a["data_nome"] or a["modificado_em"].date(),
+            a["sequencial_nome"],
+            a["modificado_em"],
+        ),
+        default=None,
+    )
 
 
 def arquivo_mais_recente(pastas_cliente, marcador=None):
