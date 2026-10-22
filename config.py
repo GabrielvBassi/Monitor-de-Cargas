@@ -40,6 +40,10 @@ CLIENTES_XLSX_PATH = os.environ.get(
 # links mailto. Processo do Outlook novo (Microsoft.OutlookForWindows) e
 # "olk.exe" -- o Outlook classico usa "OUTLOOK.EXE". A checagem abaixo aceita
 # qualquer um dos dois.
+# Modo teste: se preenchido, TODO e-mail (visualizar ou enviar) vai so pra esse
+# endereco, sem CC -- ignora os contatos reais da planilha de clientes.
+EMAIL_TESTE_DESTINO = os.environ.get("EMAIL_TESTE_DESTINO", "").strip()
+
 UI_TIMEOUT_ABRIR_JANELA = int(os.environ.get("UI_TIMEOUT_ABRIR_JANELA", "30"))
 UI_TIMEOUT_FECHAR_JANELA = int(os.environ.get("UI_TIMEOUT_FECHAR_JANELA", "10"))
 UI_PROCESSOS_ESPERADOS = os.environ.get("UI_PROCESSOS_ESPERADOS", "olk,outlook").split(",")

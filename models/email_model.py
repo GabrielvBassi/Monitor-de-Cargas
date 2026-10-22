@@ -29,18 +29,20 @@ Equipe
             "titulo": "Atrasado",
             "ativo": True,
 
-            "assunto": "Nao recebimento do arquivo - {cliente}",
+            "assunto": "Arquivo pendente - {cliente}",
 
-            "corpo": """Ola,
+            "corpo": """Prezado(a) cliente {cliente},
 
-Identificamos que o arquivo de processamento do cliente {cliente} nao foi recebido dentro do prazo esperado.
+Verificamos que, ate o momento ({data_hoje}), nao recebemos o arquivo de processamento referente ao periodo esperado.
 
 Sistema: {sistema}
 Frequencia esperada: {frequencia_verificacao}
-Ultimo arquivo recebido: {arquivo} em {data_arquivo}
-Dias em atraso: {dias_atraso}
+Ultimo arquivo recebido: {arquivo} (data do arquivo: {data_arquivo})
+Dias sem recebimento: {dias_atraso}
 
-Solicitamos verificar o envio o quanto antes.
+Solicitamos, por gentileza, que verifique o envio e nos encaminhe o arquivo o quanto antes. Caso ja tenha enviado, desconsidere esta mensagem e nos avise para que possamos conferir.
+
+Ficamos a disposicao.
 
 Atenciosamente,
 Equipe

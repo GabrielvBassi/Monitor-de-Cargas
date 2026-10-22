@@ -22,13 +22,18 @@ class EmailService:
         destinatarios = ",".join(email["destinatarios"])
         parametros = [f"subject={quote(email['assunto'])}", f"body={quote(email['corpo'])}"]
 
-        if email.get("cc"):
+        if config.EMAIL_TESTE_DESTINO:
+            destinatarios = config.EMAIL_TESTE_DESTINO
+        elif email.get("cc"):
             parametros.append(f"cc={quote(','.join(email['cc']))}")
 
         return f"mailto:{destinatarios}?{'&'.join(parametros)}"
 
     def visualizar(self, email):
         webbrowser.open(self._link_mailto(email))
+        # Pausa curta pra nao inundar o Outlook quando varias janelas sao
+        # abertas em sequencia (ex: "Cobrar pendentes").
+        time.sleep(1.5)
 
     def enviar(self, email):
         webbrowser.open(self._link_mailto(email))
