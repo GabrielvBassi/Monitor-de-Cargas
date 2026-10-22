@@ -110,6 +110,10 @@
                     &#128202; Infográfico
                 </button>
 
+                <button type="button" class="btn-exportar" onclick="cobrarAtrasados('visualizar')" title="Abre no Outlook um e-mail pronto (destinatario, assunto e texto) por cliente ATRASADO, para voce so conferir e clicar em Enviar. Clientes selecionados, ou todos os visiveis (respeitando os filtros) se nada estiver marcado">
+                    &#9993; Cobrar pendentes
+                </button>
+
                 <form method="post" onsubmit="return confirmarGerarAbaDiaria(this)">
                     <button type="submit" class="btn-exportar" title="Grava na aba de hoje (cria se ainda nao existir) so os clientes selecionados, ou todos os visiveis (respeitando os filtros, inclusive Horario) se nada estiver marcado. Nao apaga o que ja tinha sido gravado antes na mesma aba -- da pra ir preenchendo aos poucos, por leva de horario">
                         &#128221; Gerar aba de hoje
@@ -335,11 +339,11 @@
                                 <option value="1-asc">A - Z</option>
                                 <option value="1-desc">Z - A</option>
                             </optgroup>
-                            <optgroup label="Data do processamento">
+                            <optgroup label="Data do arquivo">
                                 <option value="4-desc">Mais recente</option>
                                 <option value="4-asc">Mais antiga</option>
                             </optgroup>
-                            <optgroup label="Data BAD">
+                            <optgroup label="Data de processamento">
                                 <option value="7-desc">Mais recente</option>
                                 <option value="7-asc">Mais antiga</option>
                             </optgroup>
@@ -420,10 +424,10 @@
                         <th class="ordenavel">Cliente<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Frequencia<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Arquivo de Backup (mais recente)<span class="ordenacao-indicador"></span></th>
-                        <th class="ordenavel">Data Processamento<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Data do Arquivo<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Status Processamento<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Arquivo BAD (mais recente)<span class="ordenacao-indicador"></span></th>
-                        <th class="ordenavel">Data BAD<span class="ordenacao-indicador"></span></th>
+                        <th class="ordenavel">Data de Processamento<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Registros BAD<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Status BAD<span class="ordenacao-indicador"></span></th>
                         <th class="ordenavel">Horario Execucao<span class="ordenacao-indicador"></span></th>
@@ -1095,6 +1099,45 @@ function clientesParaExportar() {
     return Array.from(document.querySelectorAll("#tabelaValidacao tbody tr"))
         .filter(function (linha) { return linha.style.display !== "none"; })
         .map(function (linha) { return linha.dataset.cliente; });
+}
+
+function cobrarAtrasados(acao) {
+    const selecionadas = Array.from(document.querySelectorAll(".linha-selecionada:checked")).map(function (cb) { return cb.closest("tr"); });
+    const linhas = selecionadas.length
+        ? selecionadas
+        : Array.from(document.querySelectorAll("#tabelaValidacao tbody tr")).filter(function (l) { return l.style.display !== "none"; });
+    const nomes = linhas.filter(function (l) { return l.dataset.statusExec === "atrasado"; }).map(function (l) { return l.dataset.cliente; });
+
+    if (!nomes.length) {
+        alert("Nenhum cliente ATRASADO entre os selecionados/visiveis.");
+        return;
+    }
+
+    const verbo = "abrir no Outlook (voce confere e clica em Enviar)";
+    if (!confirm("Vai " + verbo + " " + nomes.length + " e-mail(s) de arquivo pendente para:\n\n" + nomes.join("\n") + "\n\nContinuar?")) {
+        return;
+    }
+
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = "/monitoramento/cobrar-atrasados";
+
+    nomes.forEach(function (nome) {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "clientes";
+        input.value = nome;
+        form.appendChild(input);
+    });
+
+    const inputAcao = document.createElement("input");
+    inputAcao.type = "hidden";
+    inputAcao.name = "acao";
+    inputAcao.value = acao;
+    form.appendChild(inputAcao);
+
+    document.body.appendChild(form);
+    form.submit();
 }
 
 function confirmarGerarAbaDiaria(formulario) {

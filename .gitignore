@@ -7,3 +7,6 @@ envio_automatico.log
 historico.jsonl
 ~$*.xlsx
 ~$*.xls
+
+# Dados fake de teste local
+dev/dados_teste/

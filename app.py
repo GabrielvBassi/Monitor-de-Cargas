@@ -205,6 +205,28 @@ def monitoramento_detalhamento():
     )
 
 
+@app.route("/monitoramento/cobrar-atrasados", methods=["POST"])
+def monitoramento_cobrar_atrasados():
+    nomes = set(request.form.getlist("clientes"))
+    acao = request.form.get("acao")
+
+    try:
+        ids = [id_cliente for id_cliente, c in ClienteModel.todos().items() if c["nome"] in nomes]
+        sucessos, falhas = processar_envio("atrasado", ids, acao)
+    except (FileNotFoundError, ValueError) as exc:
+        flash(str(exc), "erro")
+        return redirect(url_for("monitoramento"))
+
+    if sucessos:
+        acao_label = "aberto(s) para visualizacao" if acao == "visualizar" else "enviado(s) automaticamente"
+        flash(f"E-mail(s) de arquivo pendente {acao_label} para: {', '.join(sucessos)}.", "sucesso")
+
+    if falhas:
+        flash(f"Falha ao processar: {', '.join(falhas)}.", "erro")
+
+    return redirect(url_for("monitoramento"))
+
+
 @app.route("/erros")
 def erros():
     try:

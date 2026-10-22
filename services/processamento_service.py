@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from models.cliente_model import ClienteModel
 from models.email_model import EmailModel
@@ -90,8 +90,12 @@ def processar_envio(nome_modelo, ids_clientes, acao):
                     )
                     continue
 
-                modificado_em = validacao["exec_modificado_em"]
-                dias_atraso = (datetime.now() - modificado_em).days if modificado_em else "-"
+                # Dias desde a data do arquivo (do nome); cai pra data de
+                # modificacao quando o nome nao traz data.
+                data_base = validacao.get("exec_data_arquivo") or validacao["exec_modificado_em"]
+                if hasattr(data_base, "date"):
+                    data_base = data_base.date()
+                dias_atraso = (date.today() - data_base).days if data_base else "-"
 
                 email = EmailGenerator.gerar(
                     nome_modelo,
@@ -102,8 +106,13 @@ def processar_envio(nome_modelo, ids_clientes, acao):
                         "arquivo": validacao["exec_arquivo"] or "-",
                         "data_arquivo": validacao["exec_data_arquivo"].strftime("%d/%m/%Y") if validacao.get("exec_data_arquivo") else "-",
                         "dias_atraso": dias_atraso,
+                        "data_hoje": date.today().strftime("%d/%m/%Y"),
                     },
                 )
+
+                if not email["destinatarios"]:
+                    falhas.append(f"{cliente['nome']} (sem e-mail de contato na planilha)")
+                    continue
 
                 if acao == "visualizar":
                     email_service.visualizar(email)
